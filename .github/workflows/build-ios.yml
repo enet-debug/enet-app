@@ -3,6 +3,7 @@ name: Build iOS (unsigned)
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags:
       - 'v*'
 
