@@ -1,0 +1,50 @@
+name: Build iOS (unsigned)
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: iOS unsigned IPA
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate iOS runner
+        run: flutter create --platforms=ios --org com.enetdev .
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS app without signing
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          APP_PATH="build/ios/iphoneos/Runner.app"
+          test -d "$APP_PATH"
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/Runner.app
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload eNet-iOS-unsigned.ipa
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: eNet-iOS-unsigned
+          path: eNet-iOS-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,27 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Native build outputs
+windows/flutter/ephemeral/
+ios/Flutter/ephemeral/
+ios/Pods/
+ios/.symlinks/
+macos/Flutter/ephemeral/
+
+# Signing material
+*.p12
+*.mobileprovision
+*.provisionprofile
+AuthKey_*.p8
