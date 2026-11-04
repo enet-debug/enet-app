@@ -1,12 +1,14 @@
 name: enet_app
 publish_to: none
-description: eNet app starter - responsive identity, demo authentication and shell.
-version: 0.1.0+1
+description: eNet app - Flutter client for real eNet ID backed by Supabase Auth.
+version: 0.2.0+1
 environment:
   sdk: '>=3.6.0 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
+  supabase_flutter: ^2.18.3
+  flutter_secure_storage: ^10.3.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

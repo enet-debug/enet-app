@@ -314,7 +314,7 @@ class _ENetShellState extends State<ENetShell> {
     return Row(children: [
       if (compact) const BrandLogo(size: 36),
       const Spacer(),
-      const _DemoBadge(),
+      const _AccountBadge(),
       if (compact) ...[
         const SizedBox(width: 12),
         Pressable(onTap: () => go(2), builder: (context, _) => ENetAvatar(name: user.name, size: 38)),
@@ -512,7 +512,7 @@ class _ENetShellState extends State<ENetShell> {
       Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 15, color: ENetColors.muted)),
       const SizedBox(height: 14),
-      const _DemoBadge(label: 'ENET ID · ДЕМО'),
+      const _AccountBadge(label: 'ENET ID'),
     ]);
     return Column(key: const ValueKey('profile'), crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Reveal(child: _PageTitle('Профиль', 'Твой ENET ID и данные аккаунта.')),
@@ -545,7 +545,7 @@ class _ENetShellState extends State<ENetShell> {
           children: [
             _RowTile(icon: Icons.person_rounded, gradient: ENetColors.violetGradient, title: 'Имя', value: user.name),
             _RowTile(icon: Icons.alternate_email_rounded, gradient: ENetColors.accent, title: 'Электронная почта', value: user.email),
-            const _RowTile(icon: Icons.shield_rounded, gradient: ENetColors.mintGradient, title: 'Статус', value: 'Демо-профиль'),
+            _RowTile(icon: Icons.shield_rounded, gradient: ENetColors.mintGradient, title: 'eNet ID', value: user.id),
           ],
         ),
       ),
@@ -616,8 +616,8 @@ class _TintedIcon extends StatelessWidget {
       );
 }
 
-class _DemoBadge extends StatelessWidget {
-  const _DemoBadge({this.label = 'ДЕМО'});
+class _AccountBadge extends StatelessWidget {
+  const _AccountBadge({this.label = 'ENET ID'});
   final String label;
 
   @override

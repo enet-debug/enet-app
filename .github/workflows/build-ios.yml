@@ -31,7 +31,14 @@ jobs:
         run: flutter pub get
 
       - name: Build iOS app without signing
-        run: flutter build ios --release --no-codesign
+        shell: bash
+        env:
+          ENET_SUPABASE_URL: ${{ vars.ENET_SUPABASE_URL }}
+          ENET_SUPABASE_PUBLISHABLE_KEY: ${{ vars.ENET_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          test -n "$ENET_SUPABASE_URL" || { echo "ENET_SUPABASE_URL repository variable missing"; exit 1; }
+          test -n "$ENET_SUPABASE_PUBLISHABLE_KEY" || { echo "ENET_SUPABASE_PUBLISHABLE_KEY repository variable missing"; exit 1; }
+          flutter build ios --release --no-codesign --dart-define="ENET_SUPABASE_URL=$ENET_SUPABASE_URL" --dart-define="ENET_SUPABASE_PUBLISHABLE_KEY=$ENET_SUPABASE_PUBLISHABLE_KEY"
 
       - name: Package unsigned IPA
         shell: bash

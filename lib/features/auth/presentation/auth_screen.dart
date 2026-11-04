@@ -28,6 +28,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final name = TextEditingController();
   bool passwordVisible = false;
   String? notice;
+  bool noticeIsError = false;
 
   @override
   void dispose() {
@@ -43,6 +44,7 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       mode = next;
       notice = null;
+      noticeIsError = false;
     });
     formKey.currentState?.reset();
   }
@@ -54,20 +56,57 @@ class _AuthScreenState extends State<AuthScreen> {
     return null;
   }
 
-  Future<void> submit() async {
-    if (!formKey.currentState!.validate()) return;
-    FocusScope.of(context).unfocus();
-    if (mode == _AuthMode.reset) {
-      await widget.auth.requestPasswordReset(email.text);
-      if (mounted) {
-        setState(() => notice = 'Демо-режим: письмо не отправляется. Подключим это после выбора сервера авторизации.');
-      }
-      return;
+  String _describeError(Object error) {
+    final message = error.toString().toLowerCase();
+    if (message.contains('invalid login credentials')) {
+      return 'Неверная почта или пароль.';
     }
-    if (mode == _AuthMode.signUp) {
-      await widget.auth.signUp(name.text, email.text, password.text);
-    } else {
-      await widget.auth.signIn(email.text, password.text);
+    if (message.contains('email not confirmed')) {
+      return 'Подтвердите адрес электронной почты, затем войдите.';
+    }
+    if (message.contains('rate limit') || message.contains('too many requests')) {
+      return 'Слишком много попыток. Повторите позже.';
+    }
+    if (message.contains('network') || message.contains('socket')) {
+      return 'Проверьте подключение к интернету.';
+    }
+    return 'Не удалось выполнить запрос. Проверьте данные и попробуйте снова.';
+  }
+
+  Future<void> submit() async {
+    if (!formKey.currentState!.validate() || widget.auth.busy) return;
+    FocusScope.of(context).unfocus();
+    if (mounted) setState(() { notice = null; noticeIsError = false; });
+
+    try {
+      if (mode == _AuthMode.reset) {
+        await widget.auth.requestPasswordReset(email.text);
+        if (mounted) {
+          setState(() {
+            notice = 'Если адрес зарегистрирован, на него отправлено письмо для восстановления пароля.';
+            noticeIsError = false;
+          });
+        }
+      } else if (mode == _AuthMode.signUp) {
+        final active = await widget.auth.signUp(
+          name.text, email.text, password.text,
+        );
+        if (mounted && !active) {
+          setState(() {
+            notice = 'Проверьте электронную почту и подтвердите регистрацию, затем войдите.';
+            noticeIsError = false;
+          });
+        }
+      } else {
+        await widget.auth.signIn(email.text, password.text);
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          notice = _describeError(error);
+          noticeIsError = true;
+        });
+      }
     }
   }
 
@@ -132,7 +171,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     final title = reset ? 'Восстановление' : signIn ? 'С возвращением!' : 'Создать аккаунт';
     final subtitle = reset
-        ? 'Введите email. Позже сюда подключим настоящую отправку письма.'
+        ? 'Введите email, чтобы получить письмо для восстановления доступа.'
         : signIn
             ? 'Твоё пространство eNet начинается здесь.'
             : 'Присоединяйся к eNet и настрой личное пространство.';
@@ -296,12 +335,13 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: ENetColors.mint.withValues(alpha: .10),
+                  color: (noticeIsError ? Colors.redAccent : ENetColors.mint).withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: ENetColors.mint.withValues(alpha: .3)),
+                  border: Border.all(color: (noticeIsError ? Colors.redAccent : ENetColors.mint).withValues(alpha: .3)),
                 ),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.check_circle_rounded, color: ENetColors.mint, size: 20),
+                  Icon(noticeIsError ? Icons.error_outline_rounded : Icons.check_circle_rounded,
+                    color: noticeIsError ? Colors.redAccent : ENetColors.mint, size: 20),
                   const SizedBox(width: 10),
                   Expanded(child: Text(notice ?? '', style: const TextStyle(color: ENetColors.text, fontSize: 13, height: 1.45))),
                 ]),
@@ -316,7 +356,7 @@ class _AuthScreenState extends State<AuthScreen> {
             SizedBox(width: 7),
             Flexible(
               child: Text(
-                'Демо-режим: аккаунты не создаются, пароли не сохраняются.',
+                'eNet ID · Учётная запись с серверной авторизацией.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: ENetColors.faint, fontSize: 11.5, height: 1.5),
               ),

@@ -31,7 +31,15 @@ jobs:
         run: flutter pub get
 
       - name: Build release
-        run: flutter build windows --release
+        shell: pwsh
+        env:
+          ENET_SUPABASE_URL: ${{ vars.ENET_SUPABASE_URL }}
+          ENET_SUPABASE_PUBLISHABLE_KEY: ${{ vars.ENET_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:ENET_SUPABASE_URL) -or [string]::IsNullOrWhiteSpace($env:ENET_SUPABASE_PUBLISHABLE_KEY)) {
+            throw "Configure the ENET_SUPABASE_URL and ENET_SUPABASE_PUBLISHABLE_KEY repository variables before a release build."
+          }
+          flutter build windows --release --dart-define="ENET_SUPABASE_URL=$env:ENET_SUPABASE_URL" --dart-define="ENET_SUPABASE_PUBLISHABLE_KEY=$env:ENET_SUPABASE_PUBLISHABLE_KEY"
 
       - name: Package application
         shell: pwsh
