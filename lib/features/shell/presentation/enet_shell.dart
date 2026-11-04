@@ -545,7 +545,7 @@ class _ENetShellState extends State<ENetShell> {
           children: [
             _RowTile(icon: Icons.person_rounded, gradient: ENetColors.violetGradient, title: 'Имя', value: user.name),
             _RowTile(icon: Icons.alternate_email_rounded, gradient: ENetColors.accent, title: 'Электронная почта', value: user.email),
-            const _RowTile(icon: Icons.shield_rounded, gradient: ENetColors.mintGradient, title: 'eNet ID', value: user.id),
+            _RowTile(icon: Icons.shield_rounded, gradient: ENetColors.mintGradient, title: 'eNet ID', value: user.id),
           ],
         ),
       ),
