@@ -13,15 +13,19 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
     try { await action(); } finally { busy = false; notifyListeners(); }
   }
+
   Future<void> signIn(String email, String password) => _execute(() async {
     user = await _repository.signIn(email: email, password: password);
   });
+
   Future<void> signUp(String name, String email, String password) => _execute(() async {
     user = await _repository.signUp(name: name, email: email, password: password);
   });
+
   Future<void> signOut() => _execute(() async {
     await _repository.signOut();
     user = null;
   });
+
   Future<void> requestPasswordReset(String email) => _execute(() => _repository.requestPasswordReset(email));
 }
