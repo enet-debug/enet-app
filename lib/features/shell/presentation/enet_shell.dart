@@ -487,8 +487,8 @@ class _ENetShellState extends State<ENetShell> {
               const SizedBox(height: 30),
               const Text('Пока тихо', style: TextStyle(color: ENetColors.text, fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -.4)),
               const SizedBox(height: 10),
-              const ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 420),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
                 child: Text(
                   'Здесь появятся сообщения от eNet, когда мы подключим настоящие сервисы. Сейчас уведомлений нет.',
                   textAlign: TextAlign.center,
