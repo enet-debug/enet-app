@@ -4,6 +4,13 @@ import '../domain/auth_repository.dart';
 /// no password is stored, and no email is sent.
 class DemoAuthRepository implements AuthRepository {
   @override
+  String get apiEndpoint => 'Демо-режим';
+
+  @override
+  Future<void> configureApiEndpoint(String endpoint) async {
+    throw UnsupportedError('Настройка API недоступна в демо-режиме.');
+  }
+  @override
   Future<AuthUser> signIn({required String email, required String password}) async {
     return AuthUser(email: email.trim(), name: email.trim().split('@').first);
   }
