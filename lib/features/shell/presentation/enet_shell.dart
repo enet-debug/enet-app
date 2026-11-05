@@ -537,7 +537,7 @@ class _ENetShellState extends State<ENetShell> {
           ),
           const SizedBox(height: 7),
           const Text(
-            'Рабочее пространство eNet',
+            'Добро пожаловать в eNet',
             style: TextStyle(
               color: ENetColors.text,
               fontSize: 25,
@@ -1032,7 +1032,7 @@ class _ENetShellState extends State<ENetShell> {
                           fontWeight: FontWeight.w800,
                         )),
                       const SizedBox(height: 8),
-                      Text('Добро пожаловать в eNet',
+                      Text('eNet ID',
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -1066,7 +1066,7 @@ class _ENetShellState extends State<ENetShell> {
                             color: ENetColors.cyan.withValues(alpha: .22),
                           ),
                         ),
-                        child: const Text('ЕДИНЫЙ ВХОД В СЕРВИСЫ eNet',
+                        child: const Text('ПРОФИЛЬ И БЕЗОПАСНОСТЬ eNet',
                           style: TextStyle(
                             color: ENetColors.cyan,
                             fontSize: 9,
