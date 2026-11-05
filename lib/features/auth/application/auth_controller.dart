@@ -55,6 +55,9 @@ class AuthController extends ChangeNotifier {
 
   Future<bool> checkServer() => _repository.checkServer();
   Future<List<EcosystemService>> listServices() => _repository.listServices();
+  Future<void> setServiceFavorite(String serviceId, bool favorite) =>
+      _repository.setServiceFavorite(serviceId, favorite);
+
   Future<void> changePassword(String currentPassword, String nextPassword) =>
       _execute(() => _repository.changePassword(currentPassword, nextPassword));
 
