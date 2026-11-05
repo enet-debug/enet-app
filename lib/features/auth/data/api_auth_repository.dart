@@ -211,6 +211,48 @@ class ApiAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<NotificationFeed> listNotifications() async {
+    final response = await _request(
+      'GET', '/v1/notifications', token: await _token(),
+    );
+    final entries = response['notifications'];
+    if (entries is! List || response['unread_count'] is! int) {
+      throw const FormatException('Некорректный ответ сервера уведомлений.');
+    }
+    return NotificationFeed(
+      unreadCount: response['unread_count'] as int,
+      notifications: entries.map((entry) {
+        final item = Map<String, dynamic>.from(entry as Map);
+        return AccountNotification(
+          id: item['id'] as String,
+          type: item['type'] as String,
+          title: item['title'] as String,
+          body: item['body'] as String,
+          createdAt: DateTime.parse(item['created_at'] as String),
+          readAt: item['read_at'] == null
+              ? null : DateTime.parse(item['read_at'] as String),
+        );
+      }).toList(growable: false),
+    );
+  }
+
+  @override
+  Future<void> readNotification(String id) async {
+    await _request(
+      'POST', '/v1/notifications/read',
+      token: await _token(), body: {'id': id},
+    );
+  }
+
+  @override
+  Future<int> readAllNotifications() async {
+    final response = await _request(
+      'POST', '/v1/notifications/read-all', token: await _token(),
+    );
+    return response['updated'] as int;
+  }
+
+  @override
   Future<void> requestPasswordReset(String email) async {
     throw Exception('Восстановление пароля пока не настроено на сервере.');
   }
