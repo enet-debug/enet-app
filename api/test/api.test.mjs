@@ -22,7 +22,13 @@ test('registration, session, catalog and logout', async () => {
     return { status: response.status, data: await response.json() };
   };
   try {
-    assert.equal((await call('/health')).status, 200);
+    const healthResponse = await fetch(base + '/health');
+    assert.equal(healthResponse.status, 200);
+    assert.deepEqual(await healthResponse.json(), {
+      status: 'ok', service: 'enet-api', version: '0.4.0',
+    });
+    assert.equal(healthResponse.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(healthResponse.headers.get('cross-origin-resource-policy'), 'same-origin');
     assert.equal((await call('/v1/auth/me')).status, 401);
     assert.equal((await call('/v1/services')).status, 401);
     assert.equal((await call('/v1/auth/register', 'POST', {
