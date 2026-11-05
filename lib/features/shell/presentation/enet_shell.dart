@@ -602,7 +602,18 @@ class _ENetShellState extends State<ENetShell> {
     final split = !compact && constraints.maxWidth >= 710;
     final railWidth = constraints.maxWidth >= 1050 ? 296.0 : 250.0;
 
-    final intro = Column(
+    final intro = Container(
+      decoration: compact ? null : BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(.72, -.85),
+          radius: 1.55,
+          colors: [
+            ENetColors.mint.withValues(alpha: .14),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (compact)
@@ -618,6 +629,7 @@ class _ENetShellState extends State<ENetShell> {
         SizedBox(height: compact ? 10 : 30),
         _hero(compact),
       ],
+      ),
     );
 
     final shortcuts = _shortcutStrip(compact);
@@ -1045,8 +1057,11 @@ class _ENetShellState extends State<ENetShell> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(compact ? 15 : 22),
                     gradient: const LinearGradient(
-                      colors: [Color(0xFF00DDA3), Color(0xFF007F62)],
+                      begin: Alignment.topLeft, end: Alignment.bottomRight,
+                      colors: [Color(0xFF0B7161), Color(0xFF063A33)],
                     ),
+                    border: Border.all(
+                      color: ENetColors.cyan.withValues(alpha: .5)),
                     boxShadow: [
                       BoxShadow(
                         color: ENetColors.mint.withValues(alpha: .24),
@@ -1057,8 +1072,8 @@ class _ENetShellState extends State<ENetShell> {
                   ),
                   child: Icon(
                     Icons.fingerprint_rounded,
-                    color: const Color(0xFF03231B),
-                    size: compact ? 28 : 31,
+                    color: ENetColors.cyan,
+                    size: compact ? 28 : 34,
                   ),
                 ),
                 SizedBox(width: compact ? 12 : 22),
@@ -1082,7 +1097,7 @@ class _ENetShellState extends State<ENetShell> {
                           child: Text(
                             compact
                               ? 'Единый доступ ко всем сервисам eNet'
-                              : 'Ваш единый аккаунт для всех сервисов eNet',
+                              : 'Единый вход во все сервисы eNet',
                             maxLines: compact ? 2 : 3,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
