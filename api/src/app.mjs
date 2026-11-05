@@ -313,7 +313,7 @@ export function createApp(options = {}) {
           ? await comparePassword(b.password, user.password_hash)
           : (await scrypt(b.password, Buffer.alloc(16), 64), false);
         if (!valid) {
-          const ipWait = recordAttempt(ipBucket, 30);
+          const ipWait = recordAttempt(ipBucket, 30, Date.now(), false);
           const accountWait = recordAttempt(accountBucket, authLimit);
           const retry = Math.max(ipWait, accountWait);
           if (retry > 0) return denyRateLimited(res, retry);
@@ -384,7 +384,7 @@ export function createApp(options = {}) {
         }
         const account = userById.get(session.user.id);
         if (!account || !(await comparePassword(body.current_password, account.password_hash))) {
-          const ipWait = recordAttempt(ipBucket, 30);
+          const ipWait = recordAttempt(ipBucket, 30, Date.now(), false);
           const accountWait = recordAttempt(accountBucket, authLimit);
           const retry = Math.max(ipWait, accountWait);
           if (retry > 0) return denyRateLimited(res, retry);
