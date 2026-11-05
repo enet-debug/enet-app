@@ -1,4 +1,4 @@
-# eNet API (v0.2)
+# eNet API (v0.3)
 
 Локальный backend для eNet ID и каталога сервисов. **Node.js 22.16+** (встроенный `node:sqlite`; в Node 22 SQLite может выдавать предупреждение ExperimentalWarning). Внешних npm-пакетов нет.
 
@@ -24,6 +24,11 @@ npm test
 - `POST /v1/auth/logout` тот же Bearer
 - `POST /v1/auth/change-password` Bearer, JSON: `{\"current_password\":\"...\",\"new_password\":\"...\"}`; проверяет старый пароль и отзывает другие сессии
 - `POST /v1/auth/logout-others` Bearer; отзывает все остальные сессии этого пользователя и возвращает `revoked`
+- `POST /v1/auth/profile` Bearer, JSON `{\"name\":\"Новое имя\"}`, возвращает актуальный `user`
+- `GET /v1/auth/sessions` Bearer, список активных сеансов с идентификаторами, датами и отметкой `current`
+- `POST /v1/auth/sessions/revoke` Bearer, JSON `{\"session_id\":\"UUID\"}`, отключает **чужой сеанс того же пользователя**, но не текущий
+
+При старте API автоматически добавляет поля метаданных в существующую таблицу сеансов без удаления пользователей. Названия устройств задаются клиентом и **не являются подтверждёнными данными об устройстве**.
 - `GET /v1/services` защищённый каталог сервисов (пока содержит ссылку на Продайзер)
 - `POST /v1/auth/reset-password` отвечает 501 до подключения почтового провайдера
 
