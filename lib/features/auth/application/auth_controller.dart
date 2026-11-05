@@ -168,6 +168,34 @@ class AuthController extends ChangeNotifier {
   Future<int> readAllNotifications() =>
       _accountRequest(_repository.readAllNotifications);
 
+  Future<List<WorkspaceTask>> listTasks() =>
+      _accountRequest(_repository.listTasks);
+
+  Future<WorkspaceTask> createTask({
+    required String title,
+    required String description,
+    DateTime? dueAt,
+  }) => _executeWithResult(() => _accountRequest(() => _repository.createTask(
+        title: title, description: description, dueAt: dueAt,
+      )));
+
+  Future<WorkspaceTask> updateTask({
+    required String id,
+    required String title,
+    required String description,
+    DateTime? dueAt,
+  }) => _executeWithResult(() => _accountRequest(() => _repository.updateTask(
+        id: id, title: title, description: description, dueAt: dueAt,
+      )));
+
+  Future<WorkspaceTask> setTaskCompleted(String id, bool completed) =>
+      _executeWithResult(() => _accountRequest(
+        () => _repository.setTaskCompleted(id, completed),
+      ));
+
+  Future<void> deleteTask(String id) =>
+      _execute(() => _accountRequest(() => _repository.deleteTask(id)));
+
   Future<void> requestPasswordReset(String email) =>
       _execute(() => _repository.requestPasswordReset(email));
 
