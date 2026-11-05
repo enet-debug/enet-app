@@ -215,14 +215,13 @@ class _WorkspaceTaskSnapshotState extends State<WorkspaceTaskSnapshot> {
           ),
         ]),
         const SizedBox(height: 5),
-        Text(tasks == null ? (_error ?? 'Загрузка…') : open.toString() + ' в работе',
+        Text(tasks == null ? (_error ?? 'Загрузка…') : '${open} в работе',
           style: const TextStyle(color: ENetColors.text,
             fontSize: 22, fontWeight: FontWeight.w800)),
         const SizedBox(height: 5),
         Text(tasks == null
           ? 'Данные из eNet API'
-          : 'Всего ' + tasks.length.toString() +
-              ' · Выполнено ' + (tasks.length - open).toString(),
+          : 'Всего ${tasks.length} · Выполнено ${tasks.length - open}',
           style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
         const SizedBox(height: 8),
         Material(color: Colors.transparent, child: InkWell(

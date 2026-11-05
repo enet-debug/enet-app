@@ -30,12 +30,6 @@ class _Dest {
   final String label;
 }
 
-const _weekdays = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье'];
-const _months = [
-  'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря',
-];
-
 const _eyebrow = TextStyle(color: ENetColors.muted, fontSize: 11, letterSpacing: 1.8, fontWeight: FontWeight.w700);
 
 class ENetShell extends StatefulWidget {
@@ -118,11 +112,6 @@ class _ENetShellState extends State<ENetShell> {
     final previous = index;
     setState(() => index = next);
     if (previous == 2 || next == 2) _refreshUnreadCount();
-  }
-
-  String _dateLabel() {
-    final n = DateTime.now();
-    return '${_weekdays[n.weekday - 1]}, ${n.day} ${_months[n.month - 1]}'.toUpperCase();
   }
 
   @override
