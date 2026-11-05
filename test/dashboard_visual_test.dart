@@ -27,25 +27,20 @@ void main() {
     expect(ENetColors.background.g, greaterThan(ENetColors.background.b));
   });
 
-  testWidgets('The dashboard shows confirmed API status and quick actions', (tester) async {
+  testWidgets('The dashboard shows confirmed API status', (tester) async {
     final auth = AuthController(_CatalogRepository());
     addTearDown(auth.dispose);
-    var openedProfile = false;
-    var openedSettings = false;
     await tester.pumpWidget(MaterialApp(
       theme: ENetTheme.dark,
-      home: Scaffold(body: DashboardStatus(
-        auth: auth,
-        openAccount: () => openedProfile = true,
-        openSettings: () => openedSettings = true,
-      )),
+      home: Scaffold(body: DashboardStatus(auth: auth)),
     ));
     await tester.pumpAndSettle();
-    expect(find.text('Сервер отвечает'), findsOneWidget);
-    await tester.tap(find.text('eNet ID'));
-    expect(openedProfile, true);
-    await tester.tap(find.text('Безопасность'));
-    expect(openedSettings, true);
+    expect(find.text('eNet API'), findsOneWidget);
+    expect(find.text('Работает'), findsOneWidget);
+    expect(find.text('Сервер отвечает на запросы'), findsOneWidget);
+    await tester.tap(find.text('Проверить'));
+    await tester.pumpAndSettle();
+    expect(find.text('Работает'), findsOneWidget);
   });
 
   testWidgets('Favorites can be saved and filtered across service cards', (tester) async {
