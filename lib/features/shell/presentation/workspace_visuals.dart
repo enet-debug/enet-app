@@ -133,6 +133,17 @@ class _DashboardSessionsSnapshotState extends State<DashboardSessionsSnapshot> {
     }
   }
 
+  String _sessionDate(DateTime value) {
+    const months = [
+      'янв', 'фев', 'мар', 'апр', 'май', 'июн',
+      'июл', 'авг', 'сен', 'окт', 'ноя', 'дек',
+    ];
+    final local = value.toLocal();
+    final hour = local.hour.toString().padLeft(2, '0');
+    final minute = local.minute.toString().padLeft(2, '0');
+    return '${local.day} ${months[local.month - 1]}, $hour:$minute';
+  }
+
   @override
   Widget build(BuildContext context) => Glass(
     radius: 18,
@@ -184,13 +195,13 @@ class _DashboardSessionsSnapshotState extends State<DashboardSessionsSnapshot> {
                   Text(session.device, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: ENetColors.text,
                       fontSize: 11.5, fontWeight: FontWeight.w700)),
-                  Text(session.current ? 'Текущее устройство' : 'Другой сеанс',
+                  Text(
+                    'Последняя активность · ${_sessionDate(session.lastSeenAt)}',
                     style: const TextStyle(color: ENetColors.muted, fontSize: 9.5)),
                 ],
               )),
-              if (session.current)
-                const Text('Сейчас', style: TextStyle(
-                  color: ENetColors.mint, fontSize: 9.5, fontWeight: FontWeight.w700)),
+              const Icon(Icons.chevron_right_rounded,
+                color: ENetColors.cyan, size: 18),
             ]),
           ),
       const SizedBox(height: 7),
@@ -202,6 +213,8 @@ class _DashboardSessionsSnapshotState extends State<DashboardSessionsSnapshot> {
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
             child: Row(children: [
+              const Icon(Icons.devices_rounded, color: ENetColors.cyan, size: 15),
+              const SizedBox(width: 8),
               Expanded(child: Text('Управление сеансами', style: TextStyle(
                 color: ENetColors.cyan, fontSize: 10.5, fontWeight: FontWeight.w700))),
               Icon(Icons.chevron_right_rounded, color: ENetColors.cyan, size: 17),
