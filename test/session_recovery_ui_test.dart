@@ -57,7 +57,9 @@ void main() {
       expect(find.byTooltip('Открыть уведомления'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
-      final profileTab = find.text('Профиль').first;
+      final profileTab = find.byKey(ValueKey(
+        size.width < 600 ? 'mobile-nav-3' : 'desktop-nav-3',
+      ));
       await tester.ensureVisible(profileTab);
       await tester.tap(profileTab);
       await tester.pump();
