@@ -108,7 +108,13 @@ void main() {
       final device = size.width < 600 ? 'mobile' : 'desktop';
       await _saveCapture(tester, 'enet-home-$device');
 
-      await tester.tap(find.text('Профиль').first);
+      // On phones the first 'Профиль' is an off-screen quick-action card.
+      // The last one is the visible bottom-navigation destination.
+      await tester.tap(
+        size.width < 600
+            ? find.text('Профиль').last
+            : find.text('Профиль').first,
+      );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 800));
       expect(find.text('00000000-0000-4000-8000-000000000001'),
