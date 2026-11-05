@@ -16,7 +16,7 @@ class BrandLogo extends StatelessWidget {
           borderRadius: BorderRadius.circular(size * .28),
           border: Border.all(color: Colors.white.withValues(alpha: .18)),
           boxShadow: [
-            BoxShadow(color: ENetColors.blue.withValues(alpha: .35), blurRadius: size * .7, offset: Offset(0, size * .18)),
+            BoxShadow(color: ENetColors.mint.withValues(alpha: .29), blurRadius: size * .7, offset: Offset(0, size * .18)),
           ],
         ),
         clipBehavior: Clip.antiAlias,
@@ -53,10 +53,10 @@ class ENetAvatar extends StatelessWidget {
       padding: EdgeInsets.all(size * .045),
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: SweepGradient(colors: [ENetColors.cyan, ENetColors.blue, ENetColors.violet, ENetColors.cyan]),
+        gradient: SweepGradient(colors: [ENetColors.cyan, ENetColors.blue, ENetColors.mint, ENetColors.cyan]),
       ),
       child: DecoratedBox(
-        decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF0B1424)),
+        decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF0D211B)),
         child: Center(
           child: Text(
             initial,
