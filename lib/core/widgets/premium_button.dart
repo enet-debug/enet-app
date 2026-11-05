@@ -67,19 +67,23 @@ class PrimaryButton extends StatelessWidget {
                     mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      AnimatedSwitcher(
+                      Flexible(child: AnimatedSwitcher(
                         duration: ENetMotion.quick,
                         child: Text(
                           label,
                           key: ValueKey(label),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: ENetColors.onAccent,
                             fontSize: 16,
+                            height: 1.15,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -.2,
                           ),
                         ),
-                      ),
+                      )),
                       if (icon != null) ...[
                         const SizedBox(width: 8),
                         AnimatedSlide(
@@ -132,7 +136,12 @@ class SecondaryButton extends StatelessWidget {
           ),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             if (icon != null) ...[Icon(icon, size: 20, color: color), const SizedBox(width: 9)],
-            Text(label, style: TextStyle(color: color, fontSize: 15.5, fontWeight: FontWeight.w600)),
+            Flexible(child: Text(
+              label, maxLines: 2, overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: color, fontSize: 15.5,
+                height: 1.15, fontWeight: FontWeight.w600),
+            )),
           ]),
         ),
       ),
