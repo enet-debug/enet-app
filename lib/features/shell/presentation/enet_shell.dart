@@ -1182,6 +1182,156 @@ class _ENetShellState extends State<ENetShell> {
   }
 }
 
+class _WindowDot extends StatelessWidget {
+  const _WindowDot({required this.color});
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 9,
+    height: 9,
+    decoration: BoxDecoration(
+      color: color,
+      shape: BoxShape.circle,
+      boxShadow: [
+        BoxShadow(color: color.withValues(alpha: .45), blurRadius: 8),
+      ],
+    ),
+  );
+}
+
+class _HomeShortcutData {
+  const _HomeShortcutData({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+}
+
+class _HomeShortcut extends StatelessWidget {
+  const _HomeShortcut({required this.data});
+  final _HomeShortcutData data;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: 122,
+    child: Pressable(
+      onTap: data.onTap,
+      pressedScale: .97,
+      haptic: false,
+      builder: (context, hovered) => Glass(
+        radius: 17,
+        blur: 10,
+        shadow: false,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        tint: data.color,
+        child: Row(children: [
+          Container(
+            width: 35,
+            height: 35,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: data.color.withValues(alpha: .15),
+              border: Border.all(color: data.color.withValues(alpha: .35)),
+            ),
+            child: Icon(data.icon, color: data.color, size: 19),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: ENetColors.text,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                )),
+              const SizedBox(height: 3),
+              Text(data.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: ENetColors.muted,
+                  fontSize: 9,
+                )),
+            ],
+          )),
+        ]),
+      ),
+    ),
+  );
+}
+
+class _FeatureCardData {
+  const _FeatureCardData({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+}
+
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard({required this.data});
+  final _FeatureCardData data;
+
+  @override
+  Widget build(BuildContext context) => Pressable(
+    onTap: data.onTap,
+    pressedScale: .985,
+    haptic: false,
+    builder: (context, hovered) => Glass(
+      radius: 18,
+      blur: 11,
+      shadow: false,
+      padding: const EdgeInsets.all(13),
+      tint: data.color,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: data.color.withValues(alpha: .14),
+              border: Border.all(color: data.color.withValues(alpha: .32)),
+            ),
+            child: Icon(data.icon, color: data.color, size: 20),
+          ),
+          const SizedBox(height: 11),
+          Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: ENetColors.text,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            )),
+          const SizedBox(height: 4),
+          Text(data.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: ENetColors.muted,
+              fontSize: 10,
+            )),
+        ],
+      ),
+    ),
+  );
+}
+
 // ═════════════════════════ Вспомогательные виджеты ═════════════════════════
 
 class _UnreadChip extends StatelessWidget {
