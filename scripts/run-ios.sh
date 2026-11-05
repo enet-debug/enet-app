@@ -23,7 +23,8 @@ fi
 
 cd "$ROOT"
 if [[ ! -f "$ROOT/ios/Runner.xcodeproj/project.pbxproj" ]]; then
-  flutter create --platforms=ios .
+  flutter create --platforms=ios --org ru.enetdev .
 fi
+/usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string eNet" ios/Runner/Info.plist
 flutter pub get
 flutter run -d ios --dart-define="ENET_API_URL=$ENET_API_URL"
