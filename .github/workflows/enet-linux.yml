@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: enet-linux-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   api:
     name: API integration tests
@@ -18,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: bash -n scripts/run-linux.sh
+      - run: bash -n scripts/run-linux.sh scripts/run-ios.sh api/deploy/backup-enet-db.sh
       - run: npm test
         working-directory: api
 
