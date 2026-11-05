@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/enet_theme.dart';
 import 'features/auth/application/auth_controller.dart';
-import 'features/auth/data/demo_auth_repository.dart';
+import 'features/auth/data/api_auth_repository.dart';
 import 'features/auth/presentation/auth_screen.dart';
 import 'features/shell/presentation/enet_shell.dart';
 
@@ -31,8 +31,9 @@ class _ENetAppState extends State<ENetApp> {
   @override
   void initState() {
     super.initState();
-    auth = AuthController(DemoAuthRepository());
+    auth = AuthController(ApiAuthRepository());
     auth.addListener(_update);
+    auth.restoreSession();
   }
 
   void _update() => setState(() {});
@@ -51,7 +52,9 @@ class _ENetAppState extends State<ENetApp> {
       debugShowCheckedModeBanner: false,
       theme: ENetTheme.dark,
       scrollBehavior: const ENetScrollBehavior(),
-      home: AnimatedSwitcher(
+      home: auth.initializing
+          ? const Scaffold(body: Center(child: CircularProgressIndicator()))
+          : AnimatedSwitcher(
         duration: const Duration(milliseconds: 550),
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeIn,
