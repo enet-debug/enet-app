@@ -434,12 +434,12 @@ class _ENetShellState extends State<ENetShell> {
     final pad = compact ? 18.0 : 38.0;
     return Column(children: [
       Padding(
-        padding: EdgeInsets.fromLTRB(pad, compact ? 12 : 20, pad, 0),
+        padding: EdgeInsets.fromLTRB(pad, compact ? 10 : 12, pad, 0),
         child: _topBar(compact),
       ),
       Expanded(
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(pad, 20, pad, compact ? 24 : 48),
+          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 12, pad, 24),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1260.0);
             return Align(
@@ -583,9 +583,9 @@ class _ENetShellState extends State<ENetShell> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   intro,
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 14),
                   shortcuts,
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 15),
                   catalog,
                 ],
               )),
@@ -603,21 +603,21 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         _accountSummaryCard(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         shortcuts,
-        const SizedBox(height: 18),
+        const SizedBox(height: 13),
         catalog,
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         DashboardStatus(
           auth: widget.auth,
           openAccount: () => go(3),
           openSettings: () => go(4),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         _quickActionsCard(),
-        const SizedBox(height: 22),
+        const SizedBox(height: 16),
         _featureHighlights(),
       ],
     );
@@ -756,10 +756,10 @@ class _ENetShellState extends State<ENetShell> {
     haptic: false,
     builder: (context, hovered) => Glass(
       radius: 20, blur: 12,
-      padding: const EdgeInsets.all(17),
+      padding: const EdgeInsets.all(13),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          ENetAvatar(name: user.name, size: 46),
+          ENetAvatar(name: user.name, size: 40),
           const SizedBox(width: 11),
           Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -918,8 +918,8 @@ class _ENetShellState extends State<ENetShell> {
         ],
         Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 17 : 22,
-            vertical: compact ? 19 : 23,
+            horizontal: compact ? 15 : 18,
+            vertical: compact ? 14 : 16,
           ),
           child: Row(
             children: [
@@ -1498,16 +1498,28 @@ class _QuickAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: Colors.transparent,
-    child: ListTile(
-      dense: true,
-      visualDensity: const VisualDensity(vertical: -2),
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: ENetColors.cyan, size: 19),
-      title: Text(label, style: const TextStyle(
-        color: ENetColors.text, fontSize: 12.5, fontWeight: FontWeight.w600,
-      )),
-      trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 18),
+    child: InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(11),
+      child: SizedBox(
+        height: 36,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: Row(children: [
+            Icon(icon, color: ENetColors.cyan, size: 18),
+            const SizedBox(width: 10),
+            Expanded(child: Text(label, maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: ENetColors.text,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ))),
+            const Icon(Icons.chevron_right_rounded,
+              color: ENetColors.faint, size: 17),
+          ]),
+        ),
+      ),
     ),
   );
 }
