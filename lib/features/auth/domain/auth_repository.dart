@@ -50,4 +50,8 @@ abstract class AuthRepository {
   Future<AuthUser> updateName(String name);
   Future<List<AccountSession>> listSessions();
   Future<void> revokeSession(String sessionId);
+  Future<String> getApiEndpoint();
+  Future<void> setApiEndpoint(String value);
+  Future<List<String>> favoriteServices();
+  Future<List<String>> saveFavoriteServices(List<String> serviceIds);
 }
