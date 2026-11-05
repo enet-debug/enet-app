@@ -81,5 +81,9 @@ class AuthController extends ChangeNotifier {
     }
   }
 
+  Future<NotificationFeed> listNotifications() => _repository.listNotifications();
+  Future<void> readNotification(String id) => _repository.readNotification(id);
+  Future<int> readAllNotifications() => _repository.readAllNotifications();
+
   Future<void> requestPasswordReset(String email) => _execute(() => _repository.requestPasswordReset(email));
 }
