@@ -60,6 +60,15 @@ class _ENetAppState extends State<ENetApp> {
         duration: const Duration(milliseconds: 550),
         switchInCurve: Curves.easeOutCubic,
         switchOutCurve: Curves.easeIn,
+        // Remove protected content immediately when a session ends. Keeping
+        // an outgoing shell alive would let it read an already-cleared user.
+        layoutBuilder: (current, previous) => Stack(
+          fit: StackFit.expand,
+          children: [
+            if (auth.user != null) ...previous,
+            if (current != null) current,
+          ],
+        ),
         transitionBuilder: (child, animation) => FadeTransition(
           opacity: animation,
           child: ScaleTransition(

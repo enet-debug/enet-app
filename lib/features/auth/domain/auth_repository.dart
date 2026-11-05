@@ -1,3 +1,13 @@
+/// A protected request was rejected because its session is no longer valid.
+class SessionExpiredException implements Exception {
+  const SessionExpiredException();
+
+  static const message = 'Сеанс eNet ID завершён. Войдите снова.';
+
+  @override
+  String toString() => message;
+}
+
 class AuthUser {
   const AuthUser({required this.email, required this.name});
   final String email;

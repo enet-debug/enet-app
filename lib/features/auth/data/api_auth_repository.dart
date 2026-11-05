@@ -19,6 +19,18 @@ class ApiAuthRepository implements AuthRepository {
   final http.Client _client;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final SharedPreferencesAsync _prefs = SharedPreferencesAsync();
+  Future<void> _sessionQueue = Future<void>.value();
+
+  // Serialize token writes, endpoint changes and rejection cleanup. A late 401
+  // must never delete the token belonging to a more recent sign-in.
+  Future<T> _withSessionStorage<T>(Future<T> Function() action) {
+    final operation = _sessionQueue.then((_) => action());
+    _sessionQueue = operation.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {},
+    );
+    return operation;
+  }
 
   @override
   Future<String> getApiEndpoint() async {
@@ -29,14 +41,24 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<void> setApiEndpoint(String value) async {
     final normalized = ApiEndpointPolicy.normalize(value);
-    final current = await getApiEndpoint();
-    if (current == normalized) return;
-    await _prefs.setString(_endpointKey, normalized);
-    await _storage.delete(key: _sessionKey);
+    await _withSessionStorage(() async {
+      final current = await getApiEndpoint();
+      if (current == normalized) return;
+      await _storage.delete(key: _sessionKey);
+      await _prefs.setString(_endpointKey, normalized);
+    });
   }
 
-  Future<Uri> _uri(String path) async =>
-      Uri.parse('${await getApiEndpoint()}$path');
+  Future<Uri> _requestUri(String path, String? token) =>
+      _withSessionStorage(() async {
+        // Capture the destination together with its current token. If the
+        // endpoint changed after a caller read the token, send nothing.
+        final endpoint = await getApiEndpoint();
+        if (token != null && await _storage.read(key: _sessionKey) != token) {
+          throw const SessionExpiredException();
+        }
+        return Uri.parse('$endpoint$path');
+      });
 
   Future<Map<String, dynamic>> _request(
     String method, String path, {
@@ -49,12 +71,13 @@ class ApiAuthRepository implements AuthRepository {
       if (body != null) 'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
+    final uri = await _requestUri(path, token);
     final http.Response response;
     try {
       response = await (method == 'GET'
-        ? _client.get(await _uri(path), headers: headers)
+        ? _client.get(uri, headers: headers)
         : _client.post(
-            await _uri(path),
+            uri,
             headers: headers,
             body: body == null ? null : jsonEncode(body),
           )).timeout(const Duration(seconds: 12));
@@ -62,6 +85,14 @@ class ApiAuthRepository implements AuthRepository {
       throw Exception('Сервер eNet не ответил. Проверьте, запущен ли API.');
     } on http.ClientException {
       throw Exception('Нет соединения с eNet API. Проверьте адрес сервера.');
+    }
+    if (response.statusCode == 401 && token != null) {
+      await _withSessionStorage(() async {
+        if (await _storage.read(key: _sessionKey) == token) {
+          await _storage.delete(key: _sessionKey);
+        }
+      });
+      throw const SessionExpiredException();
     }
     Map<String, dynamic> result;
     try {
@@ -92,8 +123,11 @@ class ApiAuthRepository implements AuthRepository {
 
   Future<AuthUser> _setSession(Map<String, dynamic> response) async {
     final token = response['token'] as String;
-    await _storage.write(key: _sessionKey, value: token);
-    return _user(response);
+    final user = _user(response);
+    await _withSessionStorage(
+      () => _storage.write(key: _sessionKey, value: token),
+    );
+    return user;
   }
 
   @override
@@ -111,21 +145,21 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<AuthUser?> restoreSession() async {
-    final token = await _storage.read(key: _sessionKey);
+    final token = await _withSessionStorage(
+      () => _storage.read(key: _sessionKey),
+    );
     if (token == null || token.isEmpty) return null;
-    try {
-      return _user(await _request('GET', '/v1/auth/me', token: token));
-    } catch (_) {
-      // The session may have expired or the local API may be offline.
-      // Do not expose an unverified account as authenticated.
-      return null;
-    }
+    // Network errors preserve the saved token and let the UI offer a retry.
+    // Only a server rejection invalidates it.
+    return _user(await _request('GET', '/v1/auth/me', token: token));
   }
 
   Future<String> _token() async {
-    final token = await _storage.read(key: _sessionKey);
+    final token = await _withSessionStorage(
+      () => _storage.read(key: _sessionKey),
+    );
     if (token == null || token.isEmpty) {
-      throw StateError('Войдите в eNet ID заново.');
+      throw const SessionExpiredException();
     }
     return token;
   }
@@ -267,7 +301,9 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
-    final token = await _storage.read(key: _sessionKey);
+    final token = await _withSessionStorage(
+      () => _storage.read(key: _sessionKey),
+    );
     try {
       if (token != null) {
         await _request('POST', '/v1/auth/logout', token: token);
@@ -275,7 +311,11 @@ class ApiAuthRepository implements AuthRepository {
     } catch (_) {
       // Local logout must work even without an API connection.
     } finally {
-      await _storage.delete(key: _sessionKey);
+      await _withSessionStorage(() async {
+        if (await _storage.read(key: _sessionKey) == token) {
+          await _storage.delete(key: _sessionKey);
+        }
+      });
     }
   }
 }
