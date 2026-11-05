@@ -1,6 +1,7 @@
 # Point api.enet-dev.ru to the VPS public IP before enabling this site.
 api.enet-dev.ru {
     encode zstd gzip
+    header Strict-Transport-Security "max-age=31536000"
     reverse_proxy 127.0.0.1:8787 {
         # The API trusts this header only when ENET_TRUST_PROXY=true.
         header_up X-Real-IP {remote_host}
