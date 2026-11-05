@@ -37,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('eNet API'), findsOneWidget);
     expect(find.text('Работает'), findsOneWidget);
-    expect(find.text('Сервер отвечает на запросы'), findsOneWidget);
+    expect(find.textContaining('Время ответа:'), findsOneWidget);
     await tester.tap(find.text('Проверить'));
     await tester.pumpAndSettle();
     expect(find.text('Работает'), findsOneWidget);
