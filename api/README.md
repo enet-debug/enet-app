@@ -23,11 +23,11 @@ npm test
 - `POST /v1/auth/login` JSON: `{"email":"...","password":"..."}`
 - `GET /v1/auth/me` заголовок `Authorization: Bearer <token>`
 - `POST /v1/auth/logout` тот же Bearer
-- `POST /v1/auth/change-password` Bearer, JSON: `{\"current_password\":\"...\",\"new_password\":\"...\"}`; проверяет старый пароль и отзывает другие сессии
+- `POST /v1/auth/change-password` Bearer, JSON: `{"current_password":"...","new_password":"..."}`; проверяет старый пароль и отзывает другие сессии
 - `POST /v1/auth/logout-others` Bearer; отзывает все остальные сессии этого пользователя и возвращает `revoked`
-- `POST /v1/auth/profile` Bearer, JSON `{\"name\":\"Новое имя\"}`, возвращает актуальный `user`
+- `POST /v1/auth/profile` Bearer, JSON `{"name":"Новое имя"}`, возвращает актуальный `user`
 - `GET /v1/auth/sessions` Bearer, список активных сеансов с идентификаторами, датами и отметкой `current`
-- `POST /v1/auth/sessions/revoke` Bearer, JSON `{\"session_id\":\"UUID\"}`, отключает **чужой сеанс того же пользователя**, но не текущий
+- `POST /v1/auth/sessions/revoke` Bearer, JSON `{"session_id":"UUID"}`, отключает **чужой сеанс того же пользователя**, но не текущий
 
 При старте API автоматически добавляет поля метаданных в существующую таблицу сеансов без удаления пользователей. Названия устройств задаются клиентом и **не являются подтверждёнными данными об устройстве**.
 - `GET /v1/services` защищённый каталог сервисов, у каждой записи возвращается `favorite` (сейчас содержит ссылку на Продайзер)
