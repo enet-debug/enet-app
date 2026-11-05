@@ -10,7 +10,6 @@ const scrypt = promisify(scryptCallback);
 const sessionMs = 7 * 24 * 60 * 60 * 1000;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const failLimit = 8;
-const attempts = new Map();
 const services = Object.freeze([
   { id: 'prodayzer', name: 'Продайзер', type: 'external', url: 'https://prodayzer.ru',
     description: 'Создание и улучшение объявлений. Единый вход пока не подключён.' },
@@ -36,17 +35,6 @@ async function comparePassword(password, stored) {
   if (expected.length !== 64) return false;
   const actual = await scrypt(password, Buffer.from(parts[1], 'hex'), 64);
   return timingSafeEqual(expected, actual);
-}
-function throttle(key, limit = failLimit) {
-  const now = Date.now();
-  if (attempts.size > 5000) {
-    for (const [item, value] of attempts) if (value.until < now) attempts.delete(item);
-  }
-  let entry = attempts.get(key);
-  if (!entry || entry.until < now) entry = { count: 0, until: now + 60_000 };
-  entry.count++;
-  attempts.set(key, entry);
-  return entry.count > limit ? Math.max(1, Math.ceil((entry.until - now) / 1000)) : 0;
 }
 async function bodyOf(req) {
   const chunks = [];
@@ -112,6 +100,20 @@ function setupDb(path) {
   return db;
 }
 export function createApp(options = {}) {
+  // Rate limit state belongs to this server instance, not the entire Node process.
+  const attempts = new Map();
+  function throttle(key, limit = failLimit) {
+    const now = Date.now();
+    if (attempts.size > 5000) {
+      for (const [item, value] of attempts) if (value.until < now) attempts.delete(item);
+    }
+    let entry = attempts.get(key);
+    if (!entry || entry.until < now) entry = { count: 0, until: now + 60_000 };
+    entry.count++;
+    attempts.set(key, entry);
+    return entry.count > limit ? Math.max(1, Math.ceil((entry.until - now) / 1000)) : 0;
+  }
+
   const db = setupDb(options.dbPath || process.env.ENET_DB_PATH || './data/enet.sqlite');
   const allowed = new Set((options.allowedOrigins ?? process.env.ENET_ALLOWED_ORIGINS ?? '')
     .split(',').map(x => x.trim()).filter(Boolean));
