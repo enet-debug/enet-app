@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/enet_theme.dart';
+import '../../../core/widgets/brand_logo.dart';
 import '../../../core/widgets/glass.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_repository.dart';
@@ -248,8 +249,7 @@ class MobileWelcomeScene extends StatelessWidget {
           const CustomPaint(painter: _MobileMountainPainter()),
           const Positioned(
             top: 8, left: 0, right: 0,
-            child: Center(child: Icon(Icons.auto_awesome_rounded,
-              color: ENetColors.cyan, size: 21)),
+            child: Center(child: ENetMark(size: 46)),
           ),
           Positioned(
             left: 18, right: 55, bottom: 17,
