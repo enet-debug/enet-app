@@ -55,7 +55,7 @@ test('profile updates and selective session revocation enforce ownership', async
     assert.ok(Date.parse(other.last_seen_at));
     assert.ok(Date.parse(other.expires_at));
     assert.equal((await call('/v1/auth/profile', 'POST', first, { name: 'X' })).status, 400);
-    assert.equal((await call('/v1/auth/profile', 'POST', first, { name: 'Hello\\nWorld' })).status, 400);
+    assert.equal((await call('/v1/auth/profile', 'POST', first, { name: ['Hello','World'].join(String.fromCharCode(10)) })).status, 400);
     const updated = await call('/v1/auth/profile', 'POST', first, { name: 'Alice Updated' });
     assert.equal(updated.status, 200);
     assert.equal(updated.data.user.name, 'Alice Updated');
