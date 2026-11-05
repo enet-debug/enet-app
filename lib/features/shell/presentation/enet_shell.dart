@@ -74,12 +74,10 @@ class _ENetShellState extends State<ENetShell> {
   static const desktopItems = [
     _Dest(0, Icons.home_outlined, Icons.home_rounded, 'Главная'),
     _Dest(1, Icons.apps_outlined, Icons.apps_rounded, 'Сервисы'),
-    _Dest(7, Icons.checklist_outlined, Icons.checklist_rounded, 'Задачи'),
-    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
-    _Dest(3, Icons.fingerprint_rounded, Icons.fingerprint_rounded, 'eNet ID'),
-    _Dest(5, Icons.devices_outlined, Icons.devices_rounded, 'Устройства'),
+    _Dest(3, Icons.person_outline_rounded, Icons.person_rounded, 'Профиль'),
     _Dest(4, Icons.shield_outlined, Icons.shield_rounded, 'Безопасность'),
     _Dest(6, Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
+    _Dest(8, Icons.info_outline_rounded, Icons.info_rounded, 'О приложении'),
   ];
 
   static const mobileItems = [
@@ -157,24 +155,32 @@ class _ENetShellState extends State<ENetShell> {
                     ),
                     child: Column(children: [
                       SizedBox(
-                        height: 38,
+                        height: 42,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 17),
                           child: Row(children: [
                             const BrandLogo(size: 22, showName: false),
                             const SizedBox(width: 9),
                             const Text('eNet APP', style: TextStyle(
                               color: ENetColors.text,
-                              fontSize: 11.5,
+                              fontSize: 12,
                               fontWeight: FontWeight.w800,
                             )),
-                            const Spacer(),
+                            const Expanded(
+                              child: Center(child: Text('eNet APP',
+                                style: TextStyle(
+                                  color: ENetColors.muted,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: .3,
+                                ))),
+                            ),
                             const Text('v0.8.0', style: TextStyle(
                               color: ENetColors.faint,
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
                             )),
-                            const SizedBox(width: 15),
+                            const SizedBox(width: 14),
                             const _WindowDot(color: Color(0xFF39D98A)),
                             const SizedBox(width: 6),
                             const _WindowDot(color: Color(0xFFFFC84A)),
@@ -188,7 +194,7 @@ class _ENetShellState extends State<ENetShell> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(11),
-                            child: SizedBox(width: 206, child: _sidebar()),
+                            child: SizedBox(width: 244, child: _sidebar()),
                           ),
                           Container(width: 1, color: ENetColors.border),
                           Expanded(child: _content(compact)),
@@ -205,24 +211,21 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Навигация ─────────────────────────
 
   Widget _sidebar() {
-    const itemHeight = 43.0;
-    const gap = 4.0;
+    const itemHeight = 46.0;
+    const gap = 7.0;
     return Glass(
-      radius: 24,
-      blur: 16,
-      padding: const EdgeInsets.fromLTRB(14, 20, 14, 14),
+      radius: 19,
+      blur: 14,
+      padding: const EdgeInsets.fromLTRB(15, 20, 15, 15),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Padding(padding: EdgeInsets.only(left: 8), child: BrandLogo(size: 46)),
-        const SizedBox(height: 12),
         const Padding(
-          padding: EdgeInsets.only(left: 10, bottom: 22),
-          child: Text('ЕДИНАЯ ЭКОСИСТЕМА',
-            style: TextStyle(color: ENetColors.cyan, fontSize: 9.5,
-              fontWeight: FontWeight.w800, letterSpacing: 1.8)),
+          padding: EdgeInsets.only(left: 5),
+          child: BrandLogo(size: 43),
         ),
         const Padding(
-          padding: EdgeInsets.only(left: 10, bottom: 10),
-          child: Text('НАВИГАЦИЯ', style: _eyebrow),
+          padding: EdgeInsets.only(left: 8, top: 2, bottom: 25),
+          child: Text('v0.5.0', style: TextStyle(
+            color: ENetColors.faint, fontSize: 10, letterSpacing: .7)),
         ),
         SizedBox(
           height: desktopItems.length * (itemHeight + gap),
@@ -234,9 +237,9 @@ class _ENetShellState extends State<ENetShell> {
               left: 0, right: 0, height: itemHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(13),
-                  color: ENetColors.mint.withValues(alpha: .13),
-                  border: Border.all(color: ENetColors.mint.withValues(alpha: .22)),
+                  borderRadius: BorderRadius.circular(12),
+                  color: ENetColors.mint.withValues(alpha: .18),
+                  border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
                 ),
               ),
             ),
@@ -249,35 +252,17 @@ class _ENetShellState extends State<ENetShell> {
           ]),
         ),
         const Spacer(),
-        const Divider(height: 22),
-        Pressable(
-          onTap: () => go(3),
-          builder: (context, hovered) => AnimatedContainer(
-            duration: ENetMotion.quick,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: hovered ? .08 : .035),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: Colors.white.withValues(alpha: .07)),
-            ),
-            child: Row(children: [
-              ENetAvatar(name: user.name, size: 38),
-              const SizedBox(width: 10),
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: ENetColors.text, fontSize: 13,
-                      fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 3),
-                  Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
-                ],
-              )),
-              const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 19),
-            ]),
-          ),
-        ),
+        const Divider(height: 20),
+        const SizedBox(height: 10),
+        const Center(child: BrandLogo(size: 47)),
+        const SizedBox(height: 7),
+        const Text('Единая экосистема\nцифровых сервисов',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: ENetColors.muted,
+            fontSize: 10.5,
+            height: 1.45,
+          )),
       ]),
     );
   }
@@ -421,15 +406,16 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Контент ─────────────────────────
 
   Widget _content(bool compact) {
-    final pad = compact ? 16.0 : 25.0;
+    final pad = compact ? 16.0 : 24.0;
     return Column(children: [
-      Padding(
-        padding: EdgeInsets.fromLTRB(pad, compact ? 10 : 12, pad, 0),
-        child: _topBar(compact),
-      ),
+      if (compact)
+        Padding(
+          padding: EdgeInsets.fromLTRB(pad, 10, pad, 0),
+          child: _topBar(compact),
+        ),
       Expanded(
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 12, pad, 24),
+          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 24, pad, 24),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1260.0);
             return Align(
@@ -440,7 +426,8 @@ class _ENetShellState extends State<ENetShell> {
                   duration: const Duration(milliseconds: 320),
                   switchInCurve: Curves.easeOut,
                   switchOutCurve: Curves.easeIn,
-                  transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                  transitionBuilder: (child, animation) =>
+                    FadeTransition(opacity: animation, child: child),
                   layoutBuilder: (current, previous) => Stack(
                     fit: StackFit.passthrough,
                     alignment: Alignment.topCenter,
@@ -458,14 +445,12 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _topBar(bool compact) {
     return Row(children: [
-      if (compact) const BrandLogo(size: 36)
-      else const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('eNet APP', style: TextStyle(
-          color: ENetColors.text, fontWeight: FontWeight.w800, fontSize: 13)),
-        SizedBox(height: 3),
-        Text('Единая экосистема для цифровых сервисов', style: TextStyle(
-          color: ENetColors.faint, fontSize: 10.5)),
-      ]),
+      const BrandLogo(size: 32),
+      const SizedBox(width: 6),
+      const Text('APP', style: TextStyle(
+        color: ENetColors.text, fontSize: 12, fontWeight: FontWeight.w800,
+        letterSpacing: 1.1,
+      )),
       const Spacer(),
       IconButton(
         tooltip: (_unreadCount ?? 0) > 0
@@ -483,11 +468,8 @@ class _ENetShellState extends State<ENetShell> {
         ),
       ),
       const SizedBox(width: 8),
-      const _DemoBadge(label: 'v0.8.0'),
-      if (compact) ...[
-        const SizedBox(width: 12),
-        Pressable(onTap: () => go(3), builder: (context, _) => ENetAvatar(name: user.name, size: 38)),
-      ],
+      Pressable(onTap: () => go(3),
+        builder: (context, _) => ENetAvatar(name: user.name, size: 36)),
     ]);
   }
 
@@ -507,6 +489,8 @@ class _ENetShellState extends State<ENetShell> {
         return _settings();
       case 7:
         return _tasks();
+      case 8:
+        return _about();
       default:
         return _home(compact);
     }
@@ -515,46 +499,32 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная ─────────────────────────
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
-    final split = !compact && constraints.maxWidth >= 885;
+    final split = !compact && constraints.maxWidth >= 980;
+    final railWidth = constraints.maxWidth >= 1250 ? 320.0 : 285.0;
 
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (compact)
-          MobileWelcomeScene(
-            name: user.name,
-            onOpenProfile: () => go(3),
-          )
-        else ...[
-          const Text(
-            'ВАША ЦИФРОВАЯ ЭКОСИСТЕМА',
-            style: TextStyle(
-              color: ENetColors.cyan,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.7,
-            ),
+        Text(
+          compact ? 'Добро пожаловать, ${user.name} 👋' : 'Добро пожаловать в eNet',
+          maxLines: compact ? 2 : 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ENetColors.text,
+            fontSize: compact ? 25 : 30,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1,
           ),
-          const SizedBox(height: 7),
-          const Text(
-            'Добро пожаловать в eNet',
-            style: TextStyle(
-              color: ENetColors.text,
-              fontSize: 25,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -.8,
-            ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Единая платформа для ваших цифровых сервисов',
+          style: TextStyle(
+            color: ENetColors.muted,
+            fontSize: compact ? 12 : 13,
           ),
-          const SizedBox(height: 5),
-          const Text(
-            'Сервисы, аккаунт и инструменты в одном месте.',
-            style: TextStyle(
-              color: ENetColors.muted,
-              fontSize: 12.5,
-            ),
-          ),
-        ],
-        SizedBox(height: compact ? 12 : 17),
+        ),
+        SizedBox(height: compact ? 14 : 18),
         _hero(compact),
       ],
     );
@@ -562,25 +532,26 @@ class _ENetShellState extends State<ENetShell> {
     final shortcuts = _shortcutStrip();
     final catalog = ServiceCatalogPanel(
       auth: widget.auth,
-      compact: true,
+      dashboard: true,
       onSeeAll: () => go(1),
     );
+
     final rail = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _accountSummaryCard(),
-        const SizedBox(height: 10),
-        WorkspaceTaskSnapshot(
-          auth: widget.auth,
-          onOpenTasks: () => go(7),
-        ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         DashboardStatus(
           auth: widget.auth,
           openAccount: () => go(3),
-          openSettings: () => go(4),
+          openSettings: () => go(6),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
+        DashboardSessionsSnapshot(
+          auth: widget.auth,
+          onManage: () => go(5),
+        ),
+        const SizedBox(height: 12),
         _quickActionsCard(),
       ],
     );
@@ -589,12 +560,10 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 16),
+        const SizedBox(height: 18),
         shortcuts,
-        const SizedBox(height: 17),
+        const SizedBox(height: 22),
         catalog,
-        const SizedBox(height: 20),
-        _featureHighlights(),
       ],
     );
 
@@ -603,8 +572,8 @@ class _ENetShellState extends State<ENetShell> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(child: central),
-          const SizedBox(width: 14),
-          SizedBox(width: 255, child: rail),
+          const SizedBox(width: 18),
+          SizedBox(width: railWidth, child: rail),
         ],
       );
     }
@@ -613,27 +582,25 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 15),
+        const SizedBox(height: 17),
         shortcuts,
-        const SizedBox(height: 18),
+        const SizedBox(height: 19),
         catalog,
-        const SizedBox(height: 15),
+        const SizedBox(height: 16),
         _accountSummaryCard(),
-        const SizedBox(height: 11),
-        WorkspaceTaskSnapshot(
-          auth: widget.auth,
-          onOpenTasks: () => go(7),
-        ),
         const SizedBox(height: 12),
         DashboardStatus(
           auth: widget.auth,
           openAccount: () => go(3),
-          openSettings: () => go(4),
+          openSettings: () => go(6),
         ),
-        const SizedBox(height: 11),
+        const SizedBox(height: 12),
+        DashboardSessionsSnapshot(
+          auth: widget.auth,
+          onManage: () => go(5),
+        ),
+        const SizedBox(height: 12),
         _quickActionsCard(),
-        const SizedBox(height: 19),
-        _featureHighlights(),
       ],
     );
   });
@@ -651,48 +618,51 @@ class _ENetShellState extends State<ENetShell> {
       _HomeShortcutData(
         icon: Icons.fingerprint_rounded,
         title: 'eNet ID',
-        subtitle: 'Аккаунт',
-        color: ENetColors.mint,
+    Widget _shortcutStrip() {
+    final items = <_HomeShortcutData>[
+      _HomeShortcutData(
+        icon: Icons.person_outline_rounded,
+        title: 'Мой профиль',
+        subtitle: 'Личные данные',
+        color: ENetColors.cyan,
         onTap: () => go(3),
       ),
       _HomeShortcutData(
-        icon: Icons.checklist_rounded,
-        title: 'Задачи',
-        subtitle: 'Планирование',
-        color: ENetColors.cyan,
-        onTap: () => go(7),
+        icon: Icons.shield_outlined,
+        title: 'Безопасность',
+        subtitle: 'Сеансы и защита',
+        color: ENetColors.mint,
+        onTap: () => go(4),
       ),
       _HomeShortcutData(
-        icon: Icons.devices_rounded,
-        title: 'Устройства',
-        subtitle: 'Сеансы',
-        color: ENetColors.blue,
-        onTap: () => go(5),
+        icon: Icons.apps_rounded,
+        title: 'Сервисы',
+        subtitle: 'Каталог eNet',
+        color: ENetColors.cyan,
+        onTap: () => go(1),
       ),
       _HomeShortcutData(
-        icon: Icons.notifications_active_outlined,
-        title: 'События',
-        subtitle: 'Уведомления',
+        icon: Icons.settings_outlined,
+        title: 'Настройки',
+        subtitle: 'Внешний вид и другое',
         color: ENetColors.cyan,
-        onTap: () => go(2),
+        onTap: () => go(6),
       ),
     ];
-    final visible = compact ? items.take(4).toList() : items;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(compact ? 'БЫСТРЫЙ ДОСТУП' : 'ВАШИ ИНСТРУМЕНТЫ', style: _eyebrow),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            for (var i = 0; i < visible.length; i++) ...[
-              if (i > 0) const SizedBox(width: 9),
-              Expanded(child: _HomeShortcut(data: visible[i])),
-            ],
-          ],
-        ),
-      ],
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      final compact = constraints.maxWidth < 560;
+      const gap = 10.0;
+      final columns = compact ? 2 : 4;
+      final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
+      return Wrap(
+        spacing: gap,
+        runSpacing: gap,
+        children: [
+          for (final item in items)
+            SizedBox(width: width, child: _HomeShortcut(data: item)),
+        ],
+      );
+    });
   }
 
   Widget _featureHighlights() => Column(
@@ -769,42 +739,28 @@ class _ENetShellState extends State<ENetShell> {
     onTap: () => go(3),
     haptic: false,
     builder: (context, hovered) => Glass(
-      radius: 20, blur: 12,
+      radius: 17,
+      blur: 12,
       padding: const EdgeInsets.all(13),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          ENetAvatar(name: user.name, size: 40),
-          const SizedBox(width: 11),
-          Expanded(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: ENetColors.text,
-                  fontSize: 14, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 3),
-              Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
-            ],
-          )),
-          const Icon(Icons.chevron_right_rounded, color: ENetColors.faint),
-        ]),
-        const SizedBox(height: 15),
-        Container(height: 1, color: ENetColors.border),
-        const SizedBox(height: 12),
-        Row(children: [
-          const Icon(Icons.fingerprint_rounded, color: ENetColors.cyan, size: 19),
-          const SizedBox(width: 8),
-          const Expanded(child: Text('eNet ID аккаунта',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: ENetColors.muted, fontSize: 12))),
-          IconButton(
-            tooltip: 'Скопировать eNet ID',
-            onPressed: _copyEnetId,
-            visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.copy_rounded, color: ENetColors.cyan, size: 18),
-          ),
-        ]),
+      child: Row(children: [
+        ENetAvatar(name: user.name, size: 48),
+        const SizedBox(width: 12),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: ENetColors.text,
+                fontSize: 14, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
+            const SizedBox(height: 5),
+            const Text('eNet ID · Аккаунт',
+              style: TextStyle(color: ENetColors.cyan, fontSize: 9.5,
+                fontWeight: FontWeight.w700)),
+          ],
+        )),
+        const Icon(Icons.chevron_right_rounded, color: ENetColors.cyan, size: 20),
       ]),
     ),
   );
@@ -828,13 +784,32 @@ class _ENetShellState extends State<ENetShell> {
       ),
       _QuickAction(
         icon: Icons.devices_rounded,
-        label: 'Управлять устройствами',
+        label: 'Управлять устр  Widget _quickActionsCard() => Glass(
+    radius: 18,
+    blur: 12,
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Row(children: [
+        Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 19),
+        SizedBox(width: 7),
+        Text('Быстрые действия', style: TextStyle(
+          color: ENetColors.text, fontSize: 13, fontWeight: FontWeight.w800)),
+      ]),
+      const SizedBox(height: 7),
+      _QuickAction(
+        icon: Icons.key_rounded,
+        label: 'Сменить пароль',
+        onTap: () => go(4),
+      ),
+      _QuickAction(
+        icon: Icons.devices_rounded,
+        label: 'Завершить другие сеансы',
         onTap: () => go(5),
       ),
       _QuickAction(
-        icon: Icons.notifications_none_rounded,
-        label: 'Уведомления',
-        onTap: () => go(2),
+        icon: Icons.brush_outlined,
+        label: 'Изменить оформление',
+        onTap: () => go(6),
       ),
     ]),
   );
@@ -889,205 +864,160 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная карточка ─────────────────────────
 
   Widget _hero(bool compact) {
-    if (compact) {
-      return Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => go(3),
-          borderRadius: BorderRadius.circular(19),
-          child: Container(
-            key: const ValueKey('workspace-hero'),
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(19),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF075C48), Color(0xFF07352C), Color(0xFF071F1B)],
-              ),
-              border: Border.all(color: ENetColors.mint.withValues(alpha: .42)),
+    final height = compact ? 132.0 : 178.0;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => go(3),
+        borderRadius: BorderRadius.circular(19),
+        child: Container(
+          key: const ValueKey('workspace-hero'),
+          height: height,
+          width: double.infinity,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(19),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF063B32),
+                Color(0xFF052A25),
+                Color(0xFF061C1A),
+              ],
             ),
-            child: Row(children: [
-              Container(
-                width: 51, height: 51,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  gradient: ENetColors.accent,
-                  boxShadow: [
-                    BoxShadow(color: ENetColors.mint.withValues(alpha: .22),
-                      blurRadius: 17),
-                  ],
-                ),
-                child: const Icon(Icons.fingerprint_rounded,
-                  color: ENetColors.onAccent, size: 29),
+            border: Border.all(color: ENetColors.mint.withValues(alpha: .38)),
+            boxShadow: [
+              BoxShadow(
+                color: ENetColors.mint.withValues(alpha: .12),
+                blurRadius: 25,
+                offset: const Offset(0, 9),
               ),
-              const SizedBox(width: 13),
-              const Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('eNet ID', style: TextStyle(
-                    color: ENetColors.text, fontSize: 19,
-                    fontWeight: FontWeight.w800, letterSpacing: -.5,
-                  )),
-                  SizedBox(height: 4),
-                  Text('Единый аккаунт eNet', style: TextStyle(
-                    color: Color(0xFFC1E8D9), fontSize: 11.5,
-                  )),
-                ],
-              )),
-              const Icon(Icons.chevron_right_rounded,
-                color: ENetColors.cyan, size: 21),
-            ]),
+            ],
           ),
-        ),
-      );
-    }
-
-    return LayoutBuilder(builder: (context, constraints) {
-    final showVisual = !compact && constraints.maxWidth >= 600;
-    return Container(
-      key: const ValueKey('workspace-hero'),
-      width: double.infinity,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(23),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF07533F),
-            Color(0xFF07352B),
-            Color(0xFF071C19),
-          ],
-        ),
-        border: Border.all(color: ENetColors.mint.withValues(alpha: .36)),
-        boxShadow: [
-          BoxShadow(
-            color: ENetColors.mint.withValues(alpha: .15),
-            blurRadius: 34,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Stack(children: [
-        if (showVisual) ...[
-          const Positioned.fill(child: WorkspaceLightTrails()),
-          const Positioned.fill(child: _HeroOrbits()),
-          const Positioned(
-            right: -8,
-            top: -30,
-            bottom: -30,
-            child: Center(
-              child: SizedBox(
-                width: 188,
-                height: 188,
-                child: FittedBox(child: _HeroBrandMark()),
-              ),
-            ),
-          ),
-        ],
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 15 : 18,
-            vertical: compact ? 14 : 16,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: compact ? 48 : 54,
-                height: compact ? 48 : 54,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: ENetColors.accent,
-                  boxShadow: [
-                    BoxShadow(
-                      color: ENetColors.mint.withValues(alpha: .28),
-                      blurRadius: 22,
-                      offset: const Offset(0, 7),
+          child: Stack(children: [
+            const Positioned.fill(child: HeroRibbonArtwork()),
+            Positioned(
+              right: compact ? -18 : 12,
+              top: compact ? 8 : -4,
+              bottom: compact ? 8 : -4,
+              child: Transform.rotate(
+                angle: -.16,
+                child: Container(
+                  width: compact ? 104 : 218,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(compact ? 17 : 23),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF102B29), Color(0xFF041514)],
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.fingerprint_rounded,
-                  color: ENetColors.onAccent,
-                  size: 30,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: showVisual ? 420 : 720,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('eNet ID · ЕДИНЫЙ АККАУНТ',
-                        style: TextStyle(
-                          color: ENetColors.cyan,
-                          fontSize: 9.5,
-                          letterSpacing: 1.1,
-                          fontWeight: FontWeight.w800,
-                        )),
-                      const SizedBox(height: 8),
-                      Text('eNet ID',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: ENetColors.text,
-                          fontSize: compact ? 20 : 25,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -.8,
-                          height: 1.12,
-                        )),
-                      const SizedBox(height: 7),
-                      Text(
-                        'Единая платформа для работы, автоматизации и цифровых сервисов.',
-                        maxLines: compact ? 3 : 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFFC5F0DF),
-                          fontSize: 12,
-                          height: 1.45,
-                        ),
-                      ),
-                      const SizedBox(height: 11),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: .16),
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: ENetColors.cyan.withValues(alpha: .22),
-                          ),
-                        ),
-                        child: const Text('ПРОФИЛЬ И БЕЗОПАСНОСТЬ eNet',
-                          style: TextStyle(
-                            color: ENetColors.cyan,
-                            fontSize: 9,
-                            letterSpacing: .8,
-                            fontWeight: FontWeight.w700,
-                          )),
+                    border: Border.all(color: ENetColors.cyan.withValues(alpha: .48)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ENetColors.mint.withValues(alpha: .22),
+                        blurRadius: 25,
+                        spreadRadius: 1,
                       ),
                     ],
                   ),
+                  child: Stack(children: [
+                    Positioned.fill(child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(compact ? 17 : 23),
+                        gradient: RadialGradient(
+                          center: const Alignment(.2, -.3),
+                          radius: 1.1,
+                          colors: [
+                            ENetColors.cyan.withValues(alpha: .24),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    )),
+                    Center(child: BrandLogo(
+                      size: compact ? 53 : 100,
+                      showName: false,
+                    )),
+                    if (!compact)
+                      const Positioned(
+                        left: 0, right: 0, bottom: 17,
+                        child: Center(child: Text('eNet ID', style: TextStyle(
+                          color: ENetColors.text,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: .4,
+                        ))),
+                      ),
+                  ]),
                 ),
               ),
-              if (showVisual) const SizedBox(width: 140),
-            ],
-          ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 14 : 26,
+                vertical: compact ? 13 : 20,
+              ),
+              child: Row(children: [
+                Container(
+                  width: compact ? 52 : 90,
+                  height: compact ? 52 : 90,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(compact ? 15 : 22),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF00DDA3), Color(0xFF007F62)],
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ENetColors.mint.withValues(alpha: .24),
+                        blurRadius: 22,
+                        offset: const Offset(0, 7),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.fingerprint_rounded,
+                    color: const Color(0xFF03231B),
+                    size: compact ? 30 : 54,
+                  ),
+                ),
+                SizedBox(width: compact ? 12 : 22),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: compact ? 76 : 185),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('eNet ID',
+                          style: TextStyle(
+                            color: ENetColors.text,
+                            fontSize: compact ? 19 : 31,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -.7,
+                          )),
+                        SizedBox(height: compact ? 4 : 8),
+                        Text(
+                          'Ваш единый аккаунт для всех сервисов eNet',
+                          maxLines: compact ? 2 : 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: const Color(0xFFD2F8E9),
+                            fontSize: compact ? 10.5 : 16,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+          ]),
         ),
-      ]),
+      ),
     );
-    });
   }
-
-  // ───────────────────────── Профиль ─────────────────────────
 
   Future<void> _copyEnetId() async {
     try {
@@ -1207,6 +1137,25 @@ class _ENetShellState extends State<ENetShell> {
     ]);
   }
 
+  Widget _about() => Column(
+    key: const ValueKey('about'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const _PageTitle('О приложении', 'eNet APP — единая экосистема цифровых сервисов.'),
+      const SizedBox(height: 22),
+      const Center(child: BrandLogo(size: 74)),
+      const SizedBox(height: 12),
+      const Center(child: Text('eNet APP · 0.8.0',
+        style: TextStyle(color: ENetColors.text, fontSize: 17,
+          fontWeight: FontWeight.w800))),
+      const SizedBox(height: 6),
+      const Center(child: Text('Windows · Linux · iOS',
+        style: TextStyle(color: ENetColors.muted, fontSize: 12))),
+      const SizedBox(height: 24),
+      ApiConnectionPanel(auth: widget.auth),
+    ],
+  );
+
   // ───────────────────────── Настройки ─────────────────────────
 
   Widget _settings() {
@@ -1291,52 +1240,54 @@ class _HomeShortcut extends StatelessWidget {
       message: data.subtitle,
       child: Pressable(
         onTap: data.onTap,
-        pressedScale: .97,
+        pressedScale: .98,
         haptic: false,
         builder: (context, hovered) => AnimatedContainer(
           duration: ENetMotion.quick,
-          height: compact ? 86 : 93,
+          height: compact ? 91 : 129,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(17),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                data.color.withValues(alpha: hovered ? .37 : .28),
-                const Color(0xFF071D1B),
+                const Color(0xFF102C2A),
+                const Color(0xFF071C1B),
               ],
             ),
             border: Border.all(
-              color: data.color.withValues(alpha: hovered ? .65 : .34),
+              color: data.color.withValues(alpha: hovered ? .52 : .25),
             ),
             boxShadow: [
               BoxShadow(
-                color: data.color.withValues(alpha: hovered ? .16 : .07),
-                blurRadius: 17,
+                color: data.color.withValues(alpha: hovered ? .12 : .035),
+                blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
             ],
           ),
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 4 : 9,
-            vertical: compact ? 9 : 11,
+            horizontal: compact ? 7 : 13,
+            vertical: compact ? 9 : 13,
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(data.icon, color: data.color, size: compact ? 25 : 29),
-              const SizedBox(height: 9),
-              Text(
-                data.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
+              Icon(data.icon, color: data.color, size: compact ? 26 : 34),
+              SizedBox(height: compact ? 6 : 10),
+              Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: ENetColors.text,
-                  fontSize: compact ? 10 : 11.5,
+                  fontSize: compact ? 10.5 : 14,
                   fontWeight: FontWeight.w800,
-                ),
-              ),
+                )),
+              const SizedBox(height: 3),
+              Text(data.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: ENetColors.muted,
+                  fontSize: compact ? 9 : 10.5,
+                )),
             ],
           ),
         ),
