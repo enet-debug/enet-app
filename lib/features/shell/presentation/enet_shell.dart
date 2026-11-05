@@ -595,12 +595,12 @@ class _ENetShellState extends State<ENetShell> {
           constraints: const BoxConstraints(minHeight: 112),
           child: _accountSummaryCard(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 126),
           child: DashboardStatus(auth: widget.auth),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 180),
           child: DashboardSessionsSnapshot(
@@ -608,7 +608,7 @@ class _ENetShellState extends State<ENetShell> {
             onManage: () => go(5),
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 200),
           child: _quickActionsCard(),
@@ -852,13 +852,13 @@ class _ENetShellState extends State<ENetShell> {
           child: Stack(children: [
             const Positioned.fill(child: HeroRibbonArtwork()),
             Positioned(
-              right: compact ? -12 : 12,
-              top: compact ? 8 : -4,
-              bottom: compact ? 8 : -4,
+              right: compact ? -12 : 28,
+              top: compact ? 14 : 14,
               child: Transform.rotate(
                 angle: -.16,
                 child: Container(
-                  width: compact ? 80 : 218,
+                  width: compact ? 80 : 225,
+                  height: compact ? 100 : 150,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(compact ? 17 : 23),
                     gradient: const LinearGradient(
@@ -893,16 +893,7 @@ class _ENetShellState extends State<ENetShell> {
                       size: compact ? 53 : 100,
                       showName: false,
                     )),
-                    if (!compact)
-                      const Positioned(
-                        left: 0, right: 0, bottom: 17,
-                        child: Center(child: Text('eNet ID', style: TextStyle(
-                          color: ENetColors.text,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: .4,
-                        ))),
-                      ),
+
                   ]),
                 ),
               ),
@@ -938,7 +929,7 @@ class _ENetShellState extends State<ENetShell> {
                 SizedBox(width: compact ? 12 : 22),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(right: compact ? 54 : 185),
+                    padding: EdgeInsets.only(right: compact ? 60 : 230),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
