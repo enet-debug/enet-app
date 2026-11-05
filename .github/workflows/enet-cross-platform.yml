@@ -16,6 +16,10 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - name: Validate Windows launcher syntax
+        shell: pwsh
+        run: |
+          $null = [scriptblock]::Create((Get-Content scripts/run-windows.ps1 -Raw))
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
@@ -51,6 +55,10 @@ jobs:
         run: xcodebuild -version
       - name: Generate iOS runner
         run: flutter create --platforms=ios --org ru.enetdev .
+      - name: Set iOS app display name
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string eNet" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleName string eNet" ios/Runner/Info.plist
       - name: Resolve Flutter dependencies
         run: flutter pub get
       - name: Build iOS without signing

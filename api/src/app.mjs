@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { isIP } from 'node:net';
 import { mkdirSync, chmodSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { randomBytes, randomUUID, createHash, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
@@ -36,16 +37,16 @@ async function comparePassword(password, stored) {
   const actual = await scrypt(password, Buffer.from(parts[1], 'hex'), 64);
   return timingSafeEqual(expected, actual);
 }
-function throttle(ip) {
+function throttle(key, limit = failLimit) {
   const now = Date.now();
   if (attempts.size > 5000) {
-    for (const [key, value] of attempts) if (value.until < now) attempts.delete(key);
+    for (const [item, value] of attempts) if (value.until < now) attempts.delete(item);
   }
-  let entry = attempts.get(ip);
+  let entry = attempts.get(key);
   if (!entry || entry.until < now) entry = { count: 0, until: now + 60_000 };
   entry.count++;
-  attempts.set(ip, entry);
-  return entry.count > failLimit;
+  attempts.set(key, entry);
+  return entry.count > limit ? Math.max(1, Math.ceil((entry.until - now) / 1000)) : 0;
 }
 async function bodyOf(req) {
   const chunks = [];
@@ -114,6 +115,16 @@ export function createApp(options = {}) {
   const db = setupDb(options.dbPath || process.env.ENET_DB_PATH || './data/enet.sqlite');
   const allowed = new Set((options.allowedOrigins ?? process.env.ENET_ALLOWED_ORIGINS ?? '')
     .split(',').map(x => x.trim()).filter(Boolean));
+  const trustProxy = options.trustProxy ?? process.env.ENET_TRUST_PROXY === 'true';
+  function clientIp(req) {
+    if (trustProxy) {
+      const forwarded = req.headers['x-real-ip'];
+      if (typeof forwarded === 'string' && isIP(forwarded.trim())) {
+        return forwarded.trim();
+      }
+    }
+    return req.socket.remoteAddress || 'unknown';
+  }
   const userByEmail = db.prepare('SELECT * FROM users WHERE email=?');
   const insertUser = db.prepare('INSERT INTO users(id,email,name,password_hash,created_at) VALUES(?,?,?,?,?)');
   const insertSession = db.prepare('INSERT INTO sessions(token_hash,user_id,expires_at,session_id,created_at,last_seen_at,device_label) VALUES(?,?,?,?,?,?,?)');
@@ -156,16 +167,21 @@ export function createApp(options = {}) {
     return { token, expires_at: new Date(expiresAt).toISOString(), user: publicUser(user) };
   }
   const server = http.createServer(async (req, res) => {
+    const requestId = randomUUID();
+    res.setHeader('X-Request-Id', requestId);
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-Request-Id', randomUUID());
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('Cache-Control', 'no-store');
     const origin = req.headers.origin;
     if (origin && allowed.has(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-eNet-Client');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id, Retry-After');
     }
     if (req.method === 'OPTIONS') {
       res.writeHead(origin && allowed.has(origin) ? 204 : 403);
@@ -192,7 +208,11 @@ export function createApp(options = {}) {
         });
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
-        if (throttle('register:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
+        const retryAfter = throttle('register:' + clientIp(req), 8);
+        if (retryAfter) {
+          res.setHeader('Retry-After', String(retryAfter));
+          return error(res, 429, 'rate_limited', 'Слишком много попыток регистрации. Попробуйте позже.');
+        }
         const b = await bodyOf(req);
         const email = cleanEmail(b.email);
         const name = typeof b.name === 'string' ? b.name.trim() : '';
@@ -211,16 +231,26 @@ export function createApp(options = {}) {
         return json(res, 201, newSession(user, req));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
-        if (throttle('login:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
+        const ipRetry = throttle('login-ip:' + clientIp(req), 30);
+        if (ipRetry) {
+          res.setHeader('Retry-After', String(ipRetry));
+          return error(res, 429, 'rate_limited', 'Слишком много запросов с этого адреса. Попробуйте позже.');
+        }
         const b = await bodyOf(req);
         const email = cleanEmail(b.email);
         if (!emailPattern.test(email) || typeof b.password !== 'string' || b.password.length > 128) {
           return error(res, 400, 'invalid_input', 'Укажите email и пароль.');
         }
+        const emailRetry = throttle('login-email:' + digest(email), 8);
+        if (emailRetry) {
+          res.setHeader('Retry-After', String(emailRetry));
+          return error(res, 429, 'rate_limited', 'Слишком много попыток входа для этого аккаунта. Попробуйте позже.');
+        }
         const user = userByEmail.get(email);
         if (!user || !(await comparePassword(b.password, user.password_hash))) {
           return error(res, 401, 'invalid_credentials', 'Неверная почта или пароль.');
         }
+        attempts.delete('login-email:' + digest(email));
         return json(res, 200, newSession(user, req));
       }
       if (path === '/v1/auth/reset-password' && req.method === 'POST') {
@@ -271,8 +301,10 @@ export function createApp(options = {}) {
       if (path === '/v1/auth/change-password' && req.method === 'POST') {
         const session = auth(req);
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
-        if (throttle('password:' + req.socket.remoteAddress)) {
-          return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
+        const retryAfter = throttle('password:' + clientIp(req), 8);
+        if (retryAfter) {
+          res.setHeader('Retry-After', String(retryAfter));
+          return error(res, 429, 'rate_limited', 'Слишком много попыток смены пароля. Попробуйте позже.');
         }
         const body = await bodyOf(req);
         if (typeof body.current_password !== 'string' ||
@@ -342,10 +374,17 @@ export function createApp(options = {}) {
       return error(res, 404, 'not_found', 'Маршрут не найден.');
     } catch (e) {
       if (e.status === 400 || e.status === 413) return error(res, e.status, 'bad_request', e.message);
-      console.error('API request error:', e);
+      console.error(JSON.stringify({
+        level: 'error', request_id: requestId, path,
+        error: e?.name || 'Error',
+      }));
       return error(res, 500, 'internal_error', 'Ошибка сервера.');
     }
   });
+  server.headersTimeout = 10_000;
+  server.requestTimeout = 20_000;
+  server.keepAliveTimeout = 5_000;
+  server.maxHeadersCount = 100;
   return {
     server,
     close: async () => {
