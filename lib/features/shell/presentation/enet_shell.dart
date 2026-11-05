@@ -45,6 +45,7 @@ class ENetShell extends StatefulWidget {
 class _ENetShellState extends State<ENetShell> {
   int index = 0;
   int? _unreadCount;
+  int _unreadRequest = 0;
   bool effects = true;
   bool _effectsTouched = false;
   final SharedPreferencesAsync _prefs = SharedPreferencesAsync();
@@ -82,12 +83,17 @@ class _ENetShellState extends State<ENetShell> {
   AuthUser get user => widget.auth.user!;
 
   Future<void> _refreshUnreadCount() async {
+    final currentRequest = ++_unreadRequest;
     try {
       final feed = await widget.auth.listNotifications();
-      if (mounted) setState(() => _unreadCount = feed.unreadCount);
+      if (mounted && currentRequest == _unreadRequest) {
+        setState(() => _unreadCount = feed.unreadCount);
+      }
     } catch (_) {
       // No notification badge when the server has not confirmed the count.
-      if (mounted) setState(() => _unreadCount = null);
+      if (mounted && currentRequest == _unreadRequest) {
+        setState(() => _unreadCount = null);
+      }
     }
   }
 
@@ -575,6 +581,7 @@ class _ENetShellState extends State<ENetShell> {
     key: const ValueKey('notifications'),
     auth: widget.auth,
     onUnreadCountChanged: (count) {
+      _unreadRequest++;
       if (mounted && count != _unreadCount) setState(() => _unreadCount = count);
     },
   );
