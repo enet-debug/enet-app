@@ -21,7 +21,8 @@ import 'dashboard_status.dart';
 import 'notifications_panel.dart';
 
 class _Dest {
-  const _Dest(this.icon, this.activeIcon, this.label);
+  const _Dest(this.index, this.icon, this.activeIcon, this.label);
+  final int index;
   final IconData icon;
   final IconData activeIcon;
   final String label;
@@ -74,11 +75,22 @@ class _ENetShellState extends State<ENetShell> {
     _prefs.setBool('enet.reduce_motion_effects', enabled).ignore();
   }
 
-  static const items = [
-    _Dest(Icons.home_outlined, Icons.home_rounded, 'Главная'),
-    _Dest(Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
-    _Dest(Icons.account_circle_outlined, Icons.account_circle_rounded, 'Профиль'),
-    _Dest(Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
+  static const desktopItems = [
+    _Dest(0, Icons.home_outlined, Icons.home_rounded, 'Главная'),
+    _Dest(1, Icons.apps_outlined, Icons.apps_rounded, 'Сервисы'),
+    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
+    _Dest(3, Icons.account_circle_outlined, Icons.account_circle_rounded, 'Профиль'),
+    _Dest(4, Icons.shield_outlined, Icons.shield_rounded, 'Безопасность'),
+    _Dest(5, Icons.devices_outlined, Icons.devices_rounded, 'Устройства'),
+    _Dest(6, Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
+  ];
+
+  static const mobileItems = [
+    _Dest(0, Icons.home_outlined, Icons.home_rounded, 'Главная'),
+    _Dest(1, Icons.apps_outlined, Icons.apps_rounded, 'Сервисы'),
+    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомл.'),
+    _Dest(3, Icons.account_circle_outlined, Icons.account_circle_rounded, 'Профиль'),
+    _Dest(-1, Icons.more_horiz_rounded, Icons.more_horiz_rounded, 'Ещё'),
   ];
 
   AuthUser get user => widget.auth.user!;
@@ -102,7 +114,7 @@ class _ENetShellState extends State<ENetShell> {
     if (next == index) return;
     final previous = index;
     setState(() => index = next);
-    if (previous == 1 || next == 1) _refreshUnreadCount();
+    if (previous == 2 || next == 2) _refreshUnreadCount();
   }
 
   String _greeting() {
@@ -156,76 +168,75 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _sidebar() {
     const itemHeight = 46.0;
-    const gap = 4.0;
+    const gap = 5.0;
     return Glass(
-      radius: 30,
-      padding: const EdgeInsets.fromLTRB(14, 22, 14, 14),
+      radius: 24,
+      blur: 16,
+      padding: const EdgeInsets.fromLTRB(14, 20, 14, 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Padding(padding: EdgeInsets.only(left: 8), child: BrandLogo(size: 40)),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.only(left: 10, bottom: 26),
+        const Padding(padding: EdgeInsets.only(left: 8), child: BrandLogo(size: 42)),
+        const SizedBox(height: 12),
+        const Padding(
+          padding: EdgeInsets.only(left: 10, bottom: 22),
           child: Text('DEVELOPER WORKSPACE',
-              style: TextStyle(color: ENetColors.cyan.withValues(alpha: .85),
-                fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 2.0)),
+            style: TextStyle(color: ENetColors.cyan, fontSize: 9.5,
+              fontWeight: FontWeight.w800, letterSpacing: 1.8)),
         ),
-        const Padding(padding: EdgeInsets.only(left: 10, bottom: 12),
-          child: Text('НАВИГАЦИЯ', style: _eyebrow)),
+        const Padding(
+          padding: EdgeInsets.only(left: 10, bottom: 10),
+          child: Text('РАБОЧЕЕ ПРОСТРАНСТВО', style: _eyebrow),
+        ),
         SizedBox(
-          height: items.length * (itemHeight + gap),
+          height: desktopItems.length * (itemHeight + gap),
           child: Stack(children: [
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 480),
-              curve: Curves.easeOutQuart,
-              top: index * (itemHeight + gap),
-              left: 0,
-              right: 0,
-              height: itemHeight,
+              duration: ENetMotion.medium,
+              curve: ENetMotion.curve,
+              top: desktopItems.indexWhere((item) => item.index == index) * (itemHeight + gap),
+              left: 0, right: 0, height: itemHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  gradient: LinearGradient(colors: [
-                    ENetColors.mint.withValues(alpha: .20),
-                    ENetColors.blue.withValues(alpha: .06),
-                  ]),
-                  border: Border.all(color: ENetColors.cyan.withValues(alpha: .28)),
-                  boxShadow: [BoxShadow(color: ENetColors.blue.withValues(alpha: .20), blurRadius: 20)],
+                  borderRadius: BorderRadius.circular(13),
+                  color: ENetColors.mint.withValues(alpha: .13),
+                  border: Border.all(color: ENetColors.mint.withValues(alpha: .22)),
                 ),
               ),
             ),
-            for (var i = 0; i < items.length; i++)
+            for (var i = 0; i < desktopItems.length; i++)
               Positioned(
                 top: i * (itemHeight + gap),
-                left: 0,
-                right: 0,
-                height: itemHeight,
+                left: 0, right: 0, height: itemHeight,
                 child: _sideItem(i),
               ),
           ]),
         ),
         const Spacer(),
+        const Divider(height: 22),
         Pressable(
-          onTap: () => go(2),
+          onTap: () => go(3),
           builder: (context, hovered) => AnimatedContainer(
             duration: ENetMotion.quick,
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: hovered ? .10 : .05),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withValues(alpha: .08)),
+              color: Colors.white.withValues(alpha: hovered ? .08 : .035),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(color: Colors.white.withValues(alpha: .07)),
             ),
             child: Row(children: [
               ENetAvatar(name: user.name, size: 38),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const SizedBox(width: 10),
+              Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: ENetColors.text, fontSize: 13.5, fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 2),
+                    style: const TextStyle(color: ENetColors.text, fontSize: 13,
+                      fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 3),
                   Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: ENetColors.muted, fontSize: 11.5)),
-                ]),
-              ),
+                    style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
+                ],
+              )),
+              const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 19),
             ]),
           ),
         ),
@@ -234,103 +245,121 @@ class _ENetShellState extends State<ENetShell> {
   }
 
   Widget _sideItem(int i) {
-    final selected = index == i;
+    final destination = desktopItems[i];
+    final selected = index == destination.index;
     return Pressable(
-      onTap: () => go(i),
-      pressedScale: .97,
+      key: ValueKey('desktop-nav-${destination.index}'),
+      onTap: () => go(destination.index),
+      pressedScale: .98,
+      haptic: false,
       builder: (context, hovered) => AnimatedContainer(
         duration: ENetMotion.quick,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Colors.white.withValues(alpha: hovered && !selected ? .06 : 0),
+          borderRadius: BorderRadius.circular(13),
+          color: Colors.white.withValues(alpha: hovered && !selected ? .045 : 0),
         ),
         child: Row(children: [
-          _TintedIcon(selected ? items[i].activeIcon : items[i].icon, selected: selected, size: 22),
-          const SizedBox(width: 13),
-          Flexible(
-            fit: FlexFit.loose,
-            child: AnimatedDefaultTextStyle(
-              duration: ENetMotion.medium,
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: selected ? ENetColors.text : ENetColors.muted,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-              child: Text(items[i].label,
-                maxLines: 1, overflow: TextOverflow.ellipsis),
+          _TintedIcon(selected ? destination.activeIcon : destination.icon,
+            selected: selected, size: 20),
+          const SizedBox(width: 12),
+          Expanded(child: Text(
+            destination.label,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: selected ? ENetColors.text : ENetColors.muted,
+              fontSize: 13,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             ),
-          ),
-          if (i == 1 && (_unreadCount ?? 0) > 0) ...[
-            const Spacer(),
+          )),
+          if (destination.index == 2 && (_unreadCount ?? 0) > 0)
             _UnreadChip(count: _unreadCount!),
-          ],
         ]),
       ),
     );
   }
 
+  Future<void> _showMoreMenu() async {
+    final selected = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Glass(
+            radius: 22, blur: 18,
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              for (final destination in desktopItems.where((item) => item.index >= 4))
+                ListTile(
+                  key: ValueKey('more-nav-${destination.index}'),
+                  leading: Icon(destination.icon, color: ENetColors.cyan),
+                  title: Text(destination.label,
+                    style: const TextStyle(color: ENetColors.text, fontWeight: FontWeight.w600)),
+                  trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint),
+                  onTap: () => Navigator.of(sheetContext).pop(destination.index),
+                ),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (selected != null && mounted) go(selected);
+  }
+
   Widget _tabBar() {
     return Glass(
-      radius: 32,
-      blur: 34,
-      strength: 1.3,
-      padding: const EdgeInsets.all(6),
+      radius: 23, blur: 14, strength: .9,
+      padding: const EdgeInsets.all(5),
       child: SizedBox(
         height: 58,
         child: LayoutBuilder(builder: (context, constraints) {
-          final w = constraints.maxWidth / items.length;
+          final w = constraints.maxWidth / mobileItems.length;
+          final found = mobileItems.indexWhere((item) => item.index == index);
+          final active = found < 0 ? mobileItems.length - 1 : found;
           return Stack(children: [
             AnimatedPositioned(
-              duration: const Duration(milliseconds: 480),
-              curve: Curves.easeOutQuart,
-              left: index * w,
-              top: 0,
-              bottom: 0,
-              width: w,
+              duration: ENetMotion.medium,
+              curve: ENetMotion.curve,
+              left: active * w, top: 0, bottom: 0, width: w,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(26),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [ENetColors.mint.withValues(alpha: .23), ENetColors.mint.withValues(alpha: .07)],
-                    ),
-                    border: Border.all(color: ENetColors.mint.withValues(alpha: .22)),
+                    borderRadius: BorderRadius.circular(18),
+                    color: ENetColors.mint.withValues(alpha: .12),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .18)),
                   ),
                 ),
               ),
             ),
             Row(children: [
-              for (var i = 0; i < items.length; i++)
+              for (var i = 0; i < mobileItems.length; i++)
                 SizedBox(
                   width: w,
                   child: Pressable(
-                    onTap: () => go(i),
-                    pressedScale: .9,
+                    key: ValueKey(mobileItems[i].index < 0
+                      ? 'mobile-nav-more'
+                      : 'mobile-nav-${mobileItems[i].index}'),
+                    onTap: mobileItems[i].index < 0
+                      ? _showMoreMenu
+                      : () => go(mobileItems[i].index),
+                    pressedScale: .94,
+                    haptic: false,
                     builder: (context, _) {
-                      final selected = index == i;
+                      final destination = mobileItems[i];
+                      final selected = i == active;
                       return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        AnimatedScale(
-                          scale: selected ? 1.1 : 1,
-                          duration: ENetMotion.medium,
-                          curve: Curves.easeOutBack,
-                          child: _TintedIcon(selected ? items[i].activeIcon : items[i].icon, selected: selected, size: 24),
-                        ),
+                        _TintedIcon(selected ? destination.activeIcon : destination.icon,
+                          selected: selected, size: 22),
                         const SizedBox(height: 3),
-                        AnimatedDefaultTextStyle(
-                          duration: ENetMotion.medium,
+                        Text(destination.label, maxLines: 1, overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 9.5,
+                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                             color: selected ? ENetColors.text : ENetColors.muted,
-                          ),
-                          child: Text(items[i].label, maxLines: 1),
-                        ),
+                          )),
                       ]);
                     },
                   ),
@@ -355,7 +384,7 @@ class _ENetShellState extends State<ENetShell> {
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(pad, 20, pad, compact ? 24 : 48),
           child: LayoutBuilder(builder: (context, constraints) {
-            final width = math.min(constraints.maxWidth, 1050.0);
+            final width = math.min(constraints.maxWidth, 1260.0);
             return Align(
               alignment: Alignment.topCenter,
               child: SizedBox(
@@ -395,7 +424,7 @@ class _ENetShellState extends State<ENetShell> {
         tooltip: (_unreadCount ?? 0) > 0
           ? 'Уведомления: $_unreadCount непрочитанных'
           : 'Открыть уведомления',
-        onPressed: () => go(1),
+        onPressed: () => go(2),
         icon: Badge(
           isLabelVisible: (_unreadCount ?? 0) > 0,
           backgroundColor: ENetColors.mint,
@@ -410,7 +439,7 @@ class _ENetShellState extends State<ENetShell> {
       const _DemoBadge(),
       if (compact) ...[
         const SizedBox(width: 12),
-        Pressable(onTap: () => go(2), builder: (context, _) => ENetAvatar(name: user.name, size: 38)),
+        Pressable(onTap: () => go(3), builder: (context, _) => ENetAvatar(name: user.name, size: 38)),
       ],
     ]);
   }
@@ -418,10 +447,16 @@ class _ENetShellState extends State<ENetShell> {
   Widget _page(bool compact) {
     switch (index) {
       case 1:
-        return _notifications();
+        return _services();
       case 2:
-        return _profile(compact);
+        return _notifications();
       case 3:
+        return _profile(compact);
+      case 4:
+        return _security();
+      case 5:
+        return _devices();
+      case 6:
         return _settings();
       default:
         return _home(compact);
@@ -430,200 +465,144 @@ class _ENetShellState extends State<ENetShell> {
 
   // ───────────────────────── Главная ─────────────────────────
 
-  Widget _home(bool compact) {
-    final titleSize = compact ? 30.0 : 48.0;
-    return Column(key: const ValueKey('home'), crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Reveal(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(_dateLabel(), style: _eyebrow),
-          const SizedBox(height: 10),
-          ShaderMask(
-            blendMode: BlendMode.srcIn,
-            shaderCallback: (rect) => const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.white, Color(0xFFB4F8D7)],
-            ).createShader(rect),
-            child: Text(
-              '${_greeting()},\n${user.name}',
-              style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.w800, letterSpacing: -titleSize * .035, height: 1.05, color: Colors.white),
-            ),
-          ),
-        ]),
-      ),
-      const SizedBox(height: 8),
-      const Text('Все твои инструменты в одном пространстве.',
-          style: TextStyle(color: ENetColors.muted, fontSize: 14.5)),
-      SizedBox(height: compact ? 18 : 26),
-      Reveal(delay: const Duration(milliseconds: 120), child: _hero(compact)),
-      SizedBox(height: compact ? 22 : 28),
-      DashboardStatus(auth: widget.auth, openAccount: () => go(2), openSettings: () => go(3)),
-      const SizedBox(height: 34),
-      ServiceCatalogPanel(auth: widget.auth),
-      const SizedBox(height: 30),
-      const Reveal(delay: Duration(milliseconds: 200), child: Text('БЫСТРЫЙ ДОСТУП', style: _eyebrow)),
-      const SizedBox(height: 16),
-      LayoutBuilder(builder: (context, constraints) {
-        final tiles = [
-          _FeatureTile(
-            icon: Icons.person_rounded,
-            gradient: ENetColors.accent,
-            heading: 'Профиль',
-            body: 'Персональное пространство и данные аккаунта.',
-            onTap: () => go(2),
-          ),
-          _FeatureTile(
-            icon: Icons.tune_rounded,
-            gradient: ENetColors.mintGradient,
-            heading: 'Настройки',
-            body: 'Управление оформлением и параметрами.',
-            onTap: () => go(3),
-          ),
-          _FeatureTile(
-            icon: Icons.notifications_active_outlined,
-            gradient: ENetColors.violetGradient,
-            heading: 'Уведомления',
-            body: 'История входов и сообщения аккаунта.',
-            onTap: () => go(1),
-          ),
-        ];
-        final delays = [220, 280, 340];
-        if (constraints.maxWidth < 700) {
-          return Column(children: [
-            for (var i = 0; i < tiles.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Reveal(delay: Duration(milliseconds: delays[i]), child: tiles[i]),
-              ),
-          ]);
-        }
-        return IntrinsicHeight(
-          child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            for (var i = 0; i < tiles.length; i++)
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(right: i == tiles.length - 1 ? 0 : 14),
-                  child: Reveal(delay: Duration(milliseconds: delays[i]), child: tiles[i]),
-                ),
-              ),
-          ]),
-        );
-      }),
-    ]);
-  }
-
-  Widget _hero(bool compact) => LayoutBuilder(builder: (context, constraints) {
-    final showVisual = !compact && constraints.maxWidth >= 820;
-    final contentWidth = showVisual
-        ? math.min(560.0, constraints.maxWidth * .58)
-        : 720.0;
-
-    return Container(
-      key: const ValueKey('workspace-hero'),
-      width: double.infinity,
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF174B37), Color(0xFF102B23), Color(0xFF081713)],
-          stops: [0, .52, 1],
+  Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
+    final split = !compact && constraints.maxWidth >= 1000;
+    final main = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('${_greeting()}, ${user.name}',
+          maxLines: 2, overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ENetColors.text,
+            fontSize: compact ? 25 : 29,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1,
+            height: 1.15,
+          )),
+        const SizedBox(height: 6),
+        Text(_dateLabel(), style: const TextStyle(
+          color: ENetColors.faint, fontSize: 10.5,
+          letterSpacing: 1.2, fontWeight: FontWeight.w700,
+        )),
+        const SizedBox(height: 20),
+        _hero(compact),
+        const SizedBox(height: 28),
+        ServiceCatalogPanel(auth: widget.auth),
+      ],
+    );
+    final rail = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _accountSummaryCard(),
+        const SizedBox(height: 16),
+        DashboardStatus(
+          auth: widget.auth,
+          openAccount: () => go(3),
+          openSettings: () => go(4),
         ),
-        border: Border.all(color: ENetColors.mint.withValues(alpha: .30)),
-        boxShadow: [
-          BoxShadow(
-            color: ENetColors.mint.withValues(alpha: .10),
-            blurRadius: 54,
-            offset: const Offset(0, 18),
-          ),
-        ],
-      ),
-      child: Stack(children: [
-        if (showVisual) ...[
-          const Positioned.fill(child: _HeroOrbits()),
-          const Positioned.fill(
-            child: Align(
-              alignment: Alignment(.72, -.02),
-              child: _HeroBrandMark(),
-            ),
-          ),
-        ],
-        Padding(
-          padding: EdgeInsets.all(compact ? 20 : 38),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: contentWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: ENetColors.mint.withValues(alpha: .12),
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(color: ENetColors.mint.withValues(alpha: .27)),
-                  ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    const Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 14),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        compact ? 'ENET · WORKSPACE' : 'ENET · DEVELOPER PLATFORM',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: ENetColors.cyan,
-                          fontSize: 10,
-                          letterSpacing: 1.4,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                  ]),
-                ),
-                SizedBox(height: compact ? 18 : 24),
-                Text(
-                  compact ? 'Твоя цифровая среда.' : 'Твоя цифровая среда.\nВ одном месте.',
-                  style: TextStyle(
-                    color: ENetColors.text,
-                    fontSize: compact ? 25 : 39,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -1.35,
-                    height: 1.12,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'eNet ID, приложения и инструменты команды — в одном интерфейсе.',
-                  style: TextStyle(
-                    color: Color(0xFFB5DBCA),
-                    fontSize: 14.5,
-                    height: 1.6,
-                  ),
-                ),
-                if (!compact) ...[
-                  const SizedBox(height: 22),
-                  Wrap(spacing: 9, runSpacing: 9, children: const [
-                    _HeroTag(icon: Icons.fingerprint_rounded, label: 'eNet ID'),
-                    _HeroTag(icon: Icons.grid_view_rounded, label: 'Приложения'),
-                    _HeroTag(icon: Icons.shield_outlined, label: 'Безопасность'),
-                  ]),
-                ],
-                SizedBox(height: compact ? 18 : 24),
-                PrimaryButton(
-                  label: 'Открыть профиль',
-                  icon: Icons.arrow_forward_rounded,
-                  expand: false,
-                  onPressed: () => go(2),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ]),
+        const SizedBox(height: 16),
+        _quickActionsCard(),
+      ],
+    );
+    if (split) {
+      return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(child: main),
+        const SizedBox(width: 20),
+        SizedBox(width: 292, child: rail),
+      ]);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [main, const SizedBox(height: 22), rail],
     );
   });
-  // ───────────────────────── Уведомления ─────────────────────────
+
+  Widget _accountSummaryCard() => Pressable(
+    onTap: () => go(3),
+    haptic: false,
+    builder: (context, hovered) => Glass(
+      radius: 20, blur: 12,
+      padding: const EdgeInsets.all(17),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          ENetAvatar(name: user.name, size: 46),
+          const SizedBox(width: 11),
+          Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: ENetColors.text,
+                  fontSize: 14, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 3),
+              Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
+            ],
+          )),
+          const Icon(Icons.chevron_right_rounded, color: ENetColors.faint),
+        ]),
+        const SizedBox(height: 15),
+        Container(height: 1, color: ENetColors.border),
+        const SizedBox(height: 12),
+        Row(children: [
+          const Icon(Icons.fingerprint_rounded, color: ENetColors.cyan, size: 19),
+          const SizedBox(width: 8),
+          const Expanded(child: Text('eNet ID аккаунта',
+            style: TextStyle(color: ENetColors.muted, fontSize: 12))),
+          TextButton(
+            onPressed: _copyEnetId,
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('Копировать', style: TextStyle(fontSize: 11)),
+          ),
+        ]),
+      ]),
+    ),
+  );
+
+  Widget _quickActionsCard() => Glass(
+    radius: 20, blur: 12,
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('БЫСТРЫЙ ДОСТУП', style: _eyebrow),
+      const SizedBox(height: 7),
+      _QuickAction(icon: Icons.apps_rounded, label: 'Каталог сервисов', onTap: () => go(1)),
+      _QuickAction(icon: Icons.notifications_none_rounded, label: 'Уведомления', onTap: () => go(2)),
+      _QuickAction(icon: Icons.devices_rounded, label: 'Мои устройства', onTap: () => go(5)),
+    ]),
+  );
+
+  Widget _services() => Column(
+    key: const ValueKey('services'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const _PageTitle('Сервисы', 'Приложения, подключённые к экосистеме eNet.'),
+      const SizedBox(height: 22),
+      ServiceCatalogPanel(auth: widget.auth),
+    ],
+  );
+
+  Widget _security() => Column(
+    key: const ValueKey('security'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const _PageTitle('Безопасность', 'Защита аккаунта и управление доступом.'),
+      const SizedBox(height: 22),
+      AccountSecurityPanel(auth: widget.auth),
+    ],
+  );
+
+  Widget _devices() => Column(
+    key: const ValueKey('devices'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const _PageTitle('Устройства', 'Активные сеансы твоего eNet ID.'),
+      const SizedBox(height: 22),
+      DeviceSessionsPanel(auth: widget.auth),
+    ],
+  );
 
   Widget _notifications() => NotificationsPanel(
     key: const ValueKey('notifications'),
@@ -633,6 +612,87 @@ class _ENetShellState extends State<ENetShell> {
       if (mounted && count != _unreadCount) setState(() => _unreadCount = count);
     },
   );
+
+  // ───────────────────────── Главная карточка ─────────────────────────
+
+  Widget _hero(bool compact) => LayoutBuilder(builder: (context, constraints) {
+    final showVisual = !compact && constraints.maxWidth >= 620;
+    final contentWidth = showVisual ? math.min(430.0, constraints.maxWidth * .62) : 720.0;
+    return Container(
+      key: const ValueKey('workspace-hero'),
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF164A35), Color(0xFF0E2C22), Color(0xFF0A1A15)],
+        ),
+        border: Border.all(color: ENetColors.mint.withValues(alpha: .26)),
+        boxShadow: [BoxShadow(
+          color: ENetColors.mint.withValues(alpha: .09),
+          blurRadius: 34, offset: const Offset(0, 12),
+        )],
+      ),
+      child: Stack(children: [
+        if (showVisual) ...[
+          const Positioned.fill(child: _HeroOrbits()),
+          const Positioned.fill(child: Align(
+            alignment: Alignment(.82, 0),
+            child: _HeroBrandMark(),
+          )),
+        ],
+        Padding(
+          padding: EdgeInsets.all(compact ? 20 : 28),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: contentWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: ENetColors.mint.withValues(alpha: .10),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .22)),
+                  ),
+                  child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.fingerprint_rounded, color: ENetColors.cyan, size: 14),
+                    SizedBox(width: 6),
+                    Text('ENET ID · ЕДИНЫЙ АККАУНТ',
+                      style: TextStyle(color: ENetColors.cyan,
+                        fontSize: 9.5, letterSpacing: 1.0, fontWeight: FontWeight.w800)),
+                  ]),
+                ),
+                const SizedBox(height: 17),
+                Text('Один аккаунт.\nВся экосистема.',
+                  style: TextStyle(
+                    color: ENetColors.text,
+                    fontSize: compact ? 27 : 34,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1.2,
+                    height: 1.12,
+                  )),
+                const SizedBox(height: 10),
+                const Text(
+                  'Управляй профилем и открывай подключённые сервисы eNet из одного пространства.',
+                  style: TextStyle(color: Color(0xFFC0E1D1), fontSize: 13, height: 1.5),
+                ),
+                const SizedBox(height: 18),
+                PrimaryButton(
+                  label: 'Открыть eNet ID',
+                  icon: Icons.arrow_forward_rounded,
+                  expand: false,
+                  onPressed: () => go(3),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
+    );
+  });
 
   // ───────────────────────── Профиль ─────────────────────────
 
@@ -779,18 +839,13 @@ class _ENetShellState extends State<ENetShell> {
       ),
       const SizedBox(height: 24),
       ApiConnectionPanel(auth: widget.auth),
-      const SizedBox(height: 24),
-      AccountSecurityPanel(auth: widget.auth),
-      const SizedBox(height: 24),
-      DeviceSessionsPanel(auth: widget.auth),
-      const SizedBox(height: 24),
       const Reveal(
         delay: Duration(milliseconds: 180),
         child: _Group(
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.7.2 (9)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.mintGradient, title: 'Версия', value: '0.8.0 (10)'),
           ],
         ),
       ),
@@ -880,11 +935,24 @@ class _PageTitle extends StatelessWidget {
   final String subtitle;
 
   @override
-  Widget build(BuildContext context) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(title, style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w800, letterSpacing: -1.5, color: ENetColors.text, height: 1.05)),
-        const SizedBox(height: 8),
-        Text(subtitle, style: const TextStyle(fontSize: 16, color: ENetColors.muted, height: 1.4)),
-      ]);
+  Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(title, style: TextStyle(
+        fontSize: compact ? 30 : 38,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -1.2,
+        color: ENetColors.text,
+        height: 1.08,
+      )),
+      const SizedBox(height: 8),
+      Text(subtitle, style: TextStyle(
+        fontSize: compact ? 14 : 15,
+        color: ENetColors.muted,
+        height: 1.4,
+      )),
+    ]);
+  }
 }
 
 /// Сгруппированный список в стиле «Настроек» iOS.
@@ -972,6 +1040,26 @@ class _RowTile extends StatelessWidget {
   }
 }
 
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    dense: true,
+    visualDensity: const VisualDensity(vertical: -2),
+    contentPadding: EdgeInsets.zero,
+    leading: Icon(icon, color: ENetColors.cyan, size: 19),
+    title: Text(label, style: const TextStyle(
+      color: ENetColors.text, fontSize: 12.5, fontWeight: FontWeight.w600,
+    )),
+    trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 18),
+    onTap: onTap,
+  );
+}
+
 class _FeatureTile extends StatelessWidget {
   const _FeatureTile({
     required this.icon,
@@ -1038,71 +1126,61 @@ class _HeroBrandMark extends StatelessWidget {
   const _HeroBrandMark();
 
   @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: SizedBox(
-        width: 286,
-        height: 286,
-        child: Stack(alignment: Alignment.center, children: [
-          Container(
-            width: 252,
-            height: 252,
+  Widget build(BuildContext context) => IgnorePointer(
+    child: SizedBox(
+      width: 220,
+      height: 220,
+      child: Stack(alignment: Alignment.center, children: [
+        Container(
+          width: 194, height: 194,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: ENetColors.cyan.withValues(alpha: .12)),
+          ),
+        ),
+        Transform.rotate(
+          angle: -.48,
+          child: Container(
+            width: 208, height: 80,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: ENetColors.cyan.withValues(alpha: .12)),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: ENetColors.cyan.withValues(alpha: .24)),
             ),
           ),
-          Transform.rotate(
-            angle: -.48,
-            child: Container(
-              width: 270,
-              height: 104,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: ENetColors.cyan.withValues(alpha: .24)),
-              ),
-            ),
-          ),
-          Transform.rotate(
-            angle: .62,
-            child: Container(
-              width: 214,
-              height: 82,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white.withValues(alpha: .12)),
-              ),
-            ),
-          ),
-          Container(
-            width: 148,
-            height: 148,
+        ),
+        Transform.rotate(
+          angle: .62,
+          child: Container(
+            width: 166, height: 64,
             decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const RadialGradient(
-                colors: [Color(0xFF245B43), Color(0xFF0B2119)],
-              ),
-              border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
-              boxShadow: [
-                BoxShadow(
-                  color: ENetColors.mint.withValues(alpha: .22),
-                  blurRadius: 44,
-                  spreadRadius: 2,
-                ),
-              ],
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(color: Colors.white.withValues(alpha: .12)),
             ),
-            child: const Center(child: BrandLogo(size: 78, showName: false)),
           ),
-          Positioned(top: 42, right: 50, child: _orbitalDot(ENetColors.cyan, 7)),
-          Positioned(bottom: 48, left: 34, child: _orbitalDot(ENetColors.mint, 5)),
-        ]),
-      ),
-    );
-  }
+        ),
+        Container(
+          width: 116, height: 116,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const RadialGradient(
+              colors: [Color(0xFF245B43), Color(0xFF0B2119)],
+            ),
+            border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
+            boxShadow: [BoxShadow(
+              color: ENetColors.mint.withValues(alpha: .20),
+              blurRadius: 34, spreadRadius: 1,
+            )],
+          ),
+          child: const Center(child: BrandLogo(size: 64, showName: false)),
+        ),
+        Positioned(top: 34, right: 38, child: _orbitalDot(ENetColors.cyan, 6)),
+        Positioned(bottom: 36, left: 28, child: _orbitalDot(ENetColors.mint, 4)),
+      ]),
+    ),
+  );
 
   Widget _orbitalDot(Color color, double size) => Container(
-    width: size,
-    height: size,
+    width: size, height: size,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color: color,

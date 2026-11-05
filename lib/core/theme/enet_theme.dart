@@ -35,7 +35,7 @@ abstract final class ENetColors {
   static const amberGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFFFC46B), Color(0xFFFF8A4C)],
+    colors: [Color(0xFF9AF6D0), Color(0xFF2D9B70)],
   );
 }
 

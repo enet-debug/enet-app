@@ -271,14 +271,14 @@ class _ServiceCard extends StatelessWidget {
         onTap: open,
         borderRadius: BorderRadius.circular(26),
         child: Glass(
-          radius: 26,
-          blur: 18,
-          padding: const EdgeInsets.all(21),
+          radius: 20,
+          blur: 12,
+          padding: const EdgeInsets.all(17),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
                   gradient: _serviceGradient,
@@ -304,14 +304,14 @@ class _ServiceCard extends StatelessWidget {
                 ),
               ),
             ]),
-            const SizedBox(height: 19),
+            const SizedBox(height: 14),
             Text(
               service.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: ENetColors.text,
-                fontSize: 19,
+                fontSize: 16.5,
                 fontWeight: FontWeight.w800,
                 letterSpacing: -.45,
               ),
