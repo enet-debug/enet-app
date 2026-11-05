@@ -19,6 +19,7 @@ import 'profile_edit_button.dart';
 import '../../auth/presentation/api_connection_panel.dart';
 import 'dashboard_status.dart';
 import 'notifications_panel.dart';
+import 'tasks_panel.dart';
 
 class _Dest {
   const _Dest(this.index, this.icon, this.activeIcon, this.label);
@@ -83,6 +84,7 @@ class _ENetShellState extends State<ENetShell> {
     _Dest(4, Icons.shield_outlined, Icons.shield_rounded, 'Безопасность'),
     _Dest(5, Icons.devices_outlined, Icons.devices_rounded, 'Устройства'),
     _Dest(6, Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
+    _Dest(7, Icons.checklist_rounded, Icons.checklist_rounded, 'Задачи'),
   ];
 
   static const mobileItems = [
@@ -467,6 +469,8 @@ class _ENetShellState extends State<ENetShell> {
         return _devices();
       case 6:
         return _settings();
+      case 7:
+        return _tasks();
       default:
         return _home(compact);
     }
@@ -598,6 +602,7 @@ class _ENetShellState extends State<ENetShell> {
       _QuickAction(icon: Icons.apps_rounded, label: 'Каталог сервисов', onTap: () => go(1)),
       _QuickAction(icon: Icons.notifications_none_rounded, label: 'Уведомления', onTap: () => go(2)),
       _QuickAction(icon: Icons.devices_rounded, label: 'Мои устройства', onTap: () => go(5)),
+      _QuickAction(icon: Icons.checklist_rounded, label: 'Мои задачи', onTap: () => go(7)),
     ]),
   );
 
@@ -608,6 +613,14 @@ class _ENetShellState extends State<ENetShell> {
       const _PageTitle('Сервисы', 'Приложения, подключённые к экосистеме eNet.'),
       const SizedBox(height: 22),
       ServiceCatalogPanel(auth: widget.auth),
+    ],
+  );
+
+  Widget _tasks() => Column(
+    key: const ValueKey('tasks'),
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TasksPanel(auth: widget.auth),
     ],
   );
 
