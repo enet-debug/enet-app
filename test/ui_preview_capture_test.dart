@@ -156,7 +156,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
       await tester.pump(const Duration(milliseconds: 800));
 
-      expect(find.text('Приложения eNet'), findsOneWidget);
+      expect(find.text('Подключённые приложения'), findsOneWidget);
+      expect(find.text('ВОЗМОЖНОСТИ eNet'), findsOneWidget);
       final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
       if (size.width > 600) {
         expect(heroSize.width, greaterThan(680));
@@ -170,8 +171,8 @@ void main() {
       // The last one is the visible bottom-navigation destination.
       await tester.tap(
         size.width < 600
-            ? find.text('Профиль').last
-            : find.text('Профиль').first,
+            ? find.byKey(const ValueKey('mobile-nav-3'))
+            : find.byKey(const ValueKey('desktop-nav-3')),
       );
       // Reveal widgets are staggered. Drive multiple frames so both the page
       // transition and delayed cards reach their final visible state.
