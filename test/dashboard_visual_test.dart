@@ -48,6 +48,27 @@ void main() {
     expect(openedSettings, true);
   });
 
+  testWidgets('Service favorites can be toggled and filtered', (tester) async {
+    final auth = AuthController(_CatalogRepository());
+    addTearDown(auth.dispose);
+    await tester.pumpWidget(MaterialApp(
+      theme: ENetTheme.dark,
+      home: Scaffold(body: SingleChildScrollView(
+        child: ServiceCatalogPanel(auth: auth))),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Продайзер'), findsOneWidget);
+    await tester.tap(find.byTooltip('Добавить Продайзер в избранное'));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Убрать Продайзер из избранного'), findsOneWidget);
+
+    await tester.tap(find.text('Избранное'));
+    await tester.pumpAndSettle();
+    expect(find.text('Продайзер'), findsOneWidget);
+    expect(find.text('eNet Studio'), findsNothing);
+  });
+
   testWidgets('Search filters services and clear restores the full catalog', (tester) async {
     final auth = AuthController(_CatalogRepository());
     addTearDown(auth.dispose);
