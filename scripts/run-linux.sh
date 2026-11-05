@@ -11,6 +11,10 @@ if ! command -v flutter >/dev/null 2>&1; then
   echo "Flutter SDK is required. Install Flutter and retry." >&2
   exit 1
 fi
+if ! command -v curl >/dev/null 2>&1; then
+  echo "curl is required to check the local API. Install curl and retry." >&2
+  exit 1
+fi
 
 cd "$ROOT"
 flutter config --enable-linux-desktop
