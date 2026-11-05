@@ -7,7 +7,7 @@ User=enet-api
 Group=enet-api
 EnvironmentFile=/etc/enet-api/enet-api.env
 Environment=ENET_BACKUP_DIR=/var/backups/enet-api
-ExecStart=/opt/enet-app/api/deploy/backup-enet-db.sh
+ExecStart=/usr/bin/env bash /opt/enet-app/api/deploy/backup-enet-db.sh
 UMask=0077
 NoNewPrivileges=true
 PrivateTmp=true
