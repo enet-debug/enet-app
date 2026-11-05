@@ -40,6 +40,9 @@ curl http://127.0.0.1:8787/health
 
 ### 3. Запустить eNet APP на Ubuntu
 
+После установки Flutter и Node.js также можно запустить оба компонента одной командой из корня проекта: `bash scripts/run-linux.sh`. Скрипт создаёт Linux runner при первом запуске, запускает локальный API при необходимости, затем Flutter APP.
+
+
 Нужен Flutter SDK (Dart 3.6+). Зависимости для Linux:
 
 ```bash
