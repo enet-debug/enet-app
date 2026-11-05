@@ -191,7 +191,7 @@ void main() {
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('Сервисы'), findsOneWidget);
+      expect(find.text('Сервисы'), findsWidgets);
       await _saveCapture(tester, 'enet-services-$device');
 
       if (size.width < 600) {

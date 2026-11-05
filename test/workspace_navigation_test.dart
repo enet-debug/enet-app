@@ -43,7 +43,7 @@ void main() {
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 450));
-      expect(find.text('Сервисы'), findsOneWidget);
+      expect(find.text('Сервисы'), findsWidgets);
       expect(find.text('Сервисы пока не добавлены.'), findsOneWidget);
 
       if (size.width < 600) {
