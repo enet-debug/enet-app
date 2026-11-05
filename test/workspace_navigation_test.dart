@@ -49,6 +49,19 @@ void main() {
       if (size.width < 600) {
         await tester.tap(find.byKey(const ValueKey('mobile-nav-more')));
         await tester.pump(const Duration(milliseconds: 350));
+        await tester.tap(find.byKey(const ValueKey('more-nav-7')));
+      } else {
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-7')));
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(find.text('Задачи'), findsOneWidget);
+      expect(find.text('Список пока пуст'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      if (size.width < 600) {
+        await tester.tap(find.byKey(const ValueKey('mobile-nav-more')));
+        await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-4')));
       } else {
         await tester.tap(find.byKey(const ValueKey('desktop-nav-4')));
