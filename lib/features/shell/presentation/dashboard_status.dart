@@ -46,7 +46,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
   Widget build(BuildContext context) => Glass(
     radius: 21,
     blur: 14,
-    padding: const EdgeInsets.fromLTRB(15, 14, 15, 10),
+    padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [
         AnimatedContainer(
@@ -139,7 +139,7 @@ class _StatusLine extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(11),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
         child: Row(children: [
           Icon(icon, color: color, size: 17),
           const SizedBox(width: 9),
