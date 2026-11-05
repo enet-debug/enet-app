@@ -10,12 +10,19 @@ class EcosystemService {
     required this.name,
     required this.description,
     required this.url,
+    this.favorite = false,
   });
 
   final String id;
   final String name;
   final String description;
   final String url;
+  final bool favorite;
+
+  EcosystemService copyWith({bool? favorite}) => EcosystemService(
+    id: id, name: name, description: description, url: url,
+    favorite: favorite ?? this.favorite,
+  );
 }
 
 class AccountSession {
@@ -47,6 +54,7 @@ abstract class AuthRepository {
   Future<AuthUser?> restoreSession();
   Future<bool> checkServer();
   Future<List<EcosystemService>> listServices();
+  Future<void> setServiceFavorite(String serviceId, bool favorite);
   Future<void> changePassword(String currentPassword, String nextPassword);
   Future<int> revokeOtherSessions();
   Future<AuthUser> updateName(String name);
