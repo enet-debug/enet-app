@@ -35,7 +35,7 @@ node src/server.mjs
 curl http://127.0.0.1:8787/health
 ```
 
-Ожидаемый ответ: `{"status":"ok","service":"enet-api","version":"0.4.0"}`.
+Проверка готовности БД: `curl http://127.0.0.1:8787/ready`; liveness-check процесса: `/health`.
 База данных будет создана в `api/data/enet.sqlite`. Доступ только с этого ПК по `127.0.0.1:8787`.
 
 ### 3. Запустить eNet APP на Ubuntu
