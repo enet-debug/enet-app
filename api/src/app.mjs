@@ -228,7 +228,7 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.4.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.5.0' });
       }
       if (path === '/ready' && req.method === 'GET') {
         try {
@@ -238,11 +238,6 @@ export function createApp(options = {}) {
         return error(res, 503, 'not_ready', 'Хранилище API недоступно.');
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
-        const retryAfter = throttle('register:' + clientIp(req), 8);
-        if (retryAfter) {
-          res.setHeader('Retry-After', String(retryAfter));
-          return error(res, 429, 'rate_limited', 'Слишком много попыток регистрации. Попробуйте позже.');
-        }
         const b = await bodyOf(req);
         const email = cleanEmail(b.email);
         const name = typeof b.name === 'string' ? b.name.trim() : '';
@@ -250,6 +245,8 @@ export function createApp(options = {}) {
             typeof b.password !== 'string' || b.password.length < 12 || b.password.length > 128) {
           return error(res, 400, 'invalid_input', 'Нужно имя, корректный email и пароль от 12 до 128 символов.');
         }
+        const registerWait = consumeRateLimit('register:' + digest(clientIp(req)), signupLimit);
+        if (registerWait > 0) return sendRateLimited(res, registerWait, 'Слишком много попыток регистрации. Попробуйте позже.');
         if (userByEmail.get(email)) return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
         const user = { id: randomUUID(), email, name };
         const hashed = await passwordHash(b.password);
@@ -261,26 +258,28 @@ export function createApp(options = {}) {
         return json(res, 201, newSession(user, req));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
-        const ipRetry = throttle('login-ip:' + clientIp(req), 30);
-        if (ipRetry) {
-          res.setHeader('Retry-After', String(ipRetry));
-          return error(res, 429, 'rate_limited', 'Слишком много запросов с этого адреса. Попробуйте позже.');
-        }
         const b = await bodyOf(req);
         const email = cleanEmail(b.email);
         if (!emailPattern.test(email) || typeof b.password !== 'string' || b.password.length > 128) {
           return error(res, 400, 'invalid_input', 'Укажите email и пароль.');
         }
-        const emailRetry = throttle('login-email:' + digest(email), 8);
-        if (emailRetry) {
-          res.setHeader('Retry-After', String(emailRetry));
-          return error(res, 429, 'rate_limited', 'Слишком много попыток входа для этого аккаунта. Попробуйте позже.');
+        const ipBucket = 'login-ip:' + digest(clientIp(req));
+        const accountBucket = 'login-account:' + digest(email);
+        const ipWait = consumeRateLimit(ipBucket, ipLoginLimit);
+        const accountWait = rateLimitWait(accountBucket);
+        if (ipWait > 0 || accountWait > 0) {
+          return sendRateLimited(res, Math.max(ipWait, accountWait), 'Слишком много попыток входа. Попробуйте позже.');
         }
         const user = userByEmail.get(email);
-        if (!user || !(await comparePassword(b.password, user.password_hash))) {
+        const valid = user
+          ? await comparePassword(b.password, user.password_hash)
+          : (await scrypt(b.password, Buffer.alloc(16), 64), false);
+        if (!valid) {
+          const wait = recordFailure(accountBucket);
+          if (wait > 0) return sendRateLimited(res, wait, 'Слишком много попыток входа для этого аккаунта. Попробуйте позже.');
           return error(res, 401, 'invalid_credentials', 'Неверная почта или пароль.');
         }
-        attempts.delete('login-email:' + digest(email));
+        clearRateLimit.run(accountBucket);
         return json(res, 200, newSession(user, req));
       }
       if (path === '/v1/auth/reset-password' && req.method === 'POST') {
@@ -331,11 +330,10 @@ export function createApp(options = {}) {
       if (path === '/v1/auth/change-password' && req.method === 'POST') {
         const session = auth(req);
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
-        const retryAfter = throttle('password:' + clientIp(req), 8);
-        if (retryAfter) {
-          res.setHeader('Retry-After', String(retryAfter));
-          return error(res, 429, 'rate_limited', 'Слишком много попыток смены пароля. Попробуйте позже.');
-        }
+        const ipBucket = 'password-ip:' + digest(clientIp(req));
+        const accountBucket = 'password-account:' + digest(session.user.id);
+        const wait = Math.max(rateLimitWait(ipBucket), rateLimitWait(accountBucket));
+        if (wait > 0) return sendRateLimited(res, wait, 'Слишком много попыток смены пароля. Попробуйте позже.');
         const body = await bodyOf(req);
         if (typeof body.current_password !== 'string' ||
             typeof body.new_password !== 'string' ||
@@ -346,8 +344,13 @@ export function createApp(options = {}) {
         }
         const account = userById.get(session.user.id);
         if (!account || !(await comparePassword(body.current_password, account.password_hash))) {
+          const ipWait = recordFailure(ipBucket);
+          const accountWait = recordFailure(accountBucket);
+          const retry = Math.max(ipWait, accountWait);
+          if (retry > 0) return sendRateLimited(res, retry, 'Слишком много попыток смены пароля. Попробуйте позже.');
           return error(res, 403, 'invalid_password', 'Неверный текущий пароль.');
         }
+        clearRateLimit.run(accountBucket);
         const hash = await passwordHash(body.new_password);
         db.exec('BEGIN IMMEDIATE');
         try {
