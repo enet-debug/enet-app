@@ -19,6 +19,8 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
   List<EcosystemService> _services = const [];
   String? _error;
   String _query = '';
+  bool _favoriteOnly = false;
+  final Set<String> _updatingFavorites = {};
   final TextEditingController _search = TextEditingController();
 
   @override
@@ -29,10 +31,17 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
 
   List<EcosystemService> get _matches {
     final q = _query.trim().toLowerCase();
-    if (q.isEmpty) return _services;
-    return _services.where((service) =>
-        service.name.toLowerCase().contains(q) ||
-        service.description.toLowerCase().contains(q)).toList(growable: false);
+    final matches = _services.where((service) {
+      if (_favoriteOnly && !service.favorite) return false;
+      return q.isEmpty ||
+          service.name.toLowerCase().contains(q) ||
+          service.description.toLowerCase().contains(q);
+    }).toList();
+    matches.sort((a, b) {
+      if (a.favorite != b.favorite) return a.favorite ? -1 : 1;
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+    return matches;
   }
 
   @override
@@ -56,6 +65,26 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
         _loading = false;
         _error = e.toString().replaceFirst('Exception: ', '');
       });
+    }
+  }
+
+  Future<void> _toggleFavorite(EcosystemService service) async {
+    if (_updatingFavorites.contains(service.id)) return;
+    setState(() => _updatingFavorites.add(service.id));
+    try {
+      final favorite = !service.favorite;
+      await widget.auth.setServiceFavorite(service.id, favorite);
+      if (!mounted) return;
+      setState(() {
+        _services = [
+          for (final item in _services)
+            item.id == service.id ? item.copyWith(favorite: favorite) : item,
+        ];
+      });
+    } catch (e) {
+      _notify(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _updatingFavorites.remove(service.id));
     }
   }
 
@@ -122,6 +151,22 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
                   ),
           ),
         ),
+        const SizedBox(height: 12),
+        Row(children: [
+          FilterChip(
+            label: const Text('Избранное'),
+            avatar: Icon(
+              _favoriteOnly ? Icons.star_rounded : Icons.star_border_rounded,
+              size: 17, color: ENetColors.cyan),
+            selected: _favoriteOnly,
+            selectedColor: ENetColors.mint.withValues(alpha: .17),
+            checkmarkColor: ENetColors.cyan,
+            onSelected: (value) => setState(() => _favoriteOnly = value),
+          ),
+          const Spacer(),
+          Text('${_services.where((service) => service.favorite).length} в избранном',
+            style: const TextStyle(color: ENetColors.faint, fontSize: 12)),
+        ]),
         const SizedBox(height: 16),
       ],
       if (_loading && _services.isEmpty)
@@ -144,7 +189,10 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       else if (matches.isEmpty)
         Padding(
           padding: const EdgeInsets.all(18),
-          child: Text('По запросу «$_query» сервисы не найдены.',
+          child: Text(
+            _favoriteOnly && _query.isEmpty
+              ? 'Пока нет избранных сервисов.'
+              : 'По запросу «$_query» сервисы не найдены.',
             style: const TextStyle(color: ENetColors.muted)),
         )
       else
@@ -156,7 +204,10 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
             children: [
               for (final service in matches)
                 SizedBox(width: itemWidth, child: _ServiceCard(
-                  service: service, open: () => _open(service.url))),
+                  service: service,
+                  open: () => _open(service.url),
+                  toggleFavorite: () => _toggleFavorite(service),
+                  saving: _updatingFavorites.contains(service.id))),
             ],
           );
         }),
@@ -171,9 +222,16 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
 }
 
 class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.service, required this.open});
+  const _ServiceCard({
+    required this.service,
+    required this.open,
+    required this.toggleFavorite,
+    required this.saving,
+  });
   final EcosystemService service;
   final VoidCallback open;
+  final VoidCallback toggleFavorite;
+  final bool saving;
 
   @override
   Widget build(BuildContext context) => Semantics(
@@ -199,11 +257,28 @@ class _ServiceCard extends StatelessWidget {
                     color: ENetColors.mint.withValues(alpha: .19),
                     blurRadius: 26, offset: const Offset(0, 10))],
                 ),
-                child: const Icon(Icons.dashboard_customize_rounded,
+                child: Icon(
+                  service.id == 'prodayzer'
+                      ? Icons.auto_awesome_rounded
+                      : Icons.dashboard_customize_rounded,
                   color: ENetColors.onAccent, size: 27),
               ),
               const Spacer(),
-              const Icon(Icons.north_east_rounded, color: ENetColors.cyan, size: 21),
+              IconButton(
+                onPressed: saving ? null : toggleFavorite,
+                tooltip: service.favorite
+                    ? 'Убрать ${service.name} из избранного'
+                    : 'Добавить ${service.name} в избранное',
+                icon: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: Icon(
+                    service.favorite ? Icons.star_rounded : Icons.star_border_rounded,
+                    key: ValueKey(service.favorite),
+                    color: service.favorite ? ENetColors.mint : ENetColors.muted,
+                    size: 25,
+                  ),
+                ),
+              ),
             ]),
             const SizedBox(height: 20),
             Text(service.name, maxLines: 1, overflow: TextOverflow.ellipsis,
