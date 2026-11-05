@@ -14,6 +14,22 @@ class ApiEndpointPanel extends StatefulWidget {
 
 class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
   bool _busy = false;
+  bool _checking = true;
+  bool? _online;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    if (!mounted) return;
+    setState(() => _checking = true);
+    final result = await widget.auth.checkServer();
+    if (!mounted) return;
+    setState(() { _online = result; _checking = false; });
+  }
 
   Future<void> _edit() async {
     final controller = TextEditingController(text: widget.auth.apiBaseUrl);
@@ -73,9 +89,13 @@ class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
     setState(() => _busy = true);
     try {
       await widget.auth.updateApiBaseUrl(value);
+      final online = await widget.auth.checkServer();
       if (mounted) {
+        setState(() => _online = online);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Адрес API сохранён. Войдите заново для подключения.')),
+          SnackBar(content: Text(online
+            ? 'Адрес сохранён. eNet API отвечает.'
+            : 'Адрес сохранён, но сервер пока не отвечает. Проверьте URL и доступность API.')),
         );
       }
     } catch (error) {
@@ -95,7 +115,10 @@ class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
     blur: 14,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
     child: Row(children: [
-      const Icon(Icons.dns_outlined, color: ENetColors.cyan, size: 20),
+      Icon(_checking ? Icons.sync_rounded : _online == true
+        ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+        color: _checking ? ENetColors.muted : _online == true
+          ? ENetColors.mint : ENetColors.danger, size: 20),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('СЕРВЕР ПОДКЛЮЧЕНИЯ', style: TextStyle(
@@ -103,8 +126,19 @@ class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
         const SizedBox(height: 4),
         Text(widget.auth.apiBaseUrl, maxLines: 1, overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: ENetColors.text, fontSize: 12)),
+        const SizedBox(height: 3),
+        Text(_checking ? 'Проверяем соединение…'
+          : _online == true ? 'API отвечает'
+          : 'Нет соединения с API',
+          style: TextStyle(color: _online == true ? ENetColors.mint : ENetColors.muted,
+            fontSize: 10.5)),
       ])),
       const SizedBox(width: 8),
+      IconButton(
+        tooltip: 'Проверить соединение с API',
+        onPressed: _checking ? null : _check,
+        icon: const Icon(Icons.refresh_rounded, color: ENetColors.cyan, size: 19),
+      ),
       TextButton(
         onPressed: _busy || widget.auth.busy ? null : _edit,
         child: Text(_busy ? 'Сохранение…' : 'Изменить'),
