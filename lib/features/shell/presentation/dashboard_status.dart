@@ -9,13 +9,9 @@ class DashboardStatus extends StatefulWidget {
   const DashboardStatus({
     super.key,
     required this.auth,
-    required this.openAccount,
-    required this.openSettings,
   });
 
   final AuthController auth;
-  final VoidCallback openAccount;
-  final VoidCallback openSettings;
 
   @override
   State<DashboardStatus> createState() => _DashboardStatusState();
