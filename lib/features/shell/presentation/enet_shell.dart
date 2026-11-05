@@ -271,6 +271,7 @@ class _ENetShellState extends State<ENetShell> {
         const Divider(height: 20),
         const SizedBox(height: 10),
         Pressable(
+          key: const ValueKey('desktop-nav-more'),
           onTap: _showMoreMenu,
           haptic: false,
           builder: (context, hovered) => Column(children: [
