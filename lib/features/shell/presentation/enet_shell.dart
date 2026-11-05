@@ -75,11 +75,12 @@ class _ENetShellState extends State<ENetShell> {
     _Dest(0, Icons.home_outlined, Icons.home_rounded, 'Главная'),
     _Dest(1, Icons.apps_outlined, Icons.apps_rounded, 'Сервисы'),
     _Dest(7, Icons.checklist_outlined, Icons.checklist_rounded, 'Задачи'),
-    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
+    _Dest(9, Icons.folder_outlined, Icons.folder_rounded, 'Файлы'),
+    _Dest(10, Icons.inventory_2_outlined, Icons.inventory_2_rounded, 'Проекты'),
+    _Dest(11, Icons.bar_chart_outlined, Icons.bar_chart_rounded, 'Аналитика'),
     _Dest(3, Icons.fingerprint_rounded, Icons.fingerprint_rounded, 'eNet ID'),
-    _Dest(5, Icons.devices_outlined, Icons.devices_rounded, 'Устройства'),
     _Dest(4, Icons.shield_outlined, Icons.shield_rounded, 'Безопасность'),
-    _Dest(6, Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
+    _Dest(6, Icons.settings_outlined, Icons.settings_rounded, 'Настройки'),
   ];
 
   static const mobileItems = [
@@ -536,10 +537,39 @@ class _ENetShellState extends State<ENetShell> {
         return _tasks();
       case 8:
         return _about();
+      case 9:
+        return _comingSoon('Файлы', 'eNet Cloud ещё не подключён.',
+          Icons.cloud_outlined, 'Смотреть сервисы', () => go(1));
+      case 10:
+        return _comingSoon('Проекты', 'Рабочая область в разработке.',
+          Icons.folder_open_rounded, 'Перейти к задачам', () => go(7));
+      case 11:
+        return _comingSoon('Аналитика',
+          'Показатели появятся после подключения источников данных.',
+          Icons.bar_chart_rounded, 'Управление сеансами', () => go(5));
       default:
         return _home(compact);
     }
   }
+
+  Widget _comingSoon(String title, String subtitle, IconData icon,
+      String action, VoidCallback onAction) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      _PageTitle(title, subtitle),
+      const SizedBox(height: 24),
+      Glass(radius: 18, padding: const EdgeInsets.all(24),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, color: ENetColors.cyan, size: 34),
+          const SizedBox(height: 16),
+          Text('$title · скоро', style: const TextStyle(color: ENetColors.text,
+            fontSize: 20, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          Text(subtitle, style: const TextStyle(color: ENetColors.muted)),
+          const SizedBox(height: 14),
+          TextButton.icon(onPressed: onAction,
+            icon: const Icon(Icons.arrow_forward_rounded), label: Text(action)),
+        ])),
+    ]);
 
   // ───────────────────────── Главная ─────────────────────────
 
