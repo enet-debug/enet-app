@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/brand_logo.dart';
@@ -11,6 +10,8 @@ import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/reveal.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_repository.dart';
+import 'account_security_panel.dart';
+import 'service_catalog_panel.dart';
 
 class _Dest {
   const _Dest(this.icon, this.activeIcon, this.label);
@@ -362,17 +363,12 @@ class _ENetShellState extends State<ENetShell> {
       const SizedBox(height: 28),
       Reveal(delay: const Duration(milliseconds: 120), child: _hero(compact)),
       const SizedBox(height: 36),
+      ServiceCatalogPanel(auth: widget.auth),
+      const SizedBox(height: 30),
       const Reveal(delay: Duration(milliseconds: 200), child: Text('ПРОСТРАНСТВО', style: _eyebrow)),
       const SizedBox(height: 16),
       LayoutBuilder(builder: (context, constraints) {
         final tiles = [
-          _FeatureTile(
-            icon: Icons.layers_rounded,
-            gradient: ENetColors.accent,
-            heading: 'Продайзер',
-            body: 'Генерация объявлений, фото и подбор цен.',
-            onTap: () { launchUrl(Uri.parse('https://prodayzer.ru'), mode: LaunchMode.externalApplication); },
-          ),
           _FeatureTile(
             icon: Icons.person_rounded,
             gradient: ENetColors.violetGradient,
@@ -388,7 +384,7 @@ class _ENetShellState extends State<ENetShell> {
             onTap: () => go(3),
           ),
         ];
-        final delays = [260, 340, 420];
+        final delays = [260, 340];
         if (constraints.maxWidth < 700) {
           return Column(children: [
             for (var i = 0; i < tiles.length; i++)
@@ -586,13 +582,15 @@ class _ENetShellState extends State<ENetShell> {
         ),
       ),
       const SizedBox(height: 24),
+      AccountSecurityPanel(auth: widget.auth),
+      const SizedBox(height: 24),
       const Reveal(
         delay: Duration(milliseconds: 180),
         child: _Group(
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.2.0 (2)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.3.0 (3)'),
           ],
         ),
       ),

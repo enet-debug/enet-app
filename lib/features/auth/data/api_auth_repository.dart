@@ -94,6 +94,54 @@ class ApiAuthRepository implements AuthRepository {
     }
   }
 
+  Future<String> _token() async {
+    final token = await _storage.read(key: _sessionKey);
+    if (token == null || token.isEmpty) {
+      throw StateError('Войдите в eNet ID заново.');
+    }
+    return token;
+  }
+
+  @override
+  Future<bool> checkServer() async {
+    try {
+      final response = await _request('GET', '/health');
+      return response['status'] == 'ok';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<List<EcosystemService>> listServices() async {
+    final result = await _request('GET', '/v1/services', token: await _token());
+    final services = result['services'];
+    if (services is! List) throw const FormatException('Некорректный каталог сервисов');
+    return services.map((value) {
+      final item = Map<String, dynamic>.from(value as Map);
+      return EcosystemService(
+        id: item['id'] as String,
+        name: item['name'] as String,
+        description: item['description'] as String? ?? '',
+        url: item['url'] as String,
+      );
+    }).toList(growable: false);
+  }
+
+  @override
+  Future<void> changePassword(String currentPassword, String nextPassword) async {
+    await _request('POST', '/v1/auth/change-password', token: await _token(), body: {
+      'current_password': currentPassword,
+      'new_password': nextPassword,
+    });
+  }
+
+  @override
+  Future<int> revokeOtherSessions() async {
+    final response = await _request('POST', '/v1/auth/logout-others', token: await _token());
+    return response['revoked'] as int;
+  }
+
   @override
   Future<void> requestPasswordReset(String email) async {
     throw Exception('Восстановление пароля пока не настроено на сервере.');

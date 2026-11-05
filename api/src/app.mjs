@@ -95,6 +95,9 @@ export function createApp(options = {}) {
     JOIN users ON sessions.user_id=users.id
     WHERE sessions.token_hash=? AND sessions.expires_at>?`);
   const revokeSession = db.prepare('DELETE FROM sessions WHERE token_hash=?');
+  const revokeOtherSessions = db.prepare('DELETE FROM sessions WHERE user_id=? AND token_hash<>?');
+  const updatePassword = db.prepare('UPDATE users SET password_hash=? WHERE id=?');
+  const userById = db.prepare('SELECT * FROM users WHERE id=?');
   const clearSessions = db.prepare('DELETE FROM sessions WHERE expires_at<=?');
   function auth(req) {
     const match = /^Bearer ([A-Za-z0-9_-]{32,256})$/.exec(req.headers.authorization || '');
@@ -127,7 +130,7 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.1.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.2.0' });
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
         if (throttle('register:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
@@ -167,6 +170,42 @@ export function createApp(options = {}) {
       if (path === '/v1/auth/me' && req.method === 'GET') {
         const session = auth(req);
         return session ? json(res, 200, { user: session.user }) : error(res, 401, 'unauthorized', 'Требуется авторизация.');
+      }
+      if (path === '/v1/auth/change-password' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        if (throttle('password:' + req.socket.remoteAddress)) {
+          return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
+        }
+        const body = await bodyOf(req);
+        if (typeof body.current_password !== 'string' ||
+            typeof body.new_password !== 'string' ||
+            body.new_password.length < 12 || body.new_password.length > 128 ||
+            body.current_password.length > 128 ||
+            body.current_password === body.new_password) {
+          return error(res, 400, 'invalid_input', 'Нужен текущий и новый пароль (от 12 до 128 символов).');
+        }
+        const account = userById.get(session.user.id);
+        if (!account || !(await comparePassword(body.current_password, account.password_hash))) {
+          return error(res, 403, 'invalid_password', 'Неверный текущий пароль.');
+        }
+        const hash = await passwordHash(body.new_password);
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          updatePassword.run(hash, account.id);
+          revokeOtherSessions.run(account.id, session.tokenHash);
+          db.exec('COMMIT');
+        } catch (e) {
+          db.exec('ROLLBACK');
+          throw e;
+        }
+        return json(res, 200, { ok: true, other_sessions_revoked: true });
+      }
+      if (path === '/v1/auth/logout-others' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const result = revokeOtherSessions.run(session.user.id, session.tokenHash);
+        return json(res, 200, { ok: true, revoked: Number(result.changes) });
       }
       if (path === '/v1/auth/logout' && req.method === 'POST') {
         const session = auth(req);
