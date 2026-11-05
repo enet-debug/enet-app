@@ -27,6 +27,13 @@ jobs:
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
+      - name: Validate Windows launch script
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/run-windows.ps1'), [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | ForEach-Object { Write-Error $_ }; exit 1 }
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
