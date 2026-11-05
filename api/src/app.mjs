@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { isIP } from 'node:net';
 import { mkdirSync, chmodSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { randomBytes, randomUUID, createHash, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
@@ -109,6 +110,16 @@ export function createApp(options = {}) {
   const db = setupDb(options.dbPath || process.env.ENET_DB_PATH || './data/enet.sqlite');
   const allowed = new Set((options.allowedOrigins ?? process.env.ENET_ALLOWED_ORIGINS ?? '')
     .split(',').map(x => x.trim()).filter(Boolean));
+  const trustProxy = options.trustProxy ?? process.env.ENET_TRUST_PROXY === 'true';
+  function clientIp(req) {
+    if (trustProxy) {
+      const forwarded = req.headers['x-real-ip'];
+      if (typeof forwarded === 'string' && isIP(forwarded.trim())) {
+        return forwarded.trim();
+      }
+    }
+    return req.socket.remoteAddress || 'unknown';
+  }
   const userByEmail = db.prepare('SELECT * FROM users WHERE email=?');
   const insertUser = db.prepare('INSERT INTO users(id,email,name,password_hash,created_at) VALUES(?,?,?,?,?)');
   const insertSession = db.prepare('INSERT INTO sessions(token_hash,user_id,expires_at,session_id,created_at,last_seen_at,device_label) VALUES(?,?,?,?,?,?,?)');
@@ -180,7 +191,7 @@ export function createApp(options = {}) {
         return error(res, 503, 'not_ready', 'Хранилище API недоступно.');
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
-        const retryAfter = throttle('register:' + (req.socket.remoteAddress || 'unknown'), 8);
+        const retryAfter = throttle('register:' + clientIp(req), 8);
         if (retryAfter) {
           res.setHeader('Retry-After', String(retryAfter));
           return error(res, 429, 'rate_limited', 'Слишком много попыток регистрации. Попробуйте позже.');
