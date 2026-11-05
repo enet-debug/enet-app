@@ -52,10 +52,8 @@ class _ApiConnectionPanelState extends State<ApiConnectionPanel> {
 
   Future<void> _edit() async {
     final key = GlobalKey<FormState>();
-    final controller = TextEditingController(text: _endpoint ?? '');
-    String? updated;
-    try {
-      updated = await showDialog<String>(
+    var typed = _endpoint ?? '';
+    final updated = await showDialog<String>(
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: const Text('Адрес eNet API'),
@@ -66,7 +64,8 @@ class _ApiConnectionPanelState extends State<ApiConnectionPanel> {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 TextFormField(
                   key: const ValueKey('api-endpoint-field'),
-                  controller: controller,
+                  initialValue: typed,
+                  onChanged: (value) => typed = value,
                   autofocus: true,
                   keyboardType: TextInputType.url,
                   autocorrect: false,
@@ -95,7 +94,7 @@ class _ApiConnectionPanelState extends State<ApiConnectionPanel> {
             FilledButton(
               onPressed: () {
                 if (key.currentState?.validate() == true) {
-                  Navigator.pop(dialogContext, controller.text.trim());
+                  Navigator.pop(dialogContext, typed.trim());
                 }
               },
               child: const Text('Сохранить'),
@@ -103,10 +102,6 @@ class _ApiConnectionPanelState extends State<ApiConnectionPanel> {
           ],
         ),
       );
-    } finally {
-      // Dispose after the closing dialog animation unmounts the text field.
-      // Controller is local and never shared between dialogs.
-    }
     if (updated == null || !mounted) return;
     try {
       await widget.auth.setApiEndpoint(updated);
