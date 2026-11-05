@@ -628,19 +628,6 @@ class _ENetShellState extends State<ENetShell> {
   });
 
   Widget _shortcutStrip() {
-    final compact = MediaQuery.sizeOf(context).width < 820;
-    final items = <_HomeShortcutData>[
-      _HomeShortcutData(
-        icon: Icons.apps_rounded,
-        title: 'Сервисы',
-        subtitle: 'Каталог',
-        color: ENetColors.violet,
-        onTap: () => go(1),
-      ),
-      _HomeShortcutData(
-        icon: Icons.fingerprint_rounded,
-        title: 'eNet ID',
-    Widget _shortcutStrip() {
     final items = <_HomeShortcutData>[
       _HomeShortcutData(
         icon: Icons.person_outline_rounded,
