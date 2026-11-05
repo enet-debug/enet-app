@@ -119,14 +119,6 @@ class _ENetShellState extends State<ENetShell> {
     if (previous == 2 || next == 2) _refreshUnreadCount();
   }
 
-  String _greeting() {
-    final h = DateTime.now().hour;
-    if (h < 5) return 'Доброй ночи';
-    if (h < 12) return 'Доброе утро';
-    if (h < 18) return 'Добрый день';
-    return 'Добрый вечер';
-  }
-
   String _dateLabel() {
     final n = DateTime.now();
     return '${_weekdays[n.weekday - 1]}, ${n.day} ${_months[n.month - 1]}'.toUpperCase();
@@ -537,7 +529,7 @@ class _ENetShellState extends State<ENetShell> {
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Добро пожаловать, ' + user.name,
+        Text('Добро пожаловать, ${user.name}',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
@@ -1504,16 +1496,19 @@ class _QuickAction extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    dense: true,
-    visualDensity: const VisualDensity(vertical: -2),
-    contentPadding: EdgeInsets.zero,
-    leading: Icon(icon, color: ENetColors.cyan, size: 19),
-    title: Text(label, style: const TextStyle(
-      color: ENetColors.text, fontSize: 12.5, fontWeight: FontWeight.w600,
-    )),
-    trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 18),
-    onTap: onTap,
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: ListTile(
+      dense: true,
+      visualDensity: const VisualDensity(vertical: -2),
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: ENetColors.cyan, size: 19),
+      title: Text(label, style: const TextStyle(
+        color: ENetColors.text, fontSize: 12.5, fontWeight: FontWeight.w600,
+      )),
+      trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 18),
+      onTap: onTap,
+    ),
   );
 }
 
