@@ -503,13 +503,15 @@ class _ENetShellState extends State<ENetShell> {
               const SizedBox(height: 12),
               const Text('eNet ID, рабочие инструменты и приложения.\\nБыстрый доступ без лишних переходов.',
                 style: TextStyle(color: Color(0xFFB5DBCA), fontSize: 14.5, height: 1.6)),
-              const SizedBox(height: 25),
-              Wrap(spacing: 9, runSpacing: 9, children: const [
-                _HeroTag(icon: Icons.verified_user_outlined, label: 'eNet ID'),
-                _HeroTag(icon: Icons.extension_outlined, label: 'Сервисы'),
-                _HeroTag(icon: Icons.security_outlined, label: 'Безопасность'),
-              ]),
-              const SizedBox(height: 26),
+              if (!compact) ...[
+                const SizedBox(height: 25),
+                Wrap(spacing: 9, runSpacing: 9, children: const [
+                  _HeroTag(icon: Icons.verified_user_outlined, label: 'eNet ID'),
+                  _HeroTag(icon: Icons.extension_outlined, label: 'Сервисы'),
+                  _HeroTag(icon: Icons.security_outlined, label: 'Безопасность'),
+                ]),
+              ],
+              SizedBox(height: compact ? 16 : 26),
               PrimaryButton(
                 label: 'Управление аккаунтом',
                 icon: Icons.arrow_forward_rounded,
