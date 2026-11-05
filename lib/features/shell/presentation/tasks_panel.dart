@@ -115,7 +115,7 @@ class _TasksPanelState extends State<TasksPanel> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('Удалить задачу?'),
-        content: Text('«\${task.title}» будет удалена из твоего списка.'),
+        content: Text('«${task.title}» будет удалена из твоего списка.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -146,7 +146,7 @@ class _TasksPanelState extends State<TasksPanel> {
     final date = value.toLocal();
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
-    return '$day.$month.\${date.year}';
+    return '$day.$month.${date.year}';
   }
 
   bool _isOverdue(WorkspaceTask task) {
@@ -477,7 +477,7 @@ class _TaskEditorDialogState extends State<_TaskEditorDialog> {
   String _date(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
-    return '$day.$month.\${date.year}';
+    return '$day.$month.${date.year}';
   }
 
   Future<void> _pickDate() async {
