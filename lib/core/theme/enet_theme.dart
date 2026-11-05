@@ -1,7 +1,7 @@
 import 'dart:ui' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 
-/// Палитра eNet 0.5: глубокий изумрудный фон и мятные акценты.
+/// Палитра eNet 0.7: глубокий изумрудный фон и мятные акценты.
 abstract final class ENetColors {
   static const background = Color(0xFF06110F);
   static const surface = Color(0xFF0D201B);
