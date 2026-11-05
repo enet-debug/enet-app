@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../domain/auth_repository.dart';
@@ -13,6 +14,16 @@ class ApiAuthRepository implements AuthRepository {
   );
   static const _sessionKey = 'enet_id_session';
   final http.Client _client;
+  String get _clientLabel {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android: return 'eNet APP / Android';
+      case TargetPlatform.iOS: return 'eNet APP / iOS';
+      case TargetPlatform.windows: return 'eNet APP / Windows';
+      case TargetPlatform.macOS: return 'eNet APP / macOS';
+      case TargetPlatform.linux: return 'eNet APP / Linux';
+      case TargetPlatform.fuchsia: return 'eNet APP / Fuchsia';
+    }
+  }
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Uri _uri(String path) => Uri.parse(
@@ -26,7 +37,7 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     final headers = <String, String>{
       'Accept': 'application/json',
-      'X-eNet-Client': 'eNet APP Flutter',
+      'X-eNet-Client': _clientLabel,
       if (body != null) 'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
