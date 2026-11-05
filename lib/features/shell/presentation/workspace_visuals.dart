@@ -44,9 +44,9 @@ class _HeroRibbonPainter extends CustomPainter {
     );
 
     final ribbon = Path()
-      ..moveTo(-w * .08, h * 1.04)
-      ..cubicTo(w * .22, h * .92, w * .30, h * .18, w * .53, h * .48)
-      ..cubicTo(w * .72, h * .76, w * .78, h * .42, w * 1.08, -h * .18);
+      ..moveTo(w * 1.08, -h * .22)
+      ..cubicTo(w * .82, -h * .08, w * .78, h * .20, w * .62, h * .57)
+      ..cubicTo(w * .48, h * .91, w * .70, h * .96, w * 1.10, h * .47);
 
     final bandShader = const LinearGradient(
       begin: Alignment.bottomLeft,
@@ -80,9 +80,9 @@ class _HeroRibbonPainter extends CustomPainter {
       ..color = const Color(0xFF8CFFE4).withValues(alpha: .76));
 
     final second = Path()
-      ..moveTo(w * .16, h * 1.15)
-      ..cubicTo(w * .39, h * .80, w * .47, h * .56, w * .66, h * .60)
-      ..cubicTo(w * .83, h * .63, w * .92, h * .20, w * 1.08, -h * .05);
+      ..moveTo(w * 1.10, -h * .12)
+      ..cubicTo(w * .84, h * .02, w * .80, h * .25, w * .65, h * .62)
+      ..cubicTo(w * .51, h * .93, w * .73, h * 1.00, w * 1.10, h * .53);
     canvas.drawPath(second, Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
