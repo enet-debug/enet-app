@@ -39,6 +39,15 @@ class AuthController extends ChangeNotifier {
     user = null;
   });
 
+  Future<void> updateName(String name) => _execute(() async {
+    user = await _repository.updateName(name);
+  });
+
+  Future<List<AccountSession>> listSessions() => _repository.listSessions();
+
+  Future<void> revokeSession(String sessionId) =>
+      _execute(() => _repository.revokeSession(sessionId));
+
   Future<bool> checkServer() => _repository.checkServer();
   Future<List<EcosystemService>> listServices() => _repository.listServices();
   Future<void> changePassword(String currentPassword, String nextPassword) =>
