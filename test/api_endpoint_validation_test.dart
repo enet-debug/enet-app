@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('normalizeApiBaseUrl', () {
     test('accepts remote HTTPS and removes trailing slashes', () {
-      expect(normalizeApiBaseUrl('  https://api.example.com/v1/  '),
-          'https://api.example.com/v1');
+      expect(normalizeApiBaseUrl('  https://api.example.com/api/  '),
+          'https://api.example.com/api');
     });
 
     test('allows HTTP only on loopback development addresses', () {
