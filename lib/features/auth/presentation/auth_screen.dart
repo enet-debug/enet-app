@@ -28,6 +28,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final name = TextEditingController();
   bool passwordVisible = false;
   String? notice;
+  bool noticeIsError = false;
 
   @override
   void dispose() {
@@ -57,17 +58,25 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> submit() async {
     if (!formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    if (mode == _AuthMode.reset) {
-      await widget.auth.requestPasswordReset(email.text);
-      if (mounted) {
-        setState(() => notice = 'Демо-режим: письмо не отправляется. Подключим это после выбора сервера авторизации.');
+    setState(() { notice = null; noticeIsError = false; });
+    try {
+      if (mode == _AuthMode.reset) {
+        await widget.auth.requestPasswordReset(email.text);
+        if (mounted) setState(() => notice = 'Проверьте почту.');
+        return;
       }
-      return;
-    }
-    if (mode == _AuthMode.signUp) {
-      await widget.auth.signUp(name.text, email.text, password.text);
-    } else {
-      await widget.auth.signIn(email.text, password.text);
+      if (mode == _AuthMode.signUp) {
+        await widget.auth.signUp(name.text, email.text, password.text);
+      } else {
+        await widget.auth.signIn(email.text, password.text);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          notice = e.toString().replaceFirst('Exception: ', '');
+          noticeIsError = true;
+        });
+      }
     }
   }
 
@@ -132,7 +141,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     final title = reset ? 'Восстановление' : signIn ? 'С возвращением!' : 'Создать аккаунт';
     final subtitle = reset
-        ? 'Введите email. Позже сюда подключим настоящую отправку письма.'
+        ? 'Восстановление пароля пока не настроено на сервере.'
         : signIn
             ? 'Твоё пространство eNet начинается здесь.'
             : 'Присоединяйся к eNet и настрой личное пространство.';
@@ -245,7 +254,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                 ),
-                validator: (v) => (v == null || v.length < 8) ? 'Минимум восемь символов' : null,
+                validator: (v) => (v == null || v.length < 12) ? 'Минимум 12 символов' : null,
               ),
             ),
           ),
@@ -296,12 +305,13 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: ENetColors.mint.withValues(alpha: .10),
+                  color: (noticeIsError ? ENetColors.danger : ENetColors.mint).withValues(alpha: .10),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: ENetColors.mint.withValues(alpha: .3)),
+                  border: Border.all(color: (noticeIsError ? ENetColors.danger : ENetColors.mint).withValues(alpha: .3)),
                 ),
                 child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Icon(Icons.check_circle_rounded, color: ENetColors.mint, size: 20),
+                  Icon(noticeIsError ? Icons.error_outline_rounded : Icons.check_circle_rounded,
+                    color: noticeIsError ? ENetColors.danger : ENetColors.mint, size: 20),
                   const SizedBox(width: 10),
                   Expanded(child: Text(notice ?? '', style: const TextStyle(color: ENetColors.text, fontSize: 13, height: 1.45))),
                 ]),
@@ -316,7 +326,7 @@ class _AuthScreenState extends State<AuthScreen> {
             SizedBox(width: 7),
             Flexible(
               child: Text(
-                'Демо-режим: аккаунты не создаются, пароли не сохраняются.',
+                'eNet ID: аккаунты и пароли обрабатываются на сервере.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: ENetColors.faint, fontSize: 11.5, height: 1.5),
               ),
