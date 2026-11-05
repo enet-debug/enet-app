@@ -26,6 +26,7 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     final headers = <String, String>{
       'Accept': 'application/json',
+      'X-eNet-Client': 'eNet APP Flutter',
       if (body != null) 'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
@@ -140,6 +141,37 @@ class ApiAuthRepository implements AuthRepository {
   Future<int> revokeOtherSessions() async {
     final response = await _request('POST', '/v1/auth/logout-others', token: await _token());
     return response['revoked'] as int;
+  }
+
+  @override
+  Future<AuthUser> updateName(String name) async {
+    final result = await _request('POST', '/v1/auth/profile',
+      token: await _token(), body: {'name': name});
+    return _user(result);
+  }
+
+  @override
+  Future<List<AccountSession>> listSessions() async {
+    final response = await _request('GET', '/v1/auth/sessions', token: await _token());
+    final sessions = response['sessions'];
+    if (sessions is! List) throw const FormatException('Некорректные данные сессий');
+    return sessions.map((value) {
+      final item = Map<String, dynamic>.from(value as Map);
+      return AccountSession(
+        id: item['id'] as String,
+        device: item['device'] as String,
+        createdAt: DateTime.parse(item['created_at'] as String),
+        lastSeenAt: DateTime.parse(item['last_seen_at'] as String),
+        expiresAt: DateTime.parse(item['expires_at'] as String),
+        current: item['current'] as bool,
+      );
+    }).toList(growable: false);
+  }
+
+  @override
+  Future<void> revokeSession(String sessionId) async {
+    await _request('POST', '/v1/auth/sessions/revoke',
+      token: await _token(), body: {'session_id': sessionId});
   }
 
   @override
