@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/enet_theme.dart';
-import '../../../core/widgets/brand_logo.dart';
 import '../../../core/widgets/glass.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_repository.dart';
