@@ -72,9 +72,9 @@ class _AuroraPainter extends CustomPainter {
 
     // (цвет, x, y, радиус, обороты за цикл, фаза, прозрачность)
     final blobs = <(Color, double, double, double, int, double, double)>[
-      (ENetColors.blue, .90, .08, .60, 1, .00, .20),
-      (ENetColors.violet, .02, .90, .58, 2, .33, .09),
-      (ENetColors.mint, .52, 1.0, .40, 1, .66, .10),
+      (ENetColors.blue, .94, .06, .64, 1, .00, .25),
+      (ENetColors.violet, .02, .88, .60, 2, .33, .13),
+      (ENetColors.mint, .48, 1.02, .46, 1, .66, .15),
     ];
     for (final (color, bx, by, rf, k, phase, alpha) in blobs) {
       final a = (t * k + phase) * math.pi * 2;

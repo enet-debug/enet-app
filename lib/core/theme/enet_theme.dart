@@ -3,39 +3,39 @@ import 'package:flutter/material.dart';
 
 /// Палитра eNet 0.7: глубокий изумрудный фон и мятные акценты.
 abstract final class ENetColors {
-  static const background = Color(0xFF06110F);
-  static const surface = Color(0xFF0D201B);
-  static const surfaceRaised = Color(0xFF163128);
-  static const border = Color(0x335FCBA2);
-  static const cyan = Color(0xFF86F3C8);
-  static const blue = Color(0xFF2FBA90);
-  static const violet = Color(0xFF77CFC0);
-  static const mint = Color(0xFF55E5B0);
+  static const background = Color(0xFF030E0D);
+  static const surface = Color(0xFF071B18);
+  static const surfaceRaised = Color(0xFF0D2A24);
+  static const border = Color(0x4059DDB7);
+  static const cyan = Color(0xFF65FFD1);
+  static const blue = Color(0xFF20D6B0);
+  static const violet = Color(0xFFB58BFF);
+  static const mint = Color(0xFF16F0B4);
   static const danger = Color(0xFFFF8892);
-  static const text = Color(0xFFF4FFF9);
-  static const muted = Color(0xFFA5C0B3);
-  static const faint = Color(0xFF779B8B);
+  static const text = Color(0xFFF2FFF9);
+  static const muted = Color(0xFFA3C5B9);
+  static const faint = Color(0xFF71998D);
   static const onAccent = Color(0xFF06221A);
 
   static const accent = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF9AF6D0), Color(0xFF38C994)],
+    colors: [Color(0xFF69FFD2), Color(0xFF00B982)],
   );
   static const violetGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF77D8C5), Color(0xFF277C70)],
+    colors: [Color(0xFFB58BFF), Color(0xFF5E3DB4)],
   );
   static const mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFA6F8D1), Color(0xFF28AC79)],
+    colors: [Color(0xFF70FFD3), Color(0xFF00B982)],
   );
   static const amberGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFFFC46B), Color(0xFFFF8A4C)],
+    colors: [Color(0xFFFFD66E), Color(0xFFE89A2D)],
   );
 }
 

@@ -136,6 +136,42 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  Widget _sessionNotice() => Semantics(
+    liveRegion: true,
+    child: Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: ENetColors.cyan.withValues(alpha: .08),
+        border: Border.all(color: ENetColors.cyan.withValues(alpha: .2)),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(
+            widget.auth.canRetrySession
+                ? Icons.cloud_off_outlined : Icons.lock_outline_rounded,
+            size: 20, color: ENetColors.cyan,
+          ),
+          const SizedBox(width: 10),
+          Expanded(child: Text(
+            widget.auth.sessionMessage!,
+            style: const TextStyle(
+              color: ENetColors.text, fontSize: 13, height: 1.5,
+            ),
+          )),
+        ]),
+        if (widget.auth.canRetrySession) ...[
+          const SizedBox(height: 10),
+          TextButton.icon(
+            onPressed: widget.auth.busy ? null : widget.auth.restoreSession,
+            icon: const Icon(Icons.refresh_rounded, size: 18),
+            label: const Text('Повторить проверку сеанса'),
+          ),
+        ],
+      ]),
+    ),
+  );
+
   Widget _collapsible({required bool show, required Widget child}) => AnimatedSize(
         duration: const Duration(milliseconds: 380),
         curve: Curves.easeOutQuart,
@@ -167,6 +203,10 @@ class _AuthScreenState extends State<AuthScreen> {
             style: TextStyle(color: ENetColors.cyan, letterSpacing: 2.4, fontSize: 11, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 12),
+          if (widget.auth.sessionMessage != null) ...[
+            _sessionNotice(),
+            const SizedBox(height: 20),
+          ],
           AnimatedSize(
             duration: const Duration(milliseconds: 320),
             curve: Curves.easeOutQuart,

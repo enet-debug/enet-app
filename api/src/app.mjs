@@ -95,7 +95,19 @@ function setupDb(path) {
       read_at TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_notifications_user_created
-      ON notifications(user_id, created_at DESC);`);
+      ON notifications(user_id, created_at DESC);
+    CREATE TABLE IF NOT EXISTS tasks(
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      completed INTEGER NOT NULL DEFAULT 0 CHECK(completed IN (0,1)),
+      due_at TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_tasks_user_status_due
+      ON tasks(user_id, completed, due_at, created_at DESC);`);
   // Backward compatible migration: preserve login sessions created by earlier API releases.
   const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
   if (!columns.has('session_id')) {
@@ -206,6 +218,31 @@ export function createApp(options = {}) {
     'UPDATE notifications SET read_at=COALESCE(read_at,?) WHERE user_id=? AND id=?');
   const markAllNotifications = db.prepare(
     'UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL');
+  const listTasks = db.prepare(
+    'SELECT id,title,description,completed,due_at,created_at,updated_at FROM tasks ' +
+    'WHERE user_id=? ORDER BY completed ASC, ' +
+    'CASE WHEN due_at IS NULL THEN 1 ELSE 0 END, due_at ASC, created_at DESC');
+  const countTasks = db.prepare('SELECT COUNT(*) AS count FROM tasks WHERE user_id=?');
+  const getTask = db.prepare(
+    'SELECT id,title,description,completed,due_at,created_at,updated_at FROM tasks WHERE id=? AND user_id=?');
+  const insertTask = db.prepare(
+    'INSERT INTO tasks(id,user_id,title,description,completed,due_at,created_at,updated_at) VALUES(?,?,?,?,0,?,?,?)');
+  const updateTask = db.prepare(
+    'UPDATE tasks SET title=?,description=?,due_at=?,updated_at=? WHERE id=? AND user_id=?');
+  const setTaskCompleted = db.prepare(
+    'UPDATE tasks SET completed=?,updated_at=? WHERE id=? AND user_id=?');
+  const deleteTask = db.prepare('DELETE FROM tasks WHERE id=? AND user_id=?');
+  function taskDto(item) {
+    return {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      completed: Boolean(item.completed),
+      due_at: item.due_at,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    };
+  }
   // Keep unread totals consistent with the finite history returned to clients.
   // This prevents repeated logins from growing the SQLite database without a limit.
   const maxNotificationHistory = Number.isInteger(options.maxNotificationHistory) &&
@@ -273,7 +310,7 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.4.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.5.0' });
       }
       if (path === '/ready' && req.method === 'GET') {
         try {
@@ -285,8 +322,8 @@ export function createApp(options = {}) {
       }
       if (path === '/v1/meta' && req.method === 'GET') {
         return json(res, 200, {
-          api: 'enet', version: '0.4.0', auth: 'bearer',
-          capabilities: ['accounts', 'sessions', 'services', 'favorites', 'notifications'],
+          api: 'enet', version: '0.5.0', auth: 'bearer',
+          capabilities: ['accounts', 'sessions', 'services', 'favorites', 'notifications', 'tasks'],
           services: { catalog: true, single_sign_on: false },
         });
       }
@@ -498,6 +535,89 @@ export function createApp(options = {}) {
         const updated = new Date().toISOString();
         savePreferences.run(session.user.id, JSON.stringify(favorites), updated);
         return json(res, 200, { favorite_services: favorites, updated_at: updated });
+      }
+      if (path === '/v1/tasks' && req.method === 'GET') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const entries = listTasks.all(session.user.id).map(taskDto);
+        const completed = entries.filter(item => item.completed).length;
+        return json(res, 200, {
+          tasks: entries,
+          summary: { total: entries.length, completed, open: entries.length - completed },
+        });
+      }
+      if (path === '/v1/tasks' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const body = await bodyOf(req);
+        const title = typeof body.title === 'string' ? body.title.trim() : '';
+        const description = typeof body.description === 'string' ? body.description.trim() : '';
+        const dueAt = body.due_at == null || body.due_at === '' ? null : body.due_at;
+        if (title.length < 1 || title.length > 120 ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(title) ||
+            description.length > 1000 ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(description) ||
+            (dueAt !== null && (typeof dueAt !== 'string' || dueAt.length > 40 ||
+              Number.isNaN(Date.parse(dueAt))))) {
+          return error(res, 400, 'invalid_task', 'Проверьте название, описание и срок задачи.');
+        }
+        if (Number(countTasks.get(session.user.id).count) >= 500) {
+          return error(res, 409, 'task_limit', 'Достигнут лимит в 500 задач для аккаунта.');
+        }
+        const id = randomUUID();
+        const now = new Date().toISOString();
+        insertTask.run(id, session.user.id, title, description, dueAt, now, now);
+        return json(res, 201, { task: taskDto(getTask.get(id, session.user.id)) });
+      }
+      if (path === '/v1/tasks/update' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const body = await bodyOf(req);
+        const id = body.id;
+        const title = typeof body.title === 'string' ? body.title.trim() : '';
+        const description = typeof body.description === 'string' ? body.description.trim() : '';
+        const dueAt = body.due_at == null || body.due_at === '' ? null : body.due_at;
+        if (typeof id !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ||
+            title.length < 1 || title.length > 120 ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(title) ||
+            description.length > 1000 ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(description) ||
+            (dueAt !== null && (typeof dueAt !== 'string' || dueAt.length > 40 ||
+              Number.isNaN(Date.parse(dueAt))))) {
+          return error(res, 400, 'invalid_task', 'Некорректные данные задачи.');
+        }
+        const now = new Date().toISOString();
+        const result = updateTask.run(title, description, dueAt, now, id, session.user.id);
+        if (!result.changes) return error(res, 404, 'not_found', 'Задача не найдена.');
+        return json(res, 200, { task: taskDto(getTask.get(id, session.user.id)) });
+      }
+      if (path === '/v1/tasks/toggle' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const body = await bodyOf(req);
+        if (typeof body.id !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id) ||
+            typeof body.completed !== 'boolean') {
+          return error(res, 400, 'invalid_task', 'Некорректный статус задачи.');
+        }
+        const result = setTaskCompleted.run(
+          Number(body.completed), new Date().toISOString(), body.id, session.user.id,
+        );
+        if (!result.changes) return error(res, 404, 'not_found', 'Задача не найдена.');
+        return json(res, 200, { task: taskDto(getTask.get(body.id, session.user.id)) });
+      }
+      if (path === '/v1/tasks/delete' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const body = await bodyOf(req);
+        if (typeof body.id !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id)) {
+          return error(res, 400, 'invalid_task', 'Некорректный идентификатор задачи.');
+        }
+        const result = deleteTask.run(body.id, session.user.id);
+        if (!result.changes) return error(res, 404, 'not_found', 'Задача не найдена.');
+        return json(res, 200, { ok: true });
       }
       if (path === '/v1/services' && req.method === 'GET') {
         if (!auth(req)) return error(res, 401, 'unauthorized', 'Требуется авторизация.');

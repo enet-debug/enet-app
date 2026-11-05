@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: eNet ID API
-  version: 0.4.0
+  version: 0.5.0
   description: |
     Local-first API for eNet ID. Public internet deployment requires HTTPS,
     email verification, observability and operations hardening.
@@ -70,6 +70,32 @@ components:
           type: array
           maxItems: 50
           items: { $ref: '#/components/schemas/Notification' }
+    Task:
+      type: object
+      required: [id, title, description, completed, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string, minLength: 1, maxLength: 120 }
+        description: { type: string, maxLength: 1000 }
+        completed: { type: boolean }
+        due_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    TaskList:
+      type: object
+      required: [tasks, summary]
+      properties:
+        tasks:
+          type: array
+          maxItems: 500
+          items: { $ref: '#/components/schemas/Task' }
+        summary:
+          type: object
+          required: [total, completed, open]
+          properties:
+            total: { type: integer, minimum: 0 }
+            completed: { type: integer, minimum: 0 }
+            open: { type: integer, minimum: 0 }
   responses:
     Unauthorized:
       description: No valid bearer session
@@ -229,6 +255,92 @@ paths:
       responses:
         '200': { description: Session revoked }
         '404': { description: Session not found or current }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/tasks:
+    get:
+      summary: List tasks belonging to the authenticated eNet ID
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Task list and actual task counters
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TaskList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      summary: Create a task for the authenticated eNet ID
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string, minLength: 1, maxLength: 120 }
+                description: { type: string, maxLength: 1000 }
+                due_at: { type: string, format: date-time, nullable: true }
+      responses:
+        '201': { description: Task created }
+        '400': { description: Invalid task data }
+        '409': { description: Account task limit reached }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/tasks/update:
+    post:
+      summary: Update a task owned by the authenticated eNet ID
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, title]
+              properties:
+                id: { type: string, format: uuid }
+                title: { type: string, minLength: 1, maxLength: 120 }
+                description: { type: string, maxLength: 1000 }
+                due_at: { type: string, format: date-time, nullable: true }
+      responses:
+        '200': { description: Task updated }
+        '400': { description: Invalid task data }
+        '404': { description: Task not found or not owned by user }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/tasks/toggle:
+    post:
+      summary: Set task completion state
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id, completed]
+              properties:
+                id: { type: string, format: uuid }
+                completed: { type: boolean }
+      responses:
+        '200': { description: Task completion state updated }
+        '404': { description: Task not found or not owned by user }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/tasks/delete:
+    post:
+      summary: Delete a task owned by the authenticated eNet ID
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: string, format: uuid }
+      responses:
+        '200': { description: Task deleted }
+        '404': { description: Task not found or not owned by user }
         '401': { $ref: '#/components/responses/Unauthorized' }
   /v1/services:
     get:
