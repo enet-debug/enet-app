@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/brand_logo.dart';
@@ -14,6 +15,7 @@ import 'account_security_panel.dart';
 import 'service_catalog_panel.dart';
 import 'device_sessions_panel.dart';
 import 'profile_edit_button.dart';
+import 'dashboard_status.dart';
 
 class _Dest {
   const _Dest(this.icon, this.activeIcon, this.label);
@@ -41,6 +43,30 @@ class ENetShell extends StatefulWidget {
 class _ENetShellState extends State<ENetShell> {
   int index = 0;
   bool effects = true;
+  bool _effectsTouched = false;
+  final SharedPreferencesAsync _prefs = SharedPreferencesAsync();
+
+  @override
+  void initState() {
+    super.initState();
+    _restoreMotionPreference();
+  }
+
+  Future<void> _restoreMotionPreference() async {
+    try {
+      final saved = await _prefs.getBool('enet.reduce_motion_effects');
+      if (mounted && !_effectsTouched && saved != null) {
+        setState(() => effects = saved);
+      }
+    } catch (_) {
+      // App still works if the desktop preference store is unavailable.
+    }
+  }
+
+  void _setEffects(bool enabled) {
+    setState(() { effects = enabled; _effectsTouched = true; });
+    _prefs.setBool('enet.reduce_motion_effects', enabled).ignore();
+  }
 
   static const items = [
     _Dest(Icons.home_outlined, Icons.home_rounded, 'Главная'),
@@ -85,7 +111,7 @@ class _ENetShellState extends State<ENetShell> {
                   : Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: SizedBox(width: 252, child: _sidebar()),
+                      child: SizedBox(width: 270, child: _sidebar()),
                     ),
                     Expanded(child: _content(compact)),
                   ]),
@@ -113,8 +139,15 @@ class _ENetShellState extends State<ENetShell> {
       padding: const EdgeInsets.fromLTRB(14, 22, 14, 14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(padding: EdgeInsets.only(left: 8), child: BrandLogo(size: 40)),
-        const SizedBox(height: 38),
-        const Padding(padding: EdgeInsets.only(left: 10, bottom: 12), child: Text('ПРОСТРАНСТВО', style: _eyebrow)),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.only(left: 10, bottom: 26),
+          child: Text('DEVELOPER WORKSPACE',
+              style: TextStyle(color: ENetColors.cyan.withValues(alpha: .85),
+                fontSize: 9.5, fontWeight: FontWeight.w800, letterSpacing: 2.0)),
+        ),
+        const Padding(padding: EdgeInsets.only(left: 10, bottom: 12),
+          child: Text('НАВИГАЦИЯ', style: _eyebrow)),
         SizedBox(
           height: items.length * (itemHeight + gap),
           child: Stack(children: [
@@ -129,8 +162,8 @@ class _ENetShellState extends State<ENetShell> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   gradient: LinearGradient(colors: [
-                    ENetColors.cyan.withValues(alpha: .20),
-                    ENetColors.blue.withValues(alpha: .10),
+                    ENetColors.mint.withValues(alpha: .20),
+                    ENetColors.blue.withValues(alpha: .06),
                   ]),
                   border: Border.all(color: ENetColors.cyan.withValues(alpha: .28)),
                   boxShadow: [BoxShadow(color: ENetColors.blue.withValues(alpha: .20), blurRadius: 20)],
@@ -232,9 +265,9 @@ class _ENetShellState extends State<ENetShell> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Colors.white.withValues(alpha: .18), Colors.white.withValues(alpha: .08)],
+                      colors: [ENetColors.mint.withValues(alpha: .23), ENetColors.mint.withValues(alpha: .07)],
                     ),
-                    border: Border.all(color: Colors.white.withValues(alpha: .14)),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .22)),
                   ),
                 ),
               ),
@@ -279,7 +312,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Контент ─────────────────────────
 
   Widget _content(bool compact) {
-    final pad = compact ? 20.0 : 36.0;
+    final pad = compact ? 18.0 : 38.0;
     return Column(children: [
       Padding(
         padding: EdgeInsets.fromLTRB(pad, compact ? 12 : 20, pad, 0),
@@ -289,7 +322,7 @@ class _ENetShellState extends State<ENetShell> {
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(pad, 20, pad, compact ? 130 : 48),
           child: LayoutBuilder(builder: (context, constraints) {
-            final width = math.min(constraints.maxWidth, 940.0);
+            final width = math.min(constraints.maxWidth, 1050.0);
             return Align(
               alignment: Alignment.topCenter,
               child: SizedBox(
@@ -316,7 +349,14 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _topBar(bool compact) {
     return Row(children: [
-      if (compact) const BrandLogo(size: 36),
+      if (compact) const BrandLogo(size: 36)
+      else const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('eNet / WORKSPACE', style: TextStyle(
+          color: ENetColors.text, fontWeight: FontWeight.w800, fontSize: 12.5)),
+        SizedBox(height: 3),
+        Text('Единое пространство', style: TextStyle(
+          color: ENetColors.faint, fontSize: 11)),
+      ]),
       const Spacer(),
       const _DemoBadge(),
       if (compact) ...[
@@ -353,7 +393,7 @@ class _ENetShellState extends State<ENetShell> {
             shaderCallback: (rect) => const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.white, Color(0xFFB4F1FF)],
+              colors: [Colors.white, Color(0xFFB4F8D7)],
             ).createShader(rect),
             child: Text(
               '${_greeting()},\n${user.name}',
@@ -362,9 +402,14 @@ class _ENetShellState extends State<ENetShell> {
           ),
         ]),
       ),
-      const SizedBox(height: 28),
+      const SizedBox(height: 8),
+      const Text('Все твои инструменты в одном пространстве.',
+          style: TextStyle(color: ENetColors.muted, fontSize: 14.5)),
+      const SizedBox(height: 26),
       Reveal(delay: const Duration(milliseconds: 120), child: _hero(compact)),
-      const SizedBox(height: 36),
+      const SizedBox(height: 28),
+      DashboardStatus(auth: widget.auth, openAccount: () => go(2), openSettings: () => go(3)),
+      const SizedBox(height: 34),
       ServiceCatalogPanel(auth: widget.auth),
       const SizedBox(height: 30),
       const Reveal(delay: Duration(milliseconds: 200), child: Text('ПРОСТРАНСТВО', style: _eyebrow)),
@@ -415,40 +460,62 @@ class _ENetShellState extends State<ENetShell> {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(30),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF0F4170), Color(0xFF1A2A72), Color(0xFF0A1431)],
+          colors: [Color(0xFF174B37), Color(0xFF102B23), Color(0xFF081713)],
+          stops: [0, .52, 1],
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: .14)),
-        boxShadow: [BoxShadow(color: ENetColors.blue.withValues(alpha: .28), blurRadius: 60, offset: const Offset(0, 24))],
+        border: Border.all(color: ENetColors.mint.withValues(alpha: .30)),
+        boxShadow: [
+          BoxShadow(color: ENetColors.mint.withValues(alpha: .10),
+            blurRadius: 54, offset: const Offset(0, 18)),
+        ],
       ),
       child: Stack(children: [
         const Positioned.fill(child: _HeroOrbits()),
         Padding(
-          padding: EdgeInsets.all(compact ? 26 : 42),
+          padding: EdgeInsets.all(compact ? 26 : 40),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 500),
+            constraints: const BoxConstraints(maxWidth: 540),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .10),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: .14)),
+                  color: ENetColors.mint.withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: ENetColors.mint.withValues(alpha: .27)),
                 ),
-                child: const Text('ДОБРО ПОЖАЛОВАТЬ В ENET',
-                    style: TextStyle(color: ENetColors.cyan, fontSize: 10.5, letterSpacing: 1.6, fontWeight: FontWeight.w800)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 14),
+                  SizedBox(width: 6),
+                  Text('ENET • DEVELOPER PLATFORM',
+                    style: TextStyle(color: ENetColors.cyan, fontSize: 10,
+                      letterSpacing: 1.4, fontWeight: FontWeight.w800)),
+                ]),
               ),
-              const SizedBox(height: 22),
-              Text('Твои сервисы в одном пространстве.',
-                  style: TextStyle(color: ENetColors.text, fontSize: compact ? 28 : 36, fontWeight: FontWeight.w800, letterSpacing: -1.2, height: 1.1)),
+              const SizedBox(height: 25),
+              Text('Одна платформа.\\nВсе твои сервисы.',
+                style: TextStyle(color: ENetColors.text,
+                  fontSize: compact ? 29 : 39, fontWeight: FontWeight.w800,
+                  letterSpacing: -1.3, height: 1.12)),
               const SizedBox(height: 12),
-              const Text('eNet ID и приложения нашей экосистемы. Начни с Продайзера.',
-                  style: TextStyle(color: Color(0xFFC7DDF2), fontSize: 15.5, height: 1.55)),
-              const SizedBox(height: 28),
-              PrimaryButton(label: 'Мой профиль', icon: Icons.arrow_forward_rounded, expand: false, onPressed: () => go(2)),
+              const Text('eNet ID, рабочие инструменты и приложения.\\nБыстрый доступ без лишних переходов.',
+                style: TextStyle(color: Color(0xFFB5DBCA), fontSize: 14.5, height: 1.6)),
+              const SizedBox(height: 25),
+              Wrap(spacing: 9, runSpacing: 9, children: const [
+                _HeroTag(icon: Icons.verified_user_outlined, label: 'eNet ID'),
+                _HeroTag(icon: Icons.extension_outlined, label: 'Сервисы'),
+                _HeroTag(icon: Icons.security_outlined, label: 'Безопасность'),
+              ]),
+              const SizedBox(height: 26),
+              PrimaryButton(
+                label: 'Управление аккаунтом',
+                icon: Icons.arrow_forward_rounded,
+                expand: false,
+                onPressed: () => go(2),
+              ),
             ]),
           ),
         ),
@@ -578,8 +645,8 @@ class _ENetShellState extends State<ENetShell> {
               gradient: ENetColors.violetGradient,
               title: 'Динамический фон',
               subtitle: 'Анимированное свечение и орбиты',
-              trailing: GlassToggle(value: effects, onChanged: (v) => setState(() => effects = v)),
-              onTap: () => setState(() => effects = !effects),
+              trailing: GlassToggle(value: effects, onChanged: _setEffects),
+              onTap: () => _setEffects(!effects),
             ),
           ],
         ),
@@ -595,7 +662,7 @@ class _ENetShellState extends State<ENetShell> {
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.4.0 (4)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.5.0 (5)'),
           ],
         ),
       ),
@@ -604,6 +671,28 @@ class _ENetShellState extends State<ENetShell> {
 }
 
 // ═════════════════════════ Вспомогательные виджеты ═════════════════════════
+
+class _HeroTag extends StatelessWidget {
+  const _HeroTag({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+    decoration: BoxDecoration(
+      color: const Color(0xFF0A1F17).withValues(alpha: .62),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: ENetColors.mint.withValues(alpha: .18)),
+    ),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(icon, color: ENetColors.cyan, size: 15),
+      const SizedBox(width: 7),
+      Text(label, style: const TextStyle(color: ENetColors.text,
+        fontSize: 11.5, fontWeight: FontWeight.w600)),
+    ]),
+  );
+}
 
 class _TintedIcon extends StatelessWidget {
   const _TintedIcon(this.icon, {required this.selected, required this.size});
