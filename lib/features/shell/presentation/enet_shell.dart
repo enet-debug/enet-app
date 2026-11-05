@@ -17,6 +17,7 @@ import 'device_sessions_panel.dart';
 import 'profile_edit_button.dart';
 import '../../auth/presentation/api_connection_panel.dart';
 import 'dashboard_status.dart';
+import 'notifications_panel.dart';
 
 class _Dest {
   const _Dest(this.icon, this.activeIcon, this.label);
@@ -431,8 +432,15 @@ class _ENetShellState extends State<ENetShell> {
             body: 'Управление оформлением и параметрами.',
             onTap: () => go(3),
           ),
+          _FeatureTile(
+            icon: Icons.notifications_active_outlined,
+            gradient: ENetColors.amberGradient,
+            heading: 'Уведомления',
+            body: 'История входов и сообщения аккаунта.',
+            onTap: () => go(1),
+          ),
         ];
-        final delays = [260, 340];
+        final delays = [220, 280, 340];
         if (constraints.maxWidth < 700) {
           return Column(children: [
             for (var i = 0; i < tiles.length; i++)
@@ -528,47 +536,10 @@ class _ENetShellState extends State<ENetShell> {
 
   // ───────────────────────── Уведомления ─────────────────────────
 
-  Widget _notifications() {
-    return Column(key: const ValueKey('notifications'), crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Reveal(child: _PageTitle('Уведомления', 'Всё важное от eNet — в одном месте.')),
-      const SizedBox(height: 28),
-      Reveal(
-        delay: const Duration(milliseconds: 120),
-        child: Glass(
-          radius: 30,
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 56),
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(children: [
-              Floating(
-                child: Container(
-                  width: 88,
-                  height: 88,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    gradient: ENetColors.accent,
-                    boxShadow: [BoxShadow(color: ENetColors.blue.withValues(alpha: .5), blurRadius: 40, offset: const Offset(0, 14))],
-                  ),
-                  child: const Icon(Icons.notifications_none_rounded, size: 44, color: ENetColors.onAccent),
-                ),
-              ),
-              const SizedBox(height: 30),
-              const Text('Пока тихо', style: TextStyle(color: ENetColors.text, fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -.4)),
-              const SizedBox(height: 10),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Text(
-                  'Здесь появятся сообщения от eNet, когда мы подключим настоящие сервисы. Сейчас уведомлений нет.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: ENetColors.muted, fontSize: 15, height: 1.6),
-                ),
-              ),
-            ]),
-          ),
-        ),
-      ),
-    ]);
-  }
+  Widget _notifications() => NotificationsPanel(
+    key: const ValueKey('notifications'),
+    auth: widget.auth,
+  );
 
   // ───────────────────────── Профиль ─────────────────────────
 
@@ -667,7 +638,7 @@ class _ENetShellState extends State<ENetShell> {
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.6.0 (6)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.7.0 (7)'),
           ],
         ),
       ),
