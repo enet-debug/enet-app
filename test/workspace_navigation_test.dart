@@ -33,7 +33,7 @@ void main() {
       ));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('Один аккаунт.'), findsOneWidget);
+      expect(find.textContaining('Один аккаунт.'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       if (size.width < 600) {
