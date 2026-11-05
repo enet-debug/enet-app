@@ -138,7 +138,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(children: [
-          const Expanded(child: Text('Сервисы eNet', style: TextStyle(
+          const Expanded(child: Text('Мои сервисы', style: TextStyle(
             color: ENetColors.text,
             fontSize: 24,
             fontWeight: FontWeight.w800,
