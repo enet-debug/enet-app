@@ -632,13 +632,13 @@ class _ENetShellState extends State<ENetShell> {
     final rail = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SizedBox(height: 102, child: _accountSummaryCard()),
+        ConstrainedBox(constraints: const BoxConstraints(minHeight: 102), child: _accountSummaryCard()),
         const SizedBox(height: 12),
-        SizedBox(height: 140, child: _balancePreviewCard()),
+        ConstrainedBox(constraints: const BoxConstraints(minHeight: 140), child: _balancePreviewCard()),
         const SizedBox(height: 12),
         DashboardStatus(auth: widget.auth),
         const SizedBox(height: 12),
-        SizedBox(height: 213, child: _quickActionsCard()),
+        ConstrainedBox(constraints: const BoxConstraints(minHeight: 213), child: _quickActionsCard()),
         Align(alignment: Alignment.centerRight,
           child: TextButton.icon(
             onPressed: () => go(5),
