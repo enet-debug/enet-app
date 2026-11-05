@@ -6,6 +6,18 @@ class AuthController extends ChangeNotifier {
   final AuthRepository _repository;
   AuthUser? user;
   bool busy = false;
+  bool initializing = true;
+
+  Future<void> restoreSession() async {
+    try {
+      user = await _repository.restoreSession();
+    } catch (_) {
+      user = null;
+    } finally {
+      initializing = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> _execute(Future<void> Function() action) async {
     if (busy) return;
