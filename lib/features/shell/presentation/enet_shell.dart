@@ -602,7 +602,7 @@ class _ENetShellState extends State<ENetShell> {
             ],
           ),
           const SizedBox(height: 24),
-          _featureHighlights(constraints.maxWidth),
+          _featureHighlights(),
         ],
       );
     }
@@ -626,7 +626,7 @@ class _ENetShellState extends State<ENetShell> {
         const SizedBox(height: 12),
         _quickActionsCard(),
         const SizedBox(height: 22),
-        _featureHighlights(constraints.maxWidth),
+        _featureHighlights(),
       ],
     );
   });
@@ -689,7 +689,7 @@ class _ENetShellState extends State<ENetShell> {
     );
   }
 
-  Widget _featureHighlights(double availableWidth) => Column(
+  Widget _featureHighlights() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       const Padding(
