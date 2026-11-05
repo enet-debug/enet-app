@@ -112,8 +112,10 @@ class _ApiConnectionPanelState extends State<ApiConnectionPanel> {
       });
       await _load();
     } catch (error) {
-      if (mounted) setState(() => _message = error.toString()
-        .replaceFirst('FormatException: ', '').replaceFirst('Exception: ', ''));
+      if (mounted) {
+        setState(() => _message = error.toString()
+          .replaceFirst('FormatException: ', '').replaceFirst('Exception: ', ''));
+      }
     }
   }
 
