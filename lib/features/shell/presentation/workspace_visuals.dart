@@ -225,3 +225,103 @@ class _DashboardSessionsSnapshotState extends State<DashboardSessionsSnapshot> {
     ]),
   );
 }
+
+class MobileWelcomeScene extends StatelessWidget {
+  const MobileWelcomeScene({super.key, required this.name, required this.onOpenProfile});
+  final String name;
+  final VoidCallback onOpenProfile;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: onOpenProfile,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        height: 177,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: ENetColors.cyan.withValues(alpha: .23)),
+        ),
+        child: Stack(fit: StackFit.expand, children: [
+          const CustomPaint(painter: _MobileMountainPainter()),
+          const Positioned(
+            top: 8, left: 0, right: 0,
+            child: Center(child: Icon(Icons.auto_awesome_rounded,
+              color: ENetColors.cyan, size: 21)),
+          ),
+          Positioned(
+            left: 18, right: 55, bottom: 17,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Добро пожаловать,', style: TextStyle(
+                  color: ENetColors.text,
+                  fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: ENetColors.text,
+                    fontSize: 23, fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+          const Positioned(
+            right: 16, bottom: 20,
+            child: Icon(Icons.arrow_forward_ios_rounded,
+              color: ENetColors.cyan, size: 16),
+          ),
+        ]),
+      ),
+    ),
+  );
+}
+
+class _MobileMountainPainter extends CustomPainter {
+  const _MobileMountainPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bounds = Offset.zero & size;
+    final w = size.width, h = size.height;
+    canvas.drawRect(bounds, Paint()..shader = const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFF071B23),
+        Color(0xFF154951),
+        Color(0xFF092522),
+        Color(0xFF03110F),
+      ],
+    ).createShader(bounds));
+    final glow = Offset(w * .53, h * .35);
+    canvas.drawCircle(glow, w * .45,
+      Paint()..shader = RadialGradient(colors: [
+        ENetColors.cyan.withValues(alpha: .3),
+        Colors.transparent,
+      ]).createShader(Rect.fromCircle(center: glow, radius: w * .45)));
+
+    for (final (phase, peak, base, color) in <(double,double,double,Color)>[
+      (.2,.18,.62,Color(0xFF2D7377)),
+      (1.6,.15,.72,Color(0xFF1B4E51)),
+      (3.0,.10,.84,Color(0xFF0C2E30)),
+      (2.2,.06,.93,Color(0xFF071B1C)),
+    ]) {
+      final ridge = Path()..moveTo(0,h)..lineTo(0,h*base);
+      for (var i=0; i<=36; i++) {
+        final t=i/36.0;
+        final undulation=math.sin(t*math.pi*4.5+phase)*h*peak;
+        final peaks=math.pow(math.sin(t*math.pi*7.5+phase),5).toDouble()*h*peak*.4;
+        ridge.lineTo(w*t,h*base-undulation-peaks);
+      }
+      ridge..lineTo(w,h)..close();
+      canvas.drawPath(ridge,Paint()..color=color);
+    }
+    canvas.drawRect(bounds,Paint()..shader=const LinearGradient(
+      begin: Alignment.topCenter,end:Alignment.bottomCenter,
+      colors:[Color(0x00031212),Color(0xC4031212)],
+    ).createShader(bounds));
+  }
+
+  @override
+  bool shouldRepaint(covariant _MobileMountainPainter oldDelegate)=>false;
+}
