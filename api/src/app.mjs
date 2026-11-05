@@ -160,6 +160,7 @@ export function createApp(options = {}) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Vary', 'Origin');
       res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-eNet-Client');
+      res.setHeader('Access-Control-Expose-Headers', 'X-Request-Id, Retry-After');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     }
     if (req.method === 'OPTIONS') {
