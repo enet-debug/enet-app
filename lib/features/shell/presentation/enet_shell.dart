@@ -723,9 +723,9 @@ class _ENetShellState extends State<ENetShell> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(17),
             gradient: const LinearGradient(colors: [
-              Color(0xFF0B4C40), Color(0xFF06241F)]),
+              Color(0xFF123A38), Color(0xFF071D20)]),
             border: Border.all(color: ENetColors.mint.withValues(
-              alpha: hovered ? .76 : .40)),
+              alpha: hovered ? .63 : .24)),
           ),
           child: Row(children: [
             Container(width: 50, height: 50,
@@ -875,7 +875,67 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная карточка ─────────────────────────
 
   Widget _hero(bool compact) {
-    final height = compact ? 104.0 : 132.0;
+    // Mobile follows the reference's quiet ID card. The luminous ribbon and
+    // tilted eNet mark belong only to the wide desktop hero.
+    if (compact) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => go(3),
+          borderRadius: BorderRadius.circular(19),
+          child: Container(
+            key: const ValueKey('workspace-hero'),
+            width: double.infinity,
+            height: 104,
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(19),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft, end: Alignment.bottomRight,
+                colors: [Color(0xFF0B423A), Color(0xFF072A2A), Color(0xFF051B1B)],
+              ),
+              border: Border.all(color: ENetColors.mint.withValues(alpha: .39)),
+              boxShadow: [
+                BoxShadow(color: ENetColors.mint.withValues(alpha: .12),
+                  blurRadius: 20, offset: const Offset(0, 5)),
+              ],
+            ),
+            child: Row(children: [
+              Container(
+                width: 58, height: 58,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft, end: Alignment.bottomRight,
+                    colors: [Color(0xFF04A884), Color(0xFF076251)],
+                  ),
+                  border: Border.all(
+                    color: ENetColors.cyan.withValues(alpha: .25)),
+                ),
+                child: const Icon(Icons.fingerprint_rounded,
+                  color: ENetColors.cyan, size: 35),
+              ),
+              const SizedBox(width: 13),
+              const Expanded(child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('eNet ID', style: TextStyle(
+                    color: ENetColors.text, fontSize: 19,
+                    fontWeight: FontWeight.w800)),
+                  SizedBox(height: 4),
+                  Text('Единый аккаунт eNet', style: TextStyle(
+                    color: ENetColors.muted, fontSize: 11.5)),
+                ],
+              )),
+              const Icon(Icons.chevron_right_rounded,
+                color: ENetColors.cyan, size: 22),
+            ]),
+          ),
+        ),
+      );
+    }
+    const height = 162.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1248,18 +1308,24 @@ class _HomeShortcut extends StatelessWidget {
         onTap: data.onTap, pressedScale: .97, haptic: false,
         builder: (context, hovered) => AnimatedContainer(
           duration: ENetMotion.quick,
-          height: compact ? 75 : 85,
+          height: compact ? 85 : 105,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             gradient: LinearGradient(
               begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: [
-                data.color.withValues(alpha: hovered ? .40 : .23),
-                const Color(0xFF051B1B),
-              ],
+              colors: compact
+                ? [
+                    const Color(0xFF122C2F),
+                    hovered ? const Color(0xFF0C403C) : const Color(0xFF071B1D),
+                  ]
+                : [
+                    data.color.withValues(alpha: hovered ? .47 : .32),
+                    const Color(0xFF051B1B),
+                  ],
             ),
-            border: Border.all(color:
-              data.color.withValues(alpha: hovered ? .65 : .30)),
+            border: Border.all(color: compact
+              ? ENetColors.cyan.withValues(alpha: hovered ? .58 : .25)
+              : data.color.withValues(alpha: hovered ? .68 : .4)),
             boxShadow: [BoxShadow(
               color: data.color.withValues(alpha: .09),
               blurRadius: 12, offset: const Offset(0, 3),
@@ -1267,12 +1333,14 @@ class _HomeShortcut extends StatelessWidget {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(data.icon, color: data.color, size: compact ? 23 : 28),
+            Icon(data.icon,
+              color: compact ? const Color(0xFFCBFFF1) : data.color,
+              size: compact ? 26 : 33),
             const SizedBox(height: 7),
             Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(color: ENetColors.text,
-                fontSize: compact ? 8.5 : 10.5,
+                fontSize: compact ? 9.5 : 12,
                 fontWeight: FontWeight.w800)),
           ]),
         ),
