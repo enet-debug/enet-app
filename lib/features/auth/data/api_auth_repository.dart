@@ -54,8 +54,9 @@ class ApiAuthRepository implements AuthRepository {
   Future<void> configureApiEndpoint(String endpoint) async {
     final normalized = normalizeApiEndpoint(endpoint);
     if (normalized == _apiUrl) return;
+    // Revoke the old server session before switching origins when it is reachable.
+    await signOut();
     await _storage.write(key: _apiUrlKey, value: normalized);
-    await _storage.delete(key: _sessionKey);
     _apiUrl = normalized;
   }
 
