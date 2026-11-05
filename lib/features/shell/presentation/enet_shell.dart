@@ -476,7 +476,7 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
     final split = !compact && constraints.maxWidth >= 1000;
-    final main = Column(
+    final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('${_greeting()}, ${user.name}',
@@ -495,11 +495,9 @@ class _ENetShellState extends State<ENetShell> {
         )),
         const SizedBox(height: 20),
         _hero(compact),
-        const SizedBox(height: 28),
-        ServiceCatalogPanel(auth: widget.auth),
       ],
     );
-    final rail = Column(
+    final accountStatus = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _accountSummaryCard(),
@@ -509,20 +507,41 @@ class _ENetShellState extends State<ENetShell> {
           openAccount: () => go(3),
           openSettings: () => go(4),
         ),
-        const SizedBox(height: 16),
-        _quickActionsCard(),
       ],
     );
+    final catalog = ServiceCatalogPanel(auth: widget.auth);
+    final quickActions = _quickActionsCard();
+
     if (split) {
       return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Expanded(child: main),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            intro,
+            const SizedBox(height: 28),
+            catalog,
+          ],
+        )),
         const SizedBox(width: 20),
-        SizedBox(width: 292, child: rail),
+        SizedBox(width: 292, child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [accountStatus, const SizedBox(height: 16), quickActions],
+        )),
       ]);
     }
+
+    // On phones, put the account and connection status before the service list.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [main, const SizedBox(height: 22), rail],
+      children: [
+        intro,
+        const SizedBox(height: 22),
+        accountStatus,
+        const SizedBox(height: 24),
+        catalog,
+        const SizedBox(height: 16),
+        quickActions,
+      ],
     );
   });
 
@@ -556,15 +575,14 @@ class _ENetShellState extends State<ENetShell> {
           const Icon(Icons.fingerprint_rounded, color: ENetColors.cyan, size: 19),
           const SizedBox(width: 8),
           const Expanded(child: Text('eNet ID аккаунта',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(color: ENetColors.muted, fontSize: 12))),
-          TextButton(
+          IconButton(
+            tooltip: 'Скопировать eNet ID',
             onPressed: _copyEnetId,
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text('Копировать', style: TextStyle(fontSize: 11)),
+            visualDensity: VisualDensity.compact,
+            icon: const Icon(Icons.copy_rounded, color: ENetColors.cyan, size: 18),
           ),
         ]),
       ]),
