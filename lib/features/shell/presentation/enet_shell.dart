@@ -668,6 +668,8 @@ class _ENetShellState extends State<ENetShell> {
       );
     }
 
+    // The phone reference has a focused landing view; the complete catalog
+    // lives under "Сервисы" instead of pushing the quick-access card away.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -675,22 +677,7 @@ class _ENetShellState extends State<ENetShell> {
         const SizedBox(height: 17),
         shortcuts,
         const SizedBox(height: 17),
-        if (compact) ...[
-          _mobileQuickAccess(),
-          const SizedBox(height: 18),
-        ],
-        catalog,
-        const SizedBox(height: 16),
-        _accountSummaryCard(),
-        const SizedBox(height: 12),
-        DashboardStatus(auth: widget.auth),
-        const SizedBox(height: 12),
-        DashboardSessionsSnapshot(
-          auth: widget.auth,
-          onManage: () => go(5),
-        ),
-        const SizedBox(height: 12),
-        _quickActionsCard(),
+        _mobileQuickAccess(),
       ],
     );
   });

@@ -171,7 +171,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
       await tester.pump(const Duration(milliseconds: 800));
 
-      expect(find.text('Мои сервисы'), findsOneWidget);
+      if (size.width < 600) {
+        expect(find.text('Быстрый доступ'), findsOneWidget);
+        expect(find.text('Мои сервисы'), findsNothing);
+      } else {
+        expect(find.text('Мои сервисы'), findsOneWidget);
+      }
       expect(find.text('Продайзер'), findsWidgets);
       final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
       if (size.width > 600) {
