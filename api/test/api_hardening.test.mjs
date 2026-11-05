@@ -32,6 +32,7 @@ test('API exposes readiness and security response headers', async () => {
     });
     assert.equal(preflight.status, 204);
     assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://client.example.org');
+    assert.equal(preflight.headers.get('access-control-expose-headers'), 'X-Request-Id, Retry-After');
   } finally {
     await close();
     rmSync(directory, { recursive: true, force: true });
