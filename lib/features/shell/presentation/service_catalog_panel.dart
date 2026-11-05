@@ -11,10 +11,12 @@ class ServiceCatalogPanel extends StatefulWidget {
     super.key,
     required this.auth,
     this.compact = false,
+    this.dashboard = false,
     this.onSeeAll,
   });
   final AuthController auth;
   final bool compact;
+  final bool dashboard;
   final VoidCallback? onSeeAll;
 
   @override
@@ -119,6 +121,179 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  Widget _buildDashboard(List<EcosystemService> matches) {
+    final query = _query.trim().toLowerCase();
+    final hasCloud = matches.any((service) =>
+      service.id.toLowerCase().contains('cloud') ||
+      service.name.toLowerCase().contains('cloud'));
+    final hasAi = matches.any((service) =>
+      service.id.toLowerCase().contains('ai') ||
+      service.name.toLowerCase().contains('ai'));
+    final showCloud = !hasCloud &&
+      (query.isEmpty || 'enet cloud'.contains(query) || 'облачное хранилище'.contains(query));
+    final showAi = !hasAi &&
+      (query.isEmpty || 'enet ai'.contains(query) || 'генерация контента'.contains(query));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(children: [
+          const Expanded(child: Text('Сервисы eNet', style: TextStyle(
+            color: ENetColors.text,
+            fontSize: 21,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -.55,
+          ))),
+          if (widget.onSeeAll != null)
+            TextButton(
+              onPressed: widget.onSeeAll,
+              style: TextButton.styleFrom(
+                foregroundColor: ENetColors.cyan,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                visualDensity: VisualDensity.compact,
+              ),
+              child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                Text('Все сервисы', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                Icon(Icons.chevron_right_rounded, size: 17),
+              ]),
+            ),
+        ]),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 43,
+          child: TextField(
+            key: const ValueKey('dashboard-service-search'),
+            controller: _search,
+            onChanged: (value) => setState(() => _query = value),
+            style: const TextStyle(color: ENetColors.text, fontSize: 12.5),
+            decoration: InputDecoration(
+              hintText: 'Поиск сервисов...',
+              hintStyle: const TextStyle(color: ENetColors.muted, fontSize: 12),
+              prefixIcon: const Icon(Icons.search_rounded, size: 19, color: ENetColors.muted),
+              suffixIcon: _query.isEmpty ? null : IconButton(
+                tooltip: 'Очистить поиск',
+                visualDensity: VisualDensity.compact,
+                onPressed: () {
+                  _search.clear();
+                  setState(() => _query = '');
+                },
+                icon: const Icon(Icons.close_rounded, size: 17),
+              ),
+              filled: true,
+              fillColor: const Color(0xFF061C1A).withValues(alpha: .92),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 13),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(13),
+                borderSide: BorderSide(color: ENetColors.mint.withValues(alpha: .18)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(13),
+                borderSide: BorderSide(color: ENetColors.mint.withValues(alpha: .16)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(13),
+                borderSide: const BorderSide(color: ENetColors.cyan, width: 1.1),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 11),
+        if (_loading && _services.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: LinearProgressIndicator(minHeight: 2),
+          )
+        else if (_error != null && _services.isEmpty)
+          Glass(
+            radius: 16,
+            padding: const EdgeInsets.all(14),
+            child: Row(children: [
+              const Icon(Icons.cloud_off_rounded, color: ENetColors.danger, size: 19),
+              const SizedBox(width: 9),
+              Expanded(child: Text('Не удалось загрузить каталог: $_error',
+                style: const TextStyle(color: ENetColors.muted, fontSize: 11))),
+              IconButton(onPressed: _load,
+                icon: const Icon(Icons.refresh_rounded, color: ENetColors.cyan)),
+            ]),
+          )
+        else ...[
+          for (final service in matches) ...[
+            _DashboardServiceTile(
+              title: service.name,
+              description: service.description,
+              icon: _dashboardIcon(service),
+              color: _dashboardColor(service),
+              active: true,
+              popular: service.name.toLowerCase().contains('продайзер') ||
+                service.id.toLowerCase().contains('prodayzer'),
+              favorite: _favoriteIds.contains(service.id),
+              onOpen: () => _open(service.url),
+              onFavorite: _savingFavorite ? null : () => _toggleFavorite(service),
+            ),
+            const SizedBox(height: 9),
+          ],
+          if (showCloud) ...[
+            const _DashboardServiceTile(
+              title: 'eNet Cloud',
+              description: 'Облачное хранилище для файлов и проектов',
+              icon: Icons.cloud_outlined,
+              color: Color(0xFF42C8F5),
+              active: false,
+            ),
+            const SizedBox(height: 9),
+          ],
+          if (showAi) ...[
+            const _DashboardServiceTile(
+              title: 'eNet AI',
+              description: 'Инструменты искусственного интеллекта',
+              icon: Icons.auto_awesome_rounded,
+              color: Color(0xFFB58BFF),
+              active: false,
+            ),
+          ],
+          if (matches.isEmpty && !showCloud && !showAi)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text('По запросу сервисы не найдены.',
+                style: TextStyle(color: ENetColors.muted, fontSize: 11.5)),
+            ),
+        ],
+        if (_error != null && _services.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 6),
+            child: Text('Показаны последние загруженные данные.',
+              style: TextStyle(color: ENetColors.danger, fontSize: 10.5)),
+          ),
+      ],
+    );
+  }
+
+  IconData _dashboardIcon(EcosystemService service) {
+    final id = service.id.toLowerCase();
+    final name = service.name.toLowerCase();
+    if (id.contains('prodayzer') || name.contains('продайзер')) {
+      return Icons.shopping_bag_outlined;
+    }
+    if (id.contains('cloud') || name.contains('cloud')) return Icons.cloud_outlined;
+    if (id.contains('ai') || name.contains('ai')) return Icons.auto_awesome_rounded;
+    return Icons.apps_rounded;
+  }
+
+  Color _dashboardColor(EcosystemService service) {
+    final id = service.id.toLowerCase();
+    final name = service.name.toLowerCase();
+    if (id.contains('prodayzer') || name.contains('продайзер')) {
+      return const Color(0xFFB58BFF);
+    }
+    if (id.contains('cloud') || name.contains('cloud')) {
+      return const Color(0xFF42C8F5);
+    }
+    if (id.contains('ai') || name.contains('ai')) {
+      return const Color(0xFFB58BFF);
+    }
+    return ENetColors.cyan;
+  }
+
   Widget _buildCompact(List<EcosystemService> matches) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
@@ -210,6 +385,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
   @override
   Widget build(BuildContext context) {
     final matches = _matches;
+    if (widget.dashboard) return _buildDashboard(matches);
     if (widget.compact) return _buildCompact(matches);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
@@ -511,4 +687,126 @@ class _ServiceCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DashboardServiceTile extends StatelessWidget {
+  const _DashboardServiceTile({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+    required this.active,
+    this.popular = false,
+    this.favorite = false,
+    this.onOpen,
+    this.onFavorite,
+  });
+
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+  final bool active;
+  final bool popular;
+  final bool favorite;
+  final VoidCallback? onOpen;
+  final VoidCallback? onFavorite;
+
+  @override
+  Widget build(BuildContext context) => Glass(
+    radius: 16,
+    blur: 11,
+    shadow: false,
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    tint: color,
+    child: Row(children: [
+      Container(
+        width: 58,
+        height: 58,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [color.withValues(alpha: .95), color.withValues(alpha: .48)],
+          ),
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: .18), blurRadius: 16, offset: const Offset(0, 5)),
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 29),
+      ),
+      const SizedBox(width: 13),
+      Expanded(child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(children: [
+            Flexible(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: ENetColors.text,
+                fontSize: 14, fontWeight: FontWeight.w800))),
+            if (popular) ...[
+              const SizedBox(width: 7),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF9A6B23).withValues(alpha: .25),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFFFC85B).withValues(alpha: .22)),
+                ),
+                child: const Text('Популярный', style: TextStyle(
+                  color: Color(0xFFFFD06D), fontSize: 9, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ]),
+          const SizedBox(height: 4),
+          Text(description, maxLines: 2, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: ENetColors.muted, fontSize: 10.5, height: 1.3)),
+        ],
+      )),
+      const SizedBox(width: 8),
+      if (active)
+        FilledButton(
+          onPressed: onOpen,
+          style: FilledButton.styleFrom(
+            backgroundColor: ENetColors.mint,
+            foregroundColor: ENetColors.onAccent,
+            minimumSize: const Size(88, 36),
+            padding: const EdgeInsets.symmetric(horizontal: 11),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+          ),
+          child: const Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.open_in_new_rounded, size: 14),
+            SizedBox(width: 5),
+            Text('Открыть'),
+          ]),
+        )
+      else
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .06),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white.withValues(alpha: .07)),
+          ),
+          child: const Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.schedule_rounded, size: 13, color: ENetColors.muted),
+            SizedBox(width: 5),
+            Text('Скоро', style: TextStyle(color: ENetColors.text,
+              fontSize: 10.5, fontWeight: FontWeight.w700)),
+          ]),
+        ),
+      if (active) ...[
+        const SizedBox(width: 4),
+        IconButton(
+          tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
+          visualDensity: VisualDensity.compact,
+          onPressed: onFavorite,
+          icon: Icon(favorite ? Icons.star_rounded : Icons.star_border_rounded,
+            color: favorite ? const Color(0xFFFFC85B) : ENetColors.muted, size: 20),
+        ),
+      ],
+    ]),
+  );
 }
