@@ -33,7 +33,12 @@ void main() {
       ));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(find.text('Добро пожаловать в eNet'), findsOneWidget);
+      expect(
+        find.text(size.width < 600
+            ? 'Единый аккаунт eNet'
+            : 'Добро пожаловать в eNet'),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
 
       if (size.width < 600) {
