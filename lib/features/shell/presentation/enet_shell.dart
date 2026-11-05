@@ -544,17 +544,30 @@ class _ENetShellState extends State<ENetShell> {
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          compact ? 'Добро пожаловать, ${user.name}' : 'Добро пожаловать в eNet',
-          maxLines: compact ? 2 : 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: ENetColors.text,
-            fontSize: compact ? 25 : 35,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -1,
-          ),
-        ),
+        compact
+          ? Text('Добро пожаловать, ${user.name}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: ENetColors.text,
+                fontSize: 25,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1,
+              ))
+          : RichText(
+              text: const TextSpan(
+                style: TextStyle(
+                  color: ENetColors.text,
+                  fontSize: 35,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1,
+                ),
+                children: [
+                  TextSpan(text: 'Добро пожаловать в '),
+                  TextSpan(text: 'eNet', style: TextStyle(color: ENetColors.mint)),
+                ],
+              ),
+            ),
         const SizedBox(height: 6),
         Text(
           'Единая платформа для ваших цифровых сервисов',
