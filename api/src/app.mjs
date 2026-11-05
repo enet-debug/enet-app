@@ -554,9 +554,9 @@ export function createApp(options = {}) {
         const description = typeof body.description === 'string' ? body.description.trim() : '';
         const dueAt = body.due_at == null || body.due_at === '' ? null : body.due_at;
         if (title.length < 1 || title.length > 120 ||
-            /[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]/.test(title) ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(title) ||
             description.length > 1000 ||
-            /[\\x00-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]/.test(description) ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(description) ||
             (dueAt !== null && (typeof dueAt !== 'string' || dueAt.length > 40 ||
               Number.isNaN(Date.parse(dueAt))))) {
           return error(res, 400, 'invalid_task', 'Проверьте название, описание и срок задачи.');
@@ -579,7 +579,10 @@ export function createApp(options = {}) {
         const dueAt = body.due_at == null || body.due_at === '' ? null : body.due_at;
         if (typeof id !== 'string' ||
             !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) ||
-            title.length < 1 || title.length > 120 || description.length > 1000 ||
+            title.length < 1 || title.length > 120 ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(title) ||
+            description.length > 1000 ||
+            /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(description) ||
             (dueAt !== null && (typeof dueAt !== 'string' || dueAt.length > 40 ||
               Number.isNaN(Date.parse(dueAt))))) {
           return error(res, 400, 'invalid_task', 'Некорректные данные задачи.');
