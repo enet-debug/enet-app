@@ -120,7 +120,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
         SizedBox(width: 7),
         Expanded(child: Text('База данных', style: TextStyle(
           color: ENetColors.muted, fontSize: 10.5))),
-        Text('Нет отдельной проверки', style: TextStyle(
+        Text('Не проверено', style: TextStyle(
           color: ENetColors.faint, fontSize: 9.5)),
       ]),
       const SizedBox(height: 8),
