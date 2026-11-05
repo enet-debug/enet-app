@@ -480,7 +480,7 @@ class _ENetShellState extends State<ENetShell> {
         ),
       Expanded(
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 20, pad, 24),
+          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 30, pad, 24),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1260.0);
             return Align(
@@ -609,13 +609,13 @@ class _ENetShellState extends State<ENetShell> {
           MobileWelcomeScene(name: user.name, onOpenProfile: () => go(3))
         else ...[
           const Text('Добро пожаловать в eNet',
-            style: TextStyle(color: ENetColors.text, fontSize: 26,
+            style: TextStyle(color: ENetColors.text, fontSize: 31,
               fontWeight: FontWeight.w800, letterSpacing: -.8)),
           const SizedBox(height: 4),
           const Text('Ваша единая платформа для работы, автоматизации и ИИ',
-            style: TextStyle(color: ENetColors.muted, fontSize: 12)),
+            style: TextStyle(color: ENetColors.muted, fontSize: 13)),
         ],
-        SizedBox(height: compact ? 10 : 23),
+        SizedBox(height: compact ? 10 : 30),
         _hero(compact),
       ],
     );
@@ -644,7 +644,7 @@ class _ENetShellState extends State<ENetShell> {
             onPressed: () => go(5),
             icon: const Icon(Icons.devices_outlined, size: 16),
             label: const Text('Управление сеансами',
-              style: TextStyle(fontSize: 11)),
+              style: TextStyle(fontFamily: 'Roboto', fontSize: 11)),
           )),
       ],
     );
@@ -653,9 +653,9 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 17),
+        const SizedBox(height: 21),
         shortcuts,
-        const SizedBox(height: 22),
+        const SizedBox(height: 30),
         catalog,
       ],
     );
