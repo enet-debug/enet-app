@@ -832,8 +832,8 @@ class _ENetShellState extends State<ENetShell> {
       ),
       _QuickAction(
         icon: Icons.devices_rounded,
-        label: 'Управление сеансами',
-        onTap: () => go(5),
+        label: 'Файлы и облако',
+        onTap: () => go(9),
       ),
     ]),
   );
