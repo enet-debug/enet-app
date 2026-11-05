@@ -1,4 +1,4 @@
-name: eNet API tests and Linux desktop build
+name: eNet API tests and cross-platform desktop/mobile builds
 
 on:
   push:
@@ -21,6 +21,62 @@ jobs:
       - run: bash -n scripts/run-linux.sh
       - run: npm test
         working-directory: api
+
+  windows:
+    name: Flutter Windows bundle
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate Windows runner
+        run: flutter create --platforms=windows .
+      - name: Resolve packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
+      - name: Build Windows desktop application
+        run: flutter build windows --release --dart-define=ENET_API_URL=http://127.0.0.1:8787
+      - name: Publish Windows bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: enet-app-windows-x64
+          path: build/windows/x64/runner/Release/
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: Flutter iOS unsigned device build
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate iOS runner
+        run: flutter create --platforms=ios .
+      - name: Resolve packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
+      - name: Build unsigned iOS application
+        run: flutter build ios --release --no-codesign --dart-define=ENET_API_URL=http://127.0.0.1:8787
+      - name: Package iOS application
+        run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app enet-app-ios-unsigned.zip
+      - name: Publish iOS bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: enet-app-ios-unsigned
+          path: enet-app-ios-unsigned.zip
+          if-no-files-found: error
+          retention-days: 14
 
   linux:
     name: Flutter Linux bundle
