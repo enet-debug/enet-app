@@ -62,7 +62,7 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('desktop-nav-0')));
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 450));
-        expect(find.text('Сервисы eNet'), findsOneWidget);
+        expect(find.text('Мои сервисы'), findsOneWidget);
       }
       expect(tester.takeException(), isNull);
 
