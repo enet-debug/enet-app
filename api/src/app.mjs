@@ -82,6 +82,27 @@ function setupDb(path) {
       expires_at INTEGER NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);`);
+  // Backward compatible migration: preserve login sessions created by earlier API releases.
+  const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
+  if (!columns.has('session_id')) {
+    db.exec("ALTER TABLE sessions ADD COLUMN session_id TEXT NOT NULL DEFAULT ''");
+  }
+  if (!columns.has('created_at')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN created_at INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!columns.has('last_seen_at')) {
+    db.exec('ALTER TABLE sessions ADD COLUMN last_seen_at INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!columns.has('device_label')) {
+    db.exec("ALTER TABLE sessions ADD COLUMN device_label TEXT NOT NULL DEFAULT 'Неизвестное устройство'");
+  }
+  const migrateSession = db.prepare('UPDATE sessions SET session_id=?, created_at=?, last_seen_at=? WHERE token_hash=?');
+  const legacySessions = db.prepare("SELECT token_hash, expires_at FROM sessions WHERE session_id=''").all();
+  for (const previous of legacySessions) {
+    const timestamp = Math.max(0, Number(previous.expires_at) - sessionMs);
+    migrateSession.run(randomUUID(), timestamp, timestamp, previous.token_hash);
+  }
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_session_id ON sessions(session_id)');
   return db;
 }
 export function createApp(options = {}) {
@@ -90,8 +111,12 @@ export function createApp(options = {}) {
     .split(',').map(x => x.trim()).filter(Boolean));
   const userByEmail = db.prepare('SELECT * FROM users WHERE email=?');
   const insertUser = db.prepare('INSERT INTO users(id,email,name,password_hash,created_at) VALUES(?,?,?,?,?)');
-  const insertSession = db.prepare('INSERT INTO sessions(token_hash,user_id,expires_at) VALUES(?,?,?)');
-  const findSession = db.prepare(`SELECT users.id,users.email,users.name FROM sessions
+  const insertSession = db.prepare('INSERT INTO sessions(token_hash,user_id,expires_at,session_id,created_at,last_seen_at,device_label) VALUES(?,?,?,?,?,?,?)');
+  const listSessions = db.prepare('SELECT session_id, device_label, created_at, last_seen_at, expires_at, token_hash FROM sessions WHERE user_id=? AND expires_at>? ORDER BY last_seen_at DESC LIMIT 100');
+  const removeSelectedSession = db.prepare('DELETE FROM sessions WHERE session_id=? AND user_id=? AND token_hash<>?');
+  const updateSessionActivity = db.prepare('UPDATE sessions SET last_seen_at=? WHERE token_hash=?');
+  const updateProfile = db.prepare('UPDATE users SET name=? WHERE id=?');
+  const findSession = db.prepare(`SELECT users.id,users.email,users.name,sessions.last_seen_at FROM sessions
     JOIN users ON sessions.user_id=users.id
     WHERE sessions.token_hash=? AND sessions.expires_at>?`);
   const revokeSession = db.prepare('DELETE FROM sessions WHERE token_hash=?');
@@ -102,14 +127,23 @@ export function createApp(options = {}) {
   function auth(req) {
     const match = /^Bearer ([A-Za-z0-9_-]{32,256})$/.exec(req.headers.authorization || '');
     if (!match) return null;
-    const row = findSession.get(digest(match[1]), Date.now());
-    return row ? { user: publicUser(row), tokenHash: digest(match[1]) } : null;
+    const tokenHash = digest(match[1]);
+    const now = Date.now();
+    const row = findSession.get(tokenHash, now);
+    if (!row) return null;
+    if (now - Number(row.last_seen_at) > 5 * 60_000) {
+      updateSessionActivity.run(now, tokenHash);
+    }
+    return { user: publicUser(row), tokenHash };
   }
-  function newSession(user) {
-    clearSessions.run(Date.now());
+  function newSession(user, req) {
+    const now = Date.now();
+    clearSessions.run(now);
     const token = randomBytes(32).toString('base64url');
-    const expiresAt = Date.now() + sessionMs;
-    insertSession.run(digest(token), user.id, expiresAt);
+    const expiresAt = now + sessionMs;
+    const label = String(req.headers['x-enet-client'] || req.headers['user-agent'] || 'Неизвестное устройство')
+      .replace(/[\\x00-\\x1f\\x7f]/g, '').slice(0, 90) || 'Неизвестное устройство';
+    insertSession.run(digest(token), user.id, expiresAt, randomUUID(), now, now, label);
     return { token, expires_at: new Date(expiresAt).toISOString(), user: publicUser(user) };
   }
   const server = http.createServer(async (req, res) => {
@@ -130,7 +164,7 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.2.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.3.0' });
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
         if (throttle('register:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
@@ -149,7 +183,7 @@ export function createApp(options = {}) {
           if (String(e.code || '').startsWith('SQLITE_CONSTRAINT')) return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
           throw e;
         }
-        return json(res, 201, newSession(user));
+        return json(res, 201, newSession(user, req));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
         if (throttle('login:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
@@ -162,7 +196,7 @@ export function createApp(options = {}) {
         if (!user || !(await comparePassword(b.password, user.password_hash))) {
           return error(res, 401, 'invalid_credentials', 'Неверная почта или пароль.');
         }
-        return json(res, 200, newSession(user));
+        return json(res, 200, newSession(user, req));
       }
       if (path === '/v1/auth/reset-password' && req.method === 'POST') {
         return error(res, 501, 'not_configured', 'Восстановление пароля пока не настроено.');
@@ -170,6 +204,44 @@ export function createApp(options = {}) {
       if (path === '/v1/auth/me' && req.method === 'GET') {
         const session = auth(req);
         return session ? json(res, 200, { user: session.user }) : error(res, 401, 'unauthorized', 'Требуется авторизация.');
+      }
+      if (path === '/v1/auth/profile' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const payload = await bodyOf(req);
+        const name = typeof payload.name === 'string' ? payload.name.trim() : '';
+        if (name.length < 2 || name.length > 80 || /[\\x00-\\x1f\\x7f]/.test(name)) {
+          return error(res, 400, 'invalid_name', 'Имя должно содержать от 2 до 80 символов.');
+        }
+        updateProfile.run(name, session.user.id);
+        return json(res, 200, { user: publicUser(userById.get(session.user.id)) });
+      }
+      if (path === '/v1/auth/sessions' && req.method === 'GET') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const entries = listSessions.all(session.user.id, Date.now()).map(item => ({
+          id: item.session_id,
+          device: item.device_label,
+          created_at: new Date(Number(item.created_at)).toISOString(),
+          last_seen_at: new Date(Number(item.last_seen_at)).toISOString(),
+          expires_at: new Date(Number(item.expires_at)).toISOString(),
+          current: item.token_hash === session.tokenHash,
+        }));
+        return json(res, 200, { sessions: entries });
+      }
+      if (path === '/v1/auth/sessions/revoke' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const payload = await bodyOf(req);
+        if (typeof payload.session_id !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.session_id)) {
+          return error(res, 400, 'invalid_input', 'Неизвестный идентификатор сеанса.');
+        }
+        const result = removeSelectedSession.run(payload.session_id, session.user.id, session.tokenHash);
+        if (!result.changes) {
+          return error(res, 404, 'not_found', 'Сеанс не найден или является текущим.');
+        }
+        return json(res, 200, { ok: true });
       }
       if (path === '/v1/auth/change-password' && req.method === 'POST') {
         const session = auth(req);
