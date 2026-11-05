@@ -75,7 +75,14 @@ function setupDb(path) {
       user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       service_id TEXT NOT NULL,
       PRIMARY KEY(user_id, service_id)
-    );`);
+    );
+    CREATE TABLE IF NOT EXISTS auth_rate_limits(
+      bucket TEXT PRIMARY KEY,
+      attempts INTEGER NOT NULL,
+      window_started_at INTEGER NOT NULL,
+      blocked_until INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE INDEX IF NOT EXISTS idx_auth_rate_limits_expiry ON auth_rate_limits(blocked_until, window_started_at);`);
   // Backward compatible migration: preserve login sessions created by earlier API releases.
   const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
   if (!columns.has('session_id')) {
@@ -100,20 +107,6 @@ function setupDb(path) {
   return db;
 }
 export function createApp(options = {}) {
-  // Rate limit state belongs to this server instance, not the entire Node process.
-  const attempts = new Map();
-  function throttle(key, limit = failLimit) {
-    const now = Date.now();
-    if (attempts.size > 5000) {
-      for (const [item, value] of attempts) if (value.until < now) attempts.delete(item);
-    }
-    let entry = attempts.get(key);
-    if (!entry || entry.until < now) entry = { count: 0, until: now + 60_000 };
-    entry.count++;
-    attempts.set(key, entry);
-    return entry.count > limit ? Math.max(1, Math.ceil((entry.until - now) / 1000)) : 0;
-  }
-
   const db = setupDb(options.dbPath || process.env.ENET_DB_PATH || './data/enet.sqlite');
   const allowed = new Set((options.allowedOrigins ?? process.env.ENET_ALLOWED_ORIGINS ?? '')
     .split(',').map(x => x.trim()).filter(Boolean));
@@ -126,6 +119,50 @@ export function createApp(options = {}) {
       }
     }
     return req.socket.remoteAddress || 'unknown';
+  }
+  const rateWindowMs = options.authRateLimitWindowMs ?? 60_000;
+  const authLimit = options.authRateLimitMax ?? failLimit;
+  const signupLimit = options.registerRateLimitMax ?? 5;
+  const ipLoginLimit = options.loginIpRateLimitMax ?? 30;
+  const rateLimitRow = db.prepare('SELECT attempts,window_started_at,blocked_until FROM auth_rate_limits WHERE bucket=?');
+  const saveRateLimit = db.prepare('INSERT INTO auth_rate_limits(bucket,attempts,window_started_at,blocked_until) VALUES(?,?,?,?) ON CONFLICT(bucket) DO UPDATE SET attempts=excluded.attempts, window_started_at=excluded.window_started_at, blocked_until=excluded.blocked_until');
+  const clearRateLimit = db.prepare('DELETE FROM auth_rate_limits WHERE bucket=?');
+  const cleanupRateLimits = db.prepare('DELETE FROM auth_rate_limits WHERE window_started_at<? AND blocked_until<?');
+  let lastRateLimitCleanup = 0;
+  function rateLimitWait(bucket, now = Date.now()) {
+    if (now - lastRateLimitCleanup > rateWindowMs * 5) {
+      cleanupRateLimits.run(now - rateWindowMs * 4, now);
+      lastRateLimitCleanup = now;
+    }
+    const row = rateLimitRow.get(bucket);
+    if (!row) return 0;
+    if (Number(row.blocked_until) > now) return Number(row.blocked_until) - now;
+    if (now - Number(row.window_started_at) >= rateWindowMs) clearRateLimit.run(bucket);
+    return 0;
+  }
+  function recordFailure(bucket, now = Date.now()) {
+    const row = rateLimitRow.get(bucket);
+    const inWindow = row && now - Number(row.window_started_at) < rateWindowMs;
+    const attempts = inWindow ? Number(row.attempts) + 1 : 1;
+    const started = inWindow ? Number(row.window_started_at) : now;
+    const blockedUntil = attempts >= authLimit ? now + rateWindowMs : 0;
+    saveRateLimit.run(bucket, attempts, started, blockedUntil);
+    return Math.max(0, blockedUntil - now);
+  }
+  function consumeRateLimit(bucket, limit, now = Date.now()) {
+    const wait = rateLimitWait(bucket, now);
+    if (wait > 0) return wait;
+    const row = rateLimitRow.get(bucket);
+    const inWindow = row && now - Number(row.window_started_at) < rateWindowMs;
+    const attempts = inWindow ? Number(row.attempts) + 1 : 1;
+    const started = inWindow ? Number(row.window_started_at) : now;
+    const blockedUntil = attempts > limit ? now + rateWindowMs : 0;
+    saveRateLimit.run(bucket, attempts, started, blockedUntil);
+    return Math.max(0, blockedUntil - now);
+  }
+  function sendRateLimited(res, wait, message = 'Слишком много попыток. Попробуйте позже.') {
+    res.setHeader('Retry-After', String(Math.max(1, Math.ceil(wait / 1000))));
+    return error(res, 429, 'rate_limited', message);
   }
   const userByEmail = db.prepare('SELECT * FROM users WHERE email=?');
   const insertUser = db.prepare('INSERT INTO users(id,email,name,password_hash,created_at) VALUES(?,?,?,?,?)');
