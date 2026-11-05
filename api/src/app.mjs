@@ -310,7 +310,7 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.4.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.5.0' });
       }
       if (path === '/ready' && req.method === 'GET') {
         try {
@@ -322,7 +322,7 @@ export function createApp(options = {}) {
       }
       if (path === '/v1/meta' && req.method === 'GET') {
         return json(res, 200, {
-          api: 'enet', version: '0.4.0', auth: 'bearer',
+          api: 'enet', version: '0.5.0', auth: 'bearer',
           capabilities: ['accounts', 'sessions', 'services', 'favorites', 'notifications', 'tasks'],
           services: { catalog: true, single_sign_on: false },
         });
