@@ -262,12 +262,6 @@ class _TasksPanelState extends State<TasksPanel> {
               const Text('Добавь первое дело, чтобы начать планирование.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: ENetColors.muted, fontSize: 12.5, height: 1.5)),
-              const SizedBox(height: 14),
-              TextButton.icon(
-                onPressed: _saving ? null : () => _edit(),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Создать задачу'),
-              ),
             ]),
           )
         else
@@ -291,7 +285,7 @@ class _TasksPanelState extends State<TasksPanel> {
           ),
         if (_loading && _tasks.isNotEmpty) const LinearProgressIndicator(),
         const SizedBox(height: 8),
-        const Text('Задачи хранятся в аккаунте eNet ID и доступны после входа на другом устройстве.',
+        const Text('После подключения устройств к одному eNet API задачи будут доступны в аккаунте на каждом из них.',
           style: TextStyle(color: ENetColors.faint, fontSize: 11.5, height: 1.45)),
       ],
     );
