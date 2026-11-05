@@ -705,25 +705,6 @@ class _ENetShellState extends State<ENetShell> {
   );
 
   Widget _quickActionsCard() => Glass(
-    radius: 20,
-    blur: 12,
-    padding: const EdgeInsets.fromLTRB(15, 13, 15, 7),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('БЫСТРЫЕ ДЕЙСТВИЯ', style: _eyebrow),
-      const SizedBox(height: 7),
-      _QuickAction(
-        icon: Icons.add_task_rounded,
-        label: 'Создать задачу',
-        onTap: () => go(7),
-      ),
-      _QuickAction(
-        icon: Icons.apps_rounded,
-        label: 'Открыть сервисы',
-        onTap: () => go(1),
-      ),
-      _QuickAction(
-        icon: Icons.devices_rounded,
-        label: 'Управлять устр  Widget _quickActionsCard() => Glass(
     radius: 18,
     blur: 12,
     padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
