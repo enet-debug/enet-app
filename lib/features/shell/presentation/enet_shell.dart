@@ -270,15 +270,21 @@ class _ENetShellState extends State<ENetShell> {
         const Spacer(),
         const Divider(height: 20),
         const SizedBox(height: 10),
-        const Center(child: BrandLogo(size: 47)),
-        const SizedBox(height: 7),
-        const Text('Единая экосистема\nцифровых сервисов',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: ENetColors.muted,
-            fontSize: 10.5,
-            height: 1.45,
-          )),
+        Pressable(
+          onTap: _showMoreMenu,
+          haptic: false,
+          builder: (context, hovered) => Column(children: [
+            const BrandLogo(size: 47),
+            const SizedBox(height: 7),
+            Text('Единая экосистема\nцифровых сервисов',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: hovered ? ENetColors.cyan : ENetColors.muted,
+                fontSize: 10.5,
+                height: 1.45,
+              )),
+          ]),
+        ),
       ]),
     );
   }
@@ -515,7 +521,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная ─────────────────────────
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
-    final split = !compact && constraints.maxWidth >= 980;
+    final split = !compact && constraints.maxWidth >= 850;
     final railWidth = constraints.maxWidth >= 1250 ? 320.0 : 285.0;
 
     final intro = Column(
@@ -527,7 +533,7 @@ class _ENetShellState extends State<ENetShell> {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: ENetColors.text,
-            fontSize: compact ? 25 : 30,
+            fontSize: compact ? 25 : 35,
             fontWeight: FontWeight.w800,
             letterSpacing: -1,
           ),
