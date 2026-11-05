@@ -128,26 +128,25 @@ class _ENetShellState extends State<ENetShell> {
         animated: effects,
         child: SafeArea(
           bottom: false,
-          child: Stack(children: [
-            Positioned.fill(
-              child: compact
-                  ? _content(compact)
-                  : Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(width: 270, child: _sidebar()),
+          // Reserve an actual dock for mobile navigation instead of letting
+          // it float over content, buttons and profile fields.
+          child: compact
+              ? Column(children: [
+                  Expanded(child: _content(compact)),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      16, 8, 16, math.max(bottomInset, 10.0) + 6,
                     ),
-                    Expanded(child: _content(compact)),
-                  ]),
-            ),
-            if (compact)
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: math.max(bottomInset, 10.0) + 6,
-                child: _tabBar(),
-              ),
-          ]),
+                    child: _tabBar(),
+                  ),
+                ])
+              : Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SizedBox(width: 270, child: _sidebar()),
+                  ),
+                  Expanded(child: _content(compact)),
+                ]),
         ),
       ),
     );
@@ -354,7 +353,7 @@ class _ENetShellState extends State<ENetShell> {
       ),
       Expanded(
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(pad, 20, pad, compact ? 130 : 48),
+          padding: EdgeInsets.fromLTRB(pad, 20, pad, compact ? 24 : 48),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1050.0);
             return Align(
