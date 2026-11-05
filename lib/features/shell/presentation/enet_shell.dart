@@ -580,7 +580,7 @@ class _ENetShellState extends State<ENetShell> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Твоя цифровая среда.\\nВ одном месте.',
+                  'Твоя цифровая среда.\nВ одном месте.',
                   style: TextStyle(
                     color: ENetColors.text,
                     fontSize: compact ? 28 : 39,
