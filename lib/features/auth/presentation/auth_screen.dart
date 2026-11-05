@@ -30,6 +30,25 @@ class _AuthScreenState extends State<AuthScreen> {
   bool passwordVisible = false;
   String? notice;
   bool noticeIsError = false;
+  bool _checkingApi = true;
+  bool? _apiAvailable;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshApiStatus();
+  }
+
+  Future<void> _refreshApiStatus() async {
+    if (!mounted) return;
+    setState(() => _checkingApi = true);
+    final available = await widget.auth.checkServer();
+    if (!mounted) return;
+    setState(() {
+      _apiAvailable = available;
+      _checkingApi = false;
+    });
+  }
 
   @override
   void dispose() {
@@ -89,10 +108,13 @@ class _AuthScreenState extends State<AuthScreen> {
     if (endpoint == null || !mounted) return;
     try {
       await widget.auth.configureApiEndpoint(endpoint);
+      await _refreshApiStatus();
       if (mounted) {
         setState(() {
-          notice = 'Адрес API сохранён. Теперь можно войти в eNet ID.';
-          noticeIsError = false;
+          notice = _apiAvailable == true
+              ? 'Адрес сохранён. eNet API отвечает, можно входить.'
+              : 'Адрес сохранён, но API пока не отвечает. Проверьте сервер и HTTPS.';
+          noticeIsError = _apiAvailable != true;
         });
       }
     } catch (e) {
