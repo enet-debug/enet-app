@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/glass.dart';
 import '../application/auth_controller.dart';
@@ -28,64 +29,19 @@ class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
     setState(() => _checking = true);
     final result = await widget.auth.checkServer();
     if (!mounted) return;
-    setState(() { _online = result; _checking = false; });
+    setState(() {
+      _online = result;
+      _checking = false;
+    });
   }
 
   Future<void> _edit() async {
-    final controller = TextEditingController(text: widget.auth.apiBaseUrl);
-    final formKey = GlobalKey<FormState>();
     final value = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Адрес сервера eNet'),
-        content: SizedBox(
-          width: 420,
-          child: Form(
-            key: formKey,
-            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              TextFormField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: TextInputType.url,
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: const InputDecoration(
-                  labelText: 'URL API',
-                  hintText: 'https://api.example.com',
-                  prefixIcon: Icon(Icons.dns_outlined),
-                ),
-                validator: (value) {
-                  try {
-                    normalizeApiBaseUrl(value ?? '');
-                    return null;
-                  } on FormatException catch (error) {
-                    return error.message.toString();
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Для iPhone и удалённых компьютеров нужен HTTPS. HTTP разрешён только для localhost.',
-                style: TextStyle(color: ENetColors.muted, fontSize: 12, height: 1.45),
-              ),
-            ]),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Отмена')),
-          FilledButton(
-            onPressed: () {
-              if (formKey.currentState?.validate() == true) {
-                Navigator.pop(dialogContext, normalizeApiBaseUrl(controller.text));
-              }
-            },
-            child: const Text('Сохранить'),
-          ),
-        ],
-      ),
+      builder: (_) => _ApiEndpointDialog(initialValue: widget.auth.apiBaseUrl),
     );
-    controller.dispose();
     if (value == null || !mounted) return;
+
     setState(() => _busy = true);
     try {
       await widget.auth.updateApiBaseUrl(value);
@@ -115,23 +71,30 @@ class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
     blur: 14,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
     child: Row(children: [
-      Icon(_checking ? Icons.sync_rounded : _online == true
-        ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
-        color: _checking ? ENetColors.muted : _online == true
-          ? ENetColors.mint : ENetColors.danger, size: 20),
+      Icon(
+        _checking ? Icons.sync_rounded
+          : _online == true ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+        color: _checking ? ENetColors.muted
+          : _online == true ? ENetColors.mint : ENetColors.danger,
+        size: 20,
+      ),
       const SizedBox(width: 12),
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const Text('СЕРВЕР ПОДКЛЮЧЕНИЯ', style: TextStyle(
-          color: ENetColors.muted, fontSize: 9.5, letterSpacing: 1.4, fontWeight: FontWeight.w700)),
+          color: ENetColors.muted, fontSize: 9.5, letterSpacing: 1.4,
+          fontWeight: FontWeight.w700)),
         const SizedBox(height: 4),
         Text(widget.auth.apiBaseUrl, maxLines: 1, overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: ENetColors.text, fontSize: 12)),
         const SizedBox(height: 3),
-        Text(_checking ? 'Проверяем соединение…'
-          : _online == true ? 'API отвечает'
-          : 'Нет соединения с API',
-          style: TextStyle(color: _online == true ? ENetColors.mint : ENetColors.muted,
-            fontSize: 10.5)),
+        Text(
+          _checking ? 'Проверяем соединение…'
+            : _online == true ? 'API отвечает' : 'Нет соединения с API',
+          style: TextStyle(
+            color: _online == true ? ENetColors.mint : ENetColors.muted,
+            fontSize: 10.5,
+          ),
+        ),
       ])),
       const SizedBox(width: 8),
       IconButton(
@@ -144,5 +107,85 @@ class _ApiEndpointPanelState extends State<ApiEndpointPanel> {
         child: Text(_busy ? 'Сохранение…' : 'Изменить'),
       ),
     ]),
+  );
+}
+
+class _ApiEndpointDialog extends StatefulWidget {
+  const _ApiEndpointDialog({required this.initialValue});
+  final String initialValue;
+
+  @override
+  State<_ApiEndpointDialog> createState() => _ApiEndpointDialogState();
+}
+
+class _ApiEndpointDialogState extends State<_ApiEndpointDialog> {
+  late final TextEditingController _controller;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (_formKey.currentState?.validate() != true) return;
+    Navigator.pop(context, normalizeApiBaseUrl(_controller.text));
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Адрес сервера eNet'),
+    content: SizedBox(
+      width: 420,
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              controller: _controller,
+              autofocus: true,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              enableSuggestions: false,
+              decoration: const InputDecoration(
+                labelText: 'URL API',
+                hintText: 'https://api.example.com',
+                prefixIcon: Icon(Icons.dns_outlined),
+              ),
+              validator: (value) {
+                try {
+                  normalizeApiBaseUrl(value ?? '');
+                  return null;
+                } on FormatException catch (error) {
+                  return error.message.toString();
+                }
+              },
+              onFieldSubmitted: (_) => _save(),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Для iPhone и удалённых компьютеров нужен HTTPS. HTTP разрешён только для localhost.',
+              style: TextStyle(color: ENetColors.muted, fontSize: 12, height: 1.45),
+            ),
+          ],
+        )),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Отмена'),
+      ),
+      FilledButton(onPressed: _save, child: const Text('Сохранить')),
+    ],
   );
 }
