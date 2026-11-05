@@ -20,5 +20,19 @@ class DemoAuthRepository implements AuthRepository {
   Future<AuthUser?> restoreSession() async => null;
 
   @override
+  Future<bool> checkServer() async => false;
+
+  @override
+  Future<List<EcosystemService>> listServices() async => const [];
+
+  @override
+  Future<void> changePassword(String currentPassword, String nextPassword) async {
+    throw UnsupportedError('Демо-аккаунт');
+  }
+
+  @override
+  Future<int> revokeOtherSessions() async => 0;
+
+  @override
   Future<void> signOut() async {}
 }
