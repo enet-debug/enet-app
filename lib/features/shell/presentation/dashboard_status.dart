@@ -125,7 +125,9 @@ class _DashboardTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Row(children: [
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Row(children: [
           Container(
             height: 44, width: 44,
             decoration: BoxDecoration(
@@ -146,6 +148,7 @@ class _DashboardTile extends StatelessWidget {
           const SizedBox(width: 4),
           Icon(actionIcon, size: 17, color: ENetColors.muted),
         ]),
+        ),
       ),
     ),
   );
