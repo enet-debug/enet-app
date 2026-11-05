@@ -63,10 +63,6 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 700));
       expect(find.text('saved-account-id'), findsOneWidget);
-      await tester.tap(find.byTooltip('Открыть уведомления'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 700));
-
       repository.expired = true;
       await tester.tap(find.byTooltip('Открыть уведомления'));
       await tester.pump();
