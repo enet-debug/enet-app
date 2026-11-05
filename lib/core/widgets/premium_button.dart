@@ -40,7 +40,7 @@ class PrimaryButton extends StatelessWidget {
             gradient: ENetColors.accent,
             boxShadow: [
               BoxShadow(
-                color: ENetColors.blue.withValues(alpha: hovered ? .55 : .34),
+                color: ENetColors.mint.withValues(alpha: hovered ? .34 : .22),
                 blurRadius: hovered ? 36 : 24,
                 offset: const Offset(0, 10),
               ),
