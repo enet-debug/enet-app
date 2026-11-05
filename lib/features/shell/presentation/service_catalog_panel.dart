@@ -123,26 +123,32 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Row(children: [
-        const Expanded(child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('МОИ СЕРВИСЫ', style: TextStyle(
-              color: ENetColors.cyan, fontSize: 10.5,
-              letterSpacing: 1.8, fontWeight: FontWeight.w800)),
-            SizedBox(height: 5),
-            Text('Подключённые приложения', style: TextStyle(
-              color: ENetColors.text, fontSize: 17,
-              fontWeight: FontWeight.w800, letterSpacing: -.35)),
-          ],
-        )),
+        const Expanded(child: Text('Мои сервисы', style: TextStyle(
+          color: ENetColors.text,
+          fontSize: 17,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -.35,
+        ))),
         if (widget.onSeeAll != null)
-          TextButton(
-            onPressed: widget.onSeeAll,
-            child: const Row(mainAxisSize: MainAxisSize.min, children: [
-              Text('Все сервисы'),
-              SizedBox(width: 3),
-              Icon(Icons.chevron_right_rounded, size: 17),
-            ]),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onSeeAll,
+              borderRadius: BorderRadius.circular(12),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 7, vertical: 8),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text('Все сервисы', style: TextStyle(
+                    color: ENetColors.cyan,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  )),
+                  SizedBox(width: 2),
+                  Icon(Icons.chevron_right_rounded,
+                    size: 16, color: ENetColors.cyan),
+                ]),
+              ),
+            ),
           ),
         IconButton(
           tooltip: 'Обновить сервисы',
