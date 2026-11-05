@@ -280,25 +280,34 @@ class _ENetShellState extends State<ENetShell> {
   }
 
   Future<void> _showMoreMenu() async {
-    final selected = await showModalBottomSheet<int>(
+    final selected = await showDialog<int>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(14),
+      builder: (dialogContext) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
           child: Glass(
-            radius: 22, blur: 18,
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            radius: 22,
+            blur: 18,
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 8),
             child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const Padding(
+                padding: EdgeInsets.fromLTRB(12, 4, 12, 10),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('ДОПОЛНИТЕЛЬНЫЕ РАЗДЕЛЫ', style: _eyebrow),
+                ),
+              ),
               for (final destination in desktopItems.where((item) => item.index >= 4))
                 ListTile(
                   key: ValueKey('more-nav-${destination.index}'),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   leading: Icon(destination.icon, color: ENetColors.cyan),
                   title: Text(destination.label,
                     style: const TextStyle(color: ENetColors.text, fontWeight: FontWeight.w600)),
                   trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint),
-                  onTap: () => Navigator.of(sheetContext).pop(destination.index),
+                  onTap: () => Navigator.of(dialogContext).pop(destination.index),
                 ),
             ]),
           ),
