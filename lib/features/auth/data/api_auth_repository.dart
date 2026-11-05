@@ -72,7 +72,15 @@ class ApiAuthRepository implements AuthRepository {
     if (response.statusCode >= 400) {
       final error = result['error'];
       final message = error is Map ? error['message'] : null;
-      throw Exception(message is String ? message : 'Ошибка API: ${response.statusCode}');
+      final description = message is String
+          ? message : 'Ошибка API: ${response.statusCode}';
+      if (response.statusCode == 429) {
+        final seconds = int.tryParse(response.headers['retry-after'] ?? '');
+        if (seconds != null && seconds > 0 && seconds <= 86400) {
+          throw Exception('$description Повторите через $seconds сек.');
+        }
+      }
+      throw Exception(description);
     }
     return result;
   }

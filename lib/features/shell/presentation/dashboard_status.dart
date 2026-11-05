@@ -125,7 +125,9 @@ class _DashboardTile extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Row(children: [
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Row(children: [
           Container(
             height: 44, width: 44,
             decoration: BoxDecoration(
@@ -138,14 +140,15 @@ class _DashboardTile extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, style: const TextStyle(
-              fontSize: 13.5, fontWeight: FontWeight.w700, color: ENetColors.text)),
+              fontSize: 13.5, height: 1.15, fontWeight: FontWeight.w700, color: ENetColors.text)),
             const SizedBox(height: 4),
             Text(subtitle, maxLines: 2, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11.5, color: ENetColors.muted)),
+              style: const TextStyle(fontSize: 11.5, height: 1.2, color: ENetColors.muted)),
           ])),
           const SizedBox(width: 4),
           Icon(actionIcon, size: 17, color: ENetColors.muted),
         ]),
+        ),
       ),
     ),
   );

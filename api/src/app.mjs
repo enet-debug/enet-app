@@ -206,6 +206,21 @@ export function createApp(options = {}) {
     'UPDATE notifications SET read_at=COALESCE(read_at,?) WHERE user_id=? AND id=?');
   const markAllNotifications = db.prepare(
     'UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL');
+  // Keep unread totals consistent with the finite history returned to clients.
+  // This prevents repeated logins from growing the SQLite database without a limit.
+  const maxNotificationHistory = Number.isInteger(options.maxNotificationHistory) &&
+      options.maxNotificationHistory > 0 && options.maxNotificationHistory <= 1000
+    ? options.maxNotificationHistory : 200;
+  const pruneNotifications = db.prepare(
+    'DELETE FROM notifications WHERE user_id=? AND id NOT IN (' +
+    'SELECT id FROM notifications WHERE user_id=? ' +
+    'ORDER BY created_at DESC, rowid DESC LIMIT ?)');
+  function recordNotification(userId, type, title, body) {
+    insertNotification.run(
+      randomUUID(), userId, type, title, body, new Date().toISOString(),
+    );
+    pruneNotifications.run(userId, userId, maxNotificationHistory);
+  }
   function auth(req) {
     const match = /^Bearer ([A-Za-z0-9_-]{32,256})$/.exec(req.headers.authorization || '');
     if (!match) return null;
@@ -226,13 +241,12 @@ export function createApp(options = {}) {
     const label = String(req.headers['x-enet-client'] || req.headers['user-agent'] || 'Неизвестное устройство')
       .replace(/[\x00-\x1f\x7f]/g, '').slice(0, 90) || 'Неизвестное устройство';
     insertSession.run(digest(token), user.id, expiresAt, randomUUID(), now, now, label);
-    insertNotification.run(
-      randomUUID(), user.id, firstLogin ? 'welcome' : 'security',
+    recordNotification(
+      user.id, firstLogin ? 'welcome' : 'security',
       firstLogin ? 'Добро пожаловать в eNet' : 'Новый вход в eNet ID',
       firstLogin
         ? 'Аккаунт создан. Вы можете управлять сервисами и безопасностью в одном приложении.'
         : 'Выполнен вход с устройства: ' + label,
-      new Date(now).toISOString(),
     );
     return { token, expires_at: new Date(expiresAt).toISOString(), user: publicUser(user) };
   }
@@ -290,12 +304,19 @@ export function createApp(options = {}) {
         if (userByEmail.get(email)) return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
         const user = { id: randomUUID(), email, name };
         const hashed = await passwordHash(b.password);
-        try { insertUser.run(user.id, user.email, user.name, hashed, new Date().toISOString()); }
-        catch (e) {
-          if (String(e.code || '').startsWith('SQLITE_CONSTRAINT')) return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          insertUser.run(user.id, user.email, user.name, hashed, new Date().toISOString());
+          const session = newSession(user, req, true);
+          db.exec('COMMIT');
+          return json(res, 201, session);
+        } catch (e) {
+          db.exec('ROLLBACK');
+          if (String(e.code || '').startsWith('SQLITE_CONSTRAINT')) {
+            return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
+          }
           throw e;
         }
-        return json(res, 201, newSession(user, req, true));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
         const b = await bodyOf(req);
@@ -320,7 +341,15 @@ export function createApp(options = {}) {
           return error(res, 401, 'invalid_credentials', 'Неверная почта или пароль.');
         }
         clearRateLimit.run(accountBucket);
-        return json(res, 200, newSession(user, req));
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          const session = newSession(user, req);
+          db.exec('COMMIT');
+          return json(res, 200, session);
+        } catch (e) {
+          db.exec('ROLLBACK');
+          throw e;
+        }
       }
       if (path === '/v1/auth/reset-password' && req.method === 'POST') {
         return error(res, 501, 'not_configured', 'Восстановление пароля пока не настроено.');
@@ -396,6 +425,8 @@ export function createApp(options = {}) {
         try {
           updatePassword.run(hash, account.id);
           revokeOtherSessions.run(account.id, session.tokenHash);
+          recordNotification(account.id, 'security', 'Пароль изменён',
+            'Пароль eNet ID изменён. Остальные активные сеансы были завершены.');
           db.exec('COMMIT');
         } catch (e) {
           db.exec('ROLLBACK');

@@ -63,16 +63,21 @@ void main() {
     final repo = _NotificationsRepository();
     final auth = AuthController(repo);
     addTearDown(auth.dispose);
+    final unreadUpdates = <int>[];
 
     await tester.pumpWidget(MaterialApp(
       theme: ENetTheme.dark,
       home: Scaffold(body: SingleChildScrollView(
-        child: NotificationsPanel(auth: auth),
+        child: NotificationsPanel(
+          auth: auth,
+          onUnreadCountChanged: unreadUpdates.add,
+        ),
       )),
     ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
+    expect(unreadUpdates.last, 2);
     expect(find.text('Непрочитанных: 2'), findsOneWidget);
     expect(find.text('Новый вход в eNet ID'), findsOneWidget);
     expect(find.text('Добро пожаловать в eNet'), findsOneWidget);
@@ -81,12 +86,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(repo.readIds.contains('a'), true);
+    expect(unreadUpdates.last, 1);
     expect(find.text('Непрочитанных: 1'), findsOneWidget);
     await tester.tap(find.byTooltip('Прочитать все уведомления'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
     expect(repo.readAllCalls, 1);
+    expect(unreadUpdates.last, 0);
     expect(find.text('Всё прочитано'), findsOneWidget);
   });
 }

@@ -6,8 +6,9 @@ import '../../auth/domain/auth_repository.dart';
 
 /// API-backed notifications. Never fabricates messages or unread counts.
 class NotificationsPanel extends StatefulWidget {
-  const NotificationsPanel({super.key, required this.auth});
+  const NotificationsPanel({super.key, required this.auth, this.onUnreadCountChanged});
   final AuthController auth;
+  final ValueChanged<int>? onUnreadCountChanged;
 
   @override
   State<NotificationsPanel> createState() => _NotificationsPanelState();
@@ -17,6 +18,7 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
   NotificationFeed? _feed;
   bool _loading = true;
   bool _readingAll = false;
+  int _requestSequence = 0;
   final Set<String> _reading = {};
   String? _error;
 
@@ -28,15 +30,28 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
 
   Future<void> _reload() async {
     if (!mounted) return;
+    final sequence = ++_requestSequence;
     setState(() { _loading = true; _error = null; });
     try {
       final feed = await widget.auth.listNotifications();
-      if (mounted) setState(() => _feed = feed);
+      if (!mounted || sequence != _requestSequence) return;
+      setState(() => _feed = feed);
+      widget.onUnreadCountChanged?.call(feed.unreadCount);
     } catch (e) {
-      if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (mounted && sequence == _requestSequence) {
+        setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && sequence == _requestSequence) {
+        setState(() => _loading = false);
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _requestSequence++;
+    super.dispose();
   }
 
   void _notify(String message) {
@@ -117,7 +132,8 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
             ),
             const SizedBox(width: 14),
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(unread == 0 ? 'Всё прочитано' : 'Непрочитанных: $unread',
+              Text(_feed == null ? 'Синхронизация' :
+                unread == 0 ? 'Всё прочитано' : 'Непрочитанных: $unread',
                 style: const TextStyle(color: ENetColors.text,
                   fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 3),

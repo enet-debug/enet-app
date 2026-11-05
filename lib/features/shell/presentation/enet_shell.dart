@@ -44,6 +44,8 @@ class ENetShell extends StatefulWidget {
 
 class _ENetShellState extends State<ENetShell> {
   int index = 0;
+  int? _unreadCount;
+  int _unreadRequest = 0;
   bool effects = true;
   bool _effectsTouched = false;
   final SharedPreferencesAsync _prefs = SharedPreferencesAsync();
@@ -52,6 +54,7 @@ class _ENetShellState extends State<ENetShell> {
   void initState() {
     super.initState();
     _restoreMotionPreference();
+    _refreshUnreadCount();
   }
 
   Future<void> _restoreMotionPreference() async {
@@ -79,8 +82,26 @@ class _ENetShellState extends State<ENetShell> {
 
   AuthUser get user => widget.auth.user!;
 
+  Future<void> _refreshUnreadCount() async {
+    final currentRequest = ++_unreadRequest;
+    try {
+      final feed = await widget.auth.listNotifications();
+      if (mounted && currentRequest == _unreadRequest) {
+        setState(() => _unreadCount = feed.unreadCount);
+      }
+    } catch (_) {
+      // No notification badge when the server has not confirmed the count.
+      if (mounted && currentRequest == _unreadRequest) {
+        setState(() => _unreadCount = null);
+      }
+    }
+  }
+
   void go(int next) {
-    if (next != index) setState(() => index = next);
+    if (next == index) return;
+    final previous = index;
+    setState(() => index = next);
+    if (previous == 1 || next == 1) _refreshUnreadCount();
   }
 
   String _greeting() {
@@ -227,15 +248,23 @@ class _ENetShellState extends State<ENetShell> {
         child: Row(children: [
           _TintedIcon(selected ? items[i].activeIcon : items[i].icon, selected: selected, size: 22),
           const SizedBox(width: 13),
-          AnimatedDefaultTextStyle(
-            duration: ENetMotion.medium,
-            style: TextStyle(
-              color: selected ? ENetColors.text : ENetColors.muted,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            fit: FlexFit.loose,
+            child: AnimatedDefaultTextStyle(
+              duration: ENetMotion.medium,
+              style: TextStyle(
+                color: selected ? ENetColors.text : ENetColors.muted,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              child: Text(items[i].label,
+                maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            child: Text(items[i].label),
           ),
+          if (i == 1 && (_unreadCount ?? 0) > 0) ...[
+            const Spacer(),
+            _UnreadChip(count: _unreadCount!),
+          ],
         ]),
       ),
     );
@@ -360,6 +389,22 @@ class _ENetShellState extends State<ENetShell> {
           color: ENetColors.faint, fontSize: 11)),
       ]),
       const Spacer(),
+      IconButton(
+        tooltip: (_unreadCount ?? 0) > 0
+          ? 'Уведомления: $_unreadCount непрочитанных'
+          : 'Открыть уведомления',
+        onPressed: () => go(1),
+        icon: Badge(
+          isLabelVisible: (_unreadCount ?? 0) > 0,
+          backgroundColor: ENetColors.mint,
+          textColor: ENetColors.onAccent,
+          label: Text(_unreadCount == null ? '' :
+            _unreadCount! > 99 ? '99+' : '$_unreadCount'),
+          child: const Icon(Icons.notifications_none_rounded,
+            color: ENetColors.cyan, size: 22),
+        ),
+      ),
+      const SizedBox(width: 8),
       const _DemoBadge(),
       if (compact) ...[
         const SizedBox(width: 12),
@@ -539,6 +584,10 @@ class _ENetShellState extends State<ENetShell> {
   Widget _notifications() => NotificationsPanel(
     key: const ValueKey('notifications'),
     auth: widget.auth,
+    onUnreadCountChanged: (count) {
+      _unreadRequest++;
+      if (mounted && count != _unreadCount) setState(() => _unreadCount = count);
+    },
   );
 
   // ───────────────────────── Профиль ─────────────────────────
@@ -638,7 +687,7 @@ class _ENetShellState extends State<ENetShell> {
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.7.0 (7)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.7.1 (8)'),
           ],
         ),
       ),
@@ -647,6 +696,24 @@ class _ENetShellState extends State<ENetShell> {
 }
 
 // ═════════════════════════ Вспомогательные виджеты ═════════════════════════
+
+class _UnreadChip extends StatelessWidget {
+  const _UnreadChip({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+    decoration: BoxDecoration(
+      color: ENetColors.mint.withValues(alpha: .16),
+      border: Border.all(color: ENetColors.mint.withValues(alpha: .3)),
+      borderRadius: BorderRadius.circular(100),
+    ),
+    child: Text(count > 99 ? '99+' : '$count',
+      style: const TextStyle(color: ENetColors.cyan,
+        fontSize: 10, fontWeight: FontWeight.w800)),
+  );
+}
 
 class _HeroTag extends StatelessWidget {
   const _HeroTag({required this.icon, required this.label});
