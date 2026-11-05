@@ -15,7 +15,7 @@ Push-Location $Root
 try {
   flutter config --enable-windows-desktop
   if (-not (Test-Path (Join-Path $Root 'windows\CMakeLists.txt'))) {
-    flutter create --platforms=windows .
+    flutter create --platforms=windows --org ru.enetdev .
   }
   flutter pub get
 
