@@ -248,14 +248,18 @@ class _ENetShellState extends State<ENetShell> {
         child: Row(children: [
           _TintedIcon(selected ? items[i].activeIcon : items[i].icon, selected: selected, size: 22),
           const SizedBox(width: 13),
-          AnimatedDefaultTextStyle(
-            duration: ENetMotion.medium,
-            style: TextStyle(
-              color: selected ? ENetColors.text : ENetColors.muted,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            fit: FlexFit.loose,
+            child: AnimatedDefaultTextStyle(
+              duration: ENetMotion.medium,
+              style: TextStyle(
+                color: selected ? ENetColors.text : ENetColors.muted,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              child: Text(items[i].label,
+                maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            child: Text(items[i].label),
           ),
           if (i == 1 && (_unreadCount ?? 0) > 0) ...[
             const Spacer(),
