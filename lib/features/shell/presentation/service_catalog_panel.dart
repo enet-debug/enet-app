@@ -158,46 +158,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
               ]),
             ),
         ]),
-        const SizedBox(height: 11),
-        SizedBox(
-          height: 45,
-          child: TextField(
-            key: const ValueKey('dashboard-service-search'),
-            controller: _search,
-            onChanged: (value) => setState(() => _query = value),
-            style: const TextStyle(color: ENetColors.text, fontSize: 12.5),
-            decoration: InputDecoration(
-              hintText: 'Поиск сервисов...',
-              hintStyle: const TextStyle(color: ENetColors.muted, fontSize: 12),
-              prefixIcon: const Icon(Icons.search_rounded, size: 19, color: ENetColors.muted),
-              suffixIcon: _query.isEmpty ? null : IconButton(
-                tooltip: 'Очистить поиск',
-                visualDensity: VisualDensity.compact,
-                onPressed: () {
-                  _search.clear();
-                  setState(() => _query = '');
-                },
-                icon: const Icon(Icons.close_rounded, size: 17),
-              ),
-              filled: true,
-              fillColor: const Color(0xFF061C1A).withValues(alpha: .92),
-              contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 13),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide(color: ENetColors.mint.withValues(alpha: .18)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide(color: ENetColors.mint.withValues(alpha: .16)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: const BorderSide(color: ENetColors.cyan, width: 1.1),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (_loading && _services.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
@@ -232,6 +193,15 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
             ),
             const SizedBox(height: 9),
           ],
+          if (showAi) ...[
+            const _DashboardServiceTile(
+              title: 'eNet AI',
+              description: 'Единый доступ к нейросетям для создания текстов, изображений и контента',
+              icon: Icons.auto_awesome_rounded,
+              color: Color(0xFFB58BFF),
+              active: false,
+            ),
+          ],
           if (showCloud) ...[
             const _DashboardServiceTile(
               title: 'eNet Cloud',
@@ -241,15 +211,6 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
               active: false,
             ),
             const SizedBox(height: 9),
-          ],
-          if (showAi) ...[
-            const _DashboardServiceTile(
-              title: 'eNet AI',
-              description: 'Единый доступ к нейросетям для создания текстов, изображений и контента',
-              icon: Icons.auto_awesome_rounded,
-              color: Color(0xFFB58BFF),
-              active: false,
-            ),
           ],
           if (matches.isEmpty && !showCloud && !showAi)
             const Padding(

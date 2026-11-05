@@ -291,23 +291,38 @@ class _ENetShellState extends State<ENetShell> {
           ]),
         ),
         const Spacer(),
-        const Divider(height: 20),
-        const SizedBox(height: 10),
         Pressable(
           key: const ValueKey('desktop-nav-more'),
           onTap: _showMoreMenu,
           haptic: false,
-          builder: (context, hovered) => Column(children: [
-            const BrandLogo(size: 47),
-            const SizedBox(height: 7),
-            Text('Единая экосистема\nцифровых сервисов',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: hovered ? ENetColors.cyan : ENetColors.muted,
-                fontSize: 10.5,
-                height: 1.45,
-              )),
-          ]),
+          builder: (context, hovered) => Container(
+            padding: const EdgeInsets.all(11),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              gradient: const LinearGradient(
+                colors: [Color(0xFF07463B), Color(0xFF092720)]),
+              border: Border.all(color: ENetColors.mint.withValues(
+                alpha: hovered ? .65 : .28)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const Row(children: [
+                  Icon(Icons.cloud_outlined, color: ENetColors.cyan, size: 22),
+                  SizedBox(width: 8),
+                  Expanded(child: Text('Облако eNet', style: TextStyle(
+                    color: ENetColors.text, fontSize: 12,
+                    fontWeight: FontWeight.w700))),
+                  Icon(Icons.more_horiz_rounded, color: ENetColors.muted, size: 18),
+                ]),
+                const SizedBox(height: 7),
+                const Text('Подключение планируется', style: TextStyle(
+                  color: ENetColors.muted, fontSize: 10)),
+                const SizedBox(height: 9),
+                Container(height: 4, decoration: BoxDecoration(
+                  color: ENetColors.cyan.withValues(alpha: .16),
+                  borderRadius: BorderRadius.circular(8))),
+              ]),
+          ),
         ),
       ]),
     );
