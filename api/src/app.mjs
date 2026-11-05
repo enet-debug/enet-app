@@ -122,7 +122,12 @@ export function createApp(options = {}) {
   const saveRateLimit = db.prepare('INSERT INTO auth_rate_limits(bucket,attempts,window_started_at,blocked_until) VALUES(?,?,?,?) ON CONFLICT(bucket) DO UPDATE SET attempts=excluded.attempts, window_started_at=excluded.window_started_at, blocked_until=excluded.blocked_until');
   const clearRateLimit = db.prepare('DELETE FROM auth_rate_limits WHERE bucket=?');
   const cleanupRateLimits = db.prepare('DELETE FROM auth_rate_limits WHERE window_started_at<? AND blocked_until<?');
+  let lastRateLimitCleanup = 0;
   function rateLimitWait(bucket, now = Date.now()) {
+    if (now - lastRateLimitCleanup > rateWindowMs * 5) {
+      cleanupRateLimits.run(now - rateWindowMs * 4, now);
+      lastRateLimitCleanup = now;
+    }
     const row = rateLimitRow.get(bucket);
     if (!row) return 0;
     if (Number(row.blocked_until) > now) return Number(row.blocked_until) - now;
@@ -196,6 +201,7 @@ export function createApp(options = {}) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
     const origin = req.headers.origin;
     if (origin && allowed.has(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
@@ -362,6 +368,9 @@ export function createApp(options = {}) {
       return error(res, 500, 'internal_error', 'Ошибка сервера.');
     }
   });
+  server.requestTimeout = 20_000;
+  server.headersTimeout = 10_000;
+  server.keepAliveTimeout = 5_000;
   return {
     server,
     close: async () => {
