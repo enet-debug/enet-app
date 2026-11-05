@@ -899,7 +899,63 @@ class _ENetShellState extends State<ENetShell> {
 
   // ───────────────────────── Главная карточка ─────────────────────────
 
-  Widget _hero(bool compact) => LayoutBuilder(builder: (context, constraints) {
+  Widget _hero(bool compact) {
+    if (compact) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => go(3),
+          borderRadius: BorderRadius.circular(19),
+          child: Container(
+            key: const ValueKey('workspace-hero'),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(19),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF075C48), Color(0xFF07352C), Color(0xFF071F1B)],
+              ),
+              border: Border.all(color: ENetColors.mint.withValues(alpha: .42)),
+            ),
+            child: Row(children: [
+              Container(
+                width: 51, height: 51,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  gradient: ENetColors.accent,
+                  boxShadow: [
+                    BoxShadow(color: ENetColors.mint.withValues(alpha: .22),
+                      blurRadius: 17),
+                  ],
+                ),
+                child: const Icon(Icons.fingerprint_rounded,
+                  color: ENetColors.onAccent, size: 29),
+              ),
+              const SizedBox(width: 13),
+              const Expanded(child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('eNet ID', style: TextStyle(
+                    color: ENetColors.text, fontSize: 19,
+                    fontWeight: FontWeight.w800, letterSpacing: -.5,
+                  )),
+                  SizedBox(height: 4),
+                  Text('Единый аккаунт eNet', style: TextStyle(
+                    color: Color(0xFFC1E8D9), fontSize: 11.5,
+                  )),
+                ],
+              )),
+              const Icon(Icons.chevron_right_rounded,
+                color: ENetColors.cyan, size: 21),
+            ]),
+          ),
+        ),
+      );
+    }
+
+    return LayoutBuilder(builder: (context, constraints) {
     final showVisual = !compact && constraints.maxWidth >= 600;
     return Container(
       key: const ValueKey('workspace-hero'),
@@ -927,6 +983,7 @@ class _ENetShellState extends State<ENetShell> {
       ),
       child: Stack(children: [
         if (showVisual) ...[
+          const Positioned.fill(child: WorkspaceLightTrails()),
           const Positioned.fill(child: _HeroOrbits()),
           const Positioned(
             right: -8,
@@ -1038,7 +1095,8 @@ class _ENetShellState extends State<ENetShell> {
         ),
       ]),
     );
-  });
+    });
+  }
 
   // ───────────────────────── Профиль ─────────────────────────
 
