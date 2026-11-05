@@ -3,6 +3,19 @@ import '../domain/auth_repository.dart';
 /// UI-only: accepts any validated email/password. No account is created,
 /// no password is stored, and no email is sent.
 class DemoAuthRepository implements AuthRepository {
+  String _apiBaseUrl = 'http://127.0.0.1:8787';
+
+  @override
+  String get apiBaseUrl => _apiBaseUrl;
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> updateApiBaseUrl(String value) async {
+    _apiBaseUrl = normalizeApiBaseUrl(value);
+  }
+
   @override
   Future<AuthUser> signIn({required String email, required String password}) async {
     return AuthUser(email: email.trim(), name: email.trim().split('@').first);
