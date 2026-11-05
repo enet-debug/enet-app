@@ -20,6 +20,7 @@ import '../../auth/presentation/api_connection_panel.dart';
 import 'dashboard_status.dart';
 import 'notifications_panel.dart';
 import 'tasks_panel.dart';
+import 'workspace_visuals.dart';
 
 class _Dest {
   const _Dest(this.index, this.icon, this.activeIcon, this.label);
@@ -198,7 +199,7 @@ class _ENetShellState extends State<ENetShell> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(11),
-                            child: SizedBox(width: 232, child: _sidebar()),
+                            child: SizedBox(width: 206, child: _sidebar()),
                           ),
                           Container(width: 1, color: ENetColors.border),
                           Expanded(child: _content(compact)),
@@ -431,7 +432,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Контент ─────────────────────────
 
   Widget _content(bool compact) {
-    final pad = compact ? 18.0 : 38.0;
+    final pad = compact ? 16.0 : 25.0;
     return Column(children: [
       Padding(
         padding: EdgeInsets.fromLTRB(pad, compact ? 10 : 12, pad, 0),
@@ -525,28 +526,46 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная ─────────────────────────
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
-    final split = !compact && constraints.maxWidth >= 940;
+    final split = !compact && constraints.maxWidth >= 885;
+
     final intro = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Добро пожаловать, ${user.name}',
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: ENetColors.text,
-            fontSize: compact ? 25 : 28,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -1,
-            height: 1.15,
-          )),
-        const SizedBox(height: 6),
-        Text(_dateLabel(), style: const TextStyle(
-          color: ENetColors.faint,
-          fontSize: 10.5,
-          letterSpacing: 1.2,
-          fontWeight: FontWeight.w700,
-        )),
-        const SizedBox(height: 17),
+        if (compact)
+          MobileWelcomeScene(
+            name: user.name,
+            onOpenProfile: () => go(3),
+          )
+        else ...[
+          const Text(
+            'ВАША ЦИФРОВАЯ ЭКОСИСТЕМА',
+            style: TextStyle(
+              color: ENetColors.cyan,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.7,
+            ),
+          ),
+          const SizedBox(height: 7),
+          const Text(
+            'Рабочее пространство eNet',
+            style: TextStyle(
+              color: ENetColors.text,
+              fontSize: 25,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -.8,
+            ),
+          ),
+          const SizedBox(height: 5),
+          const Text(
+            'Сервисы, аккаунт и инструменты в одном месте.',
+            style: TextStyle(
+              color: ENetColors.muted,
+              fontSize: 12.5,
+            ),
+          ),
+        ],
+        SizedBox(height: compact ? 12 : 17),
         _hero(compact),
       ],
     );
@@ -561,40 +580,42 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _accountSummaryCard(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
+        WorkspaceTaskSnapshot(
+          auth: widget.auth,
+          onOpenTasks: () => go(7),
+        ),
+        const SizedBox(height: 10),
         DashboardStatus(
           auth: widget.auth,
           openAccount: () => go(3),
           openSettings: () => go(4),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         _quickActionsCard(),
       ],
     );
 
+    final central = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        intro,
+        const SizedBox(height: 16),
+        shortcuts,
+        const SizedBox(height: 17),
+        catalog,
+        const SizedBox(height: 20),
+        _featureHighlights(),
+      ],
+    );
+
     if (split) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  intro,
-                  const SizedBox(height: 14),
-                  shortcuts,
-                  const SizedBox(height: 15),
-                  catalog,
-                ],
-              )),
-              const SizedBox(width: 18),
-              SizedBox(width: 276, child: rail),
-            ],
-          ),
-          const SizedBox(height: 24),
-          _featureHighlights(),
+          Expanded(child: central),
+          const SizedBox(width: 14),
+          SizedBox(width: 255, child: rail),
         ],
       );
     }
@@ -603,27 +624,33 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 12),
-        _accountSummaryCard(),
-        const SizedBox(height: 12),
+        const SizedBox(height: 15),
         shortcuts,
-        const SizedBox(height: 13),
+        const SizedBox(height: 18),
         catalog,
+        const SizedBox(height: 15),
+        _accountSummaryCard(),
+        const SizedBox(height: 11),
+        WorkspaceTaskSnapshot(
+          auth: widget.auth,
+          onOpenTasks: () => go(7),
+        ),
         const SizedBox(height: 12),
         DashboardStatus(
           auth: widget.auth,
           openAccount: () => go(3),
           openSettings: () => go(4),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 11),
         _quickActionsCard(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 19),
         _featureHighlights(),
       ],
     );
   });
 
   Widget _shortcutStrip() {
+    final compact = MediaQuery.sizeOf(context).width < 820;
     final items = <_HomeShortcutData>[
       _HomeShortcutData(
         icon: Icons.apps_rounded,
@@ -661,21 +688,19 @@ class _ENetShellState extends State<ENetShell> {
         onTap: () => go(2),
       ),
     ];
-
+    final visible = compact ? items.take(4).toList() : items;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('БЫСТРЫЙ ДОСТУП', style: _eyebrow),
+        Text(compact ? 'БЫСТРЫЙ ДОСТУП' : 'ВАШИ ИНСТРУМЕНТЫ', style: _eyebrow),
         const SizedBox(height: 10),
-        SizedBox(
-          height: 82,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 9),
-            itemBuilder: (context, i) => _HomeShortcut(data: items[i]),
-          ),
+        Row(
+          children: [
+            for (var i = 0; i < visible.length; i++) ...[
+              if (i > 0) const SizedBox(width: 9),
+              Expanded(child: _HomeShortcut(data: visible[i])),
+            ],
+          ],
         ),
       ],
     );
@@ -1213,52 +1238,64 @@ class _HomeShortcut extends StatelessWidget {
   final _HomeShortcutData data;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 122,
-    child: Pressable(
-      onTap: data.onTap,
-      pressedScale: .97,
-      haptic: false,
-      builder: (context, hovered) => Glass(
-        radius: 17,
-        blur: 10,
-        shadow: false,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-        tint: data.color,
-        child: Row(children: [
-          Container(
-            width: 35,
-            height: 35,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: data.color.withValues(alpha: .15),
-              border: Border.all(color: data.color.withValues(alpha: .35)),
+  Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 820;
+    return Tooltip(
+      message: data.subtitle,
+      child: Pressable(
+        onTap: data.onTap,
+        pressedScale: .97,
+        haptic: false,
+        builder: (context, hovered) => AnimatedContainer(
+          duration: ENetMotion.quick,
+          height: compact ? 86 : 93,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(17),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                data.color.withValues(alpha: hovered ? .37 : .28),
+                const Color(0xFF071D1B),
+              ],
             ),
-            child: Icon(data.icon, color: data.color, size: 19),
-          ),
-          const SizedBox(width: 8),
-          Expanded(child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: ENetColors.text,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
-                )),
-              const SizedBox(height: 3),
-              Text(data.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: ENetColors.muted,
-                  fontSize: 9,
-                )),
+            border: Border.all(
+              color: data.color.withValues(alpha: hovered ? .65 : .34),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: data.color.withValues(alpha: hovered ? .16 : .07),
+                blurRadius: 17,
+                offset: const Offset(0, 5),
+              ),
             ],
-          )),
-        ]),
+          ),
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 4 : 9,
+            vertical: compact ? 9 : 11,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(data.icon, color: data.color, size: compact ? 25 : 29),
+              const SizedBox(height: 9),
+              Text(
+                data.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: ENetColors.text,
+                  fontSize: compact ? 10 : 11.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _FeatureCardData {
