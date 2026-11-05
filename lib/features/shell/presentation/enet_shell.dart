@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/brand_logo.dart';
@@ -368,10 +369,9 @@ class _ENetShellState extends State<ENetShell> {
           _FeatureTile(
             icon: Icons.layers_rounded,
             gradient: ENetColors.accent,
-            heading: 'Новые возможности',
-            body: 'Добавим позже, когда определим направление приложения.',
-            soon: true,
-            onTap: null,
+            heading: 'Продайзер',
+            body: 'Генерация объявлений, фото и подбор цен.',
+            onTap: () { launchUrl(Uri.parse('https://prodayzer.ru'), mode: LaunchMode.externalApplication); },
           ),
           _FeatureTile(
             icon: Icons.person_rounded,
@@ -444,10 +444,10 @@ class _ENetShellState extends State<ENetShell> {
                     style: TextStyle(color: ENetColors.cyan, fontSize: 10.5, letterSpacing: 1.6, fontWeight: FontWeight.w800)),
               ),
               const SizedBox(height: 22),
-              Text('Это начало твоего пространства.',
+              Text('Твои сервисы в одном пространстве.',
                   style: TextStyle(color: ENetColors.text, fontSize: compact ? 28 : 36, fontWeight: FontWeight.w800, letterSpacing: -1.2, height: 1.1)),
               const SizedBox(height: 12),
-              const Text('Скоро здесь появится всё, что мы создадим для eNet.',
+              const Text('eNet ID и приложения нашей экосистемы. Начни с Продайзера.',
                   style: TextStyle(color: Color(0xFFC7DDF2), fontSize: 15.5, height: 1.55)),
               const SizedBox(height: 28),
               PrimaryButton(label: 'Мой профиль', icon: Icons.arrow_forward_rounded, expand: false, onPressed: () => go(2)),
@@ -512,7 +512,7 @@ class _ENetShellState extends State<ENetShell> {
       Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 15, color: ENetColors.muted)),
       const SizedBox(height: 14),
-      const _DemoBadge(label: 'ENET ID · ДЕМО'),
+      const _DemoBadge(label: 'ENET ID · АКТИВЕН'),
     ]);
     return Column(key: const ValueKey('profile'), crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Reveal(child: _PageTitle('Профиль', 'Твой ENET ID и данные аккаунта.')),
@@ -541,11 +541,11 @@ class _ENetShellState extends State<ENetShell> {
         delay: const Duration(milliseconds: 180),
         child: _Group(
           header: 'АККАУНТ',
-          footer: 'Это временный профиль для проверки интерфейса. После подключения сервера появятся настоящие учётные записи.',
+          footer: 'Профиль загружен с сервера eNet ID.',
           children: [
             _RowTile(icon: Icons.person_rounded, gradient: ENetColors.violetGradient, title: 'Имя', value: user.name),
             _RowTile(icon: Icons.alternate_email_rounded, gradient: ENetColors.accent, title: 'Электронная почта', value: user.email),
-            const _RowTile(icon: Icons.shield_rounded, gradient: ENetColors.mintGradient, title: 'Статус', value: 'Демо-профиль'),
+            const _RowTile(icon: Icons.shield_rounded, gradient: ENetColors.mintGradient, title: 'Статус', value: 'Активный аккаунт'),
           ],
         ),
       ),
@@ -592,7 +592,7 @@ class _ENetShellState extends State<ENetShell> {
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.1.0 (1)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.2.0 (2)'),
           ],
         ),
       ),
