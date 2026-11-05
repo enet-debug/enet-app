@@ -7,7 +7,7 @@ import { DatabaseSync } from 'node:sqlite';
 
 const scrypt = promisify(scryptCallback);
 const sessionMs = 7 * 24 * 60 * 60 * 1000;
-const emailPattern = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const failLimit = 8;
 const attempts = new Map();
 const services = Object.freeze([
