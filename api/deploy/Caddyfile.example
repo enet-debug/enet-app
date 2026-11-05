@@ -1,0 +1,10 @@
+# Create an A/AAAA DNS record for api.enet-dev.ru pointing to this VPS.
+# Caddy obtains and renews the HTTPS certificate automatically.
+api.enet-dev.ru {
+    encode zstd gzip
+
+    reverse_proxy 127.0.0.1:8787 {
+        # The API trusts this header only when ENET_TRUST_PROXY=true.
+        header_up X-Real-IP {remote_host}
+    }
+}
