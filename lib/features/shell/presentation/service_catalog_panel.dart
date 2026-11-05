@@ -164,7 +164,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
           child: Row(children: [
             const Icon(Icons.cloud_off_rounded, color: ENetColors.danger),
             const SizedBox(width: 10),
-            Expanded(child: Text('Не удалось загрузить сервисы: ' + _error!,
+            Expanded(child: Text('Не удалось загрузить сервисы: $_error',
               style: const TextStyle(color: ENetColors.muted, fontSize: 12))),
             IconButton(onPressed: _load,
               icon: const Icon(Icons.refresh_rounded, color: ENetColors.cyan)),
@@ -358,7 +358,7 @@ class _ServiceCard extends StatelessWidget {
     if (compact) {
       return Semantics(
         button: true,
-        label: 'Открыть сервис ' + service.name,
+        label: 'Открыть сервис ${service.name}',
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -405,14 +405,14 @@ class _ServiceCard extends StatelessWidget {
                 )),
                 const SizedBox(width: 5),
                 IconButton(
-                  tooltip: 'Открыть ' + service.name,
+                  tooltip: 'Открыть ${service.name}',
                   visualDensity: VisualDensity.compact,
                   onPressed: open,
                   icon: const Icon(Icons.open_in_new_rounded,
                     color: ENetColors.cyan, size: 18),
                 ),
                 IconButton(
-                  key: ValueKey('favorite-' + service.id),
+                  key: ValueKey('favorite-${service.id}'),
                   tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
                   visualDensity: VisualDensity.compact,
                   onPressed: onFavorite,
@@ -431,7 +431,7 @@ class _ServiceCard extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Открыть сервис ' + service.name,
+      label: 'Открыть сервис ${service.name}',
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -461,7 +461,7 @@ class _ServiceCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 IconButton(
-                  key: ValueKey('favorite-' + service.id),
+                  key: ValueKey('favorite-${service.id}'),
                   tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
                   onPressed: onFavorite,
                   icon: Icon(
