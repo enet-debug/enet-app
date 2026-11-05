@@ -153,7 +153,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
                 visualDensity: VisualDensity.compact,
               ),
               child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                Text('Все сервисы', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                Text('Все сервисы', style: TextStyle(fontFamily: 'Roboto', fontSize: 11.5, fontWeight: FontWeight.w700)),
                 Icon(Icons.chevron_right_rounded, size: 17),
               ]),
             ),
@@ -550,7 +550,7 @@ class _ServiceCard extends StatelessWidget {
               radius: 18,
               blur: 12,
               shadow: false,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               child: Row(children: [
                 Container(
                   width: 43,
@@ -721,8 +721,8 @@ class _DashboardServiceTile extends StatelessWidget {
     tint: color,
     child: Row(children: [
       Container(
-        width: 58,
-        height: 58,
+        width: 64,
+        height: 64,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           gradient: LinearGradient(
@@ -774,12 +774,12 @@ class _DashboardServiceTile extends StatelessWidget {
             minimumSize: const Size(88, 36),
             padding: const EdgeInsets.symmetric(horizontal: 11),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+            textStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 11, fontWeight: FontWeight.w800),
           ),
           child: const Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.open_in_new_rounded, size: 14),
             SizedBox(width: 5),
-            Text('Открыть'),
+            Text('Открыть', style: TextStyle(fontFamily: 'Roboto')),
           ]),
         )
       else
