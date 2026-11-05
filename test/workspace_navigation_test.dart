@@ -55,7 +55,7 @@ void main() {
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 450));
-      expect(find.text('Задачи'), findsOneWidget);
+      expect(find.text('Задачи'), findsNWidgets(2));
       expect(find.text('Список пока пуст'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
