@@ -298,6 +298,69 @@ class ApiAuthRepository implements AuthRepository {
     return response['updated'] as int;
   }
 
+  WorkspaceTask _task(Map<String, dynamic> item) => WorkspaceTask(
+    id: item['id'] as String,
+    title: item['title'] as String,
+    description: item['description'] as String? ?? '',
+    completed: item['completed'] as bool,
+    createdAt: DateTime.parse(item['created_at'] as String),
+    updatedAt: DateTime.parse(item['updated_at'] as String),
+    dueAt: item['due_at'] == null ? null : DateTime.parse(item['due_at'] as String),
+  );
+
+  @override
+  Future<List<WorkspaceTask>> listTasks() async {
+    final response = await _request('GET', '/v1/tasks', token: await _token());
+    final entries = response['tasks'];
+    if (entries is! List) throw const FormatException('Некорректный список задач.');
+    return entries.map((value) => _task(Map<String, dynamic>.from(value as Map)))
+        .toList(growable: false);
+  }
+
+  @override
+  Future<WorkspaceTask> createTask({
+    required String title,
+    required String description,
+    DateTime? dueAt,
+  }) async {
+    final response = await _request('POST', '/v1/tasks', token: await _token(), body: {
+      'title': title,
+      'description': description,
+      'due_at': dueAt?.toUtc().toIso8601String(),
+    });
+    return _task(Map<String, dynamic>.from(response['task'] as Map));
+  }
+
+  @override
+  Future<WorkspaceTask> updateTask({
+    required String id,
+    required String title,
+    required String description,
+    DateTime? dueAt,
+  }) async {
+    final response = await _request('POST', '/v1/tasks/update',
+      token: await _token(), body: {
+        'id': id,
+        'title': title,
+        'description': description,
+        'due_at': dueAt?.toUtc().toIso8601String(),
+      });
+    return _task(Map<String, dynamic>.from(response['task'] as Map));
+  }
+
+  @override
+  Future<WorkspaceTask> setTaskCompleted(String id, bool completed) async {
+    final response = await _request('POST', '/v1/tasks/toggle',
+      token: await _token(), body: {'id': id, 'completed': completed});
+    return _task(Map<String, dynamic>.from(response['task'] as Map));
+  }
+
+  @override
+  Future<void> deleteTask(String id) async {
+    await _request('POST', '/v1/tasks/delete',
+      token: await _token(), body: {'id': id});
+  }
+
   @override
   Future<void> requestPasswordReset(String email) async {
     throw Exception('Восстановление пароля пока не настроено на сервере.');
