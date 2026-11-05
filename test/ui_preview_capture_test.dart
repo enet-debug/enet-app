@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:enet_app/features/auth/data/demo_auth_repository.dart';
@@ -6,6 +7,7 @@ import 'package:enet_app/features/auth/domain/auth_repository.dart';
 import 'package:enet_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
@@ -36,6 +38,20 @@ class _PreviewRepository extends DemoAuthRepository {
 
 const _captureKey = ValueKey<String>('real-app-capture-root');
 
+Future<void> _loadReadableFont() async {
+  // The flutter_test engine normally substitutes the Ahem font, which paints
+  // text as blocks. Load a local system font into the app's Roboto family so
+  // real UI screenshots include readable Russian text.
+  final source = File('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf');
+  if (!source.existsSync()) {
+    throw StateError('Readable screenshot font was not installed');
+  }
+  final bytes = await source.readAsBytes();
+  final loader = FontLoader('Roboto');
+  loader.addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+  await loader.load();
+}
+
 Future<void> _saveCapture(WidgetTester tester, String filename) async {
   await tester.pump();
   final boundary =
@@ -63,6 +79,12 @@ Future<void> _saveCapture(WidgetTester tester, String filename) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    if (Platform.environment['ENET_CAPTURE_UI'] == '1') {
+      await _loadReadableFont();
+    }
+  });
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
