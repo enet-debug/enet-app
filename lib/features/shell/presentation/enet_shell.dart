@@ -85,10 +85,10 @@ class _ENetShellState extends State<ENetShell> {
 
   static const mobileItems = [
     _Dest(0, Icons.home_outlined, Icons.home_rounded, 'Главная'),
-    _Dest(1, Icons.apps_outlined, Icons.apps_rounded, 'Сервисы'),
-    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомл.'),
-    _Dest(3, Icons.account_circle_outlined, Icons.account_circle_rounded, 'Профиль'),
-    _Dest(-1, Icons.more_horiz_rounded, Icons.more_horiz_rounded, 'Ещё'),
+    _Dest(1, Icons.search_rounded, Icons.search_rounded, 'Сервисы'),
+    _Dest(-2, Icons.add_rounded, Icons.add_rounded, 'Создать'),
+    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
+    _Dest(3, Icons.person_outline_rounded, Icons.person_rounded, 'Профиль'),
   ];
 
   static const moreItems = [
@@ -386,68 +386,76 @@ class _ENetShellState extends State<ENetShell> {
     if (selected != null && mounted) go(selected);
   }
 
-  Widget _tabBar() {
-    return Glass(
-      radius: 23, blur: 14, strength: .9,
-      padding: const EdgeInsets.all(5),
-      child: SizedBox(
-        height: 58,
-        child: LayoutBuilder(builder: (context, constraints) {
-          final w = constraints.maxWidth / mobileItems.length;
-          final found = mobileItems.indexWhere((item) => item.index == index);
-          final active = found < 0 ? mobileItems.length - 1 : found;
-          return Stack(children: [
-            AnimatedPositioned(
-              duration: ENetMotion.medium,
-              curve: ENetMotion.curve,
-              left: active * w, top: 0, bottom: 0, width: w,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    color: ENetColors.mint.withValues(alpha: .12),
-                    border: Border.all(color: ENetColors.mint.withValues(alpha: .18)),
-                  ),
-                ),
-              ),
-            ),
-            Row(children: [
-              for (var i = 0; i < mobileItems.length; i++)
-                SizedBox(
-                  width: w,
-                  child: Pressable(
-                    key: ValueKey(mobileItems[i].index < 0
-                      ? 'mobile-nav-more'
-                      : 'mobile-nav-${mobileItems[i].index}'),
-                    onTap: mobileItems[i].index < 0
-                      ? _showMoreMenu
-                      : () => go(mobileItems[i].index),
-                    pressedScale: .94,
-                    haptic: false,
-                    builder: (context, _) {
-                      final destination = mobileItems[i];
-                      final selected = i == active;
-                      return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                        _TintedIcon(selected ? destination.activeIcon : destination.icon,
-                          selected: selected, size: 22),
-                        const SizedBox(height: 3),
-                        Text(destination.label, maxLines: 1, overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                            color: selected ? ENetColors.text : ENetColors.muted,
-                          )),
-                      ]);
-                    },
-                  ),
-                ),
-            ]),
-          ]);
-        }),
-      ),
+  Future<void> _showCreateMenu() async {
+    final selected = await showModalBottomSheet<int>(
+      context: context, backgroundColor: ENetColors.surface,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 26),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const Align(alignment: Alignment.centerLeft,
+            child: Text('Быстрые действия',
+              style: TextStyle(color: ENetColors.text,
+                fontSize: 18, fontWeight: FontWeight.w800))),
+          ListTile(
+            leading: const Icon(Icons.shopping_bag_outlined, color: ENetColors.violet),
+            title: const Text('Создать объявление'),
+            subtitle: const Text('Открыть Продайзер через каталог'),
+            onTap: () => Navigator.of(ctx).pop(1),
+          ),
+          ListTile(
+            leading: const Icon(Icons.checklist_rounded, color: ENetColors.cyan),
+            title: const Text('Новая задача'),
+            onTap: () => Navigator.of(ctx).pop(7),
+          ),
+        ]),
+      )),
     );
+    if (selected != null && mounted) go(selected);
   }
+
+  Widget _tabBar() => Glass(
+    radius: 23, blur: 14, strength: .9,
+    padding: const EdgeInsets.all(5),
+    child: SizedBox(height: 58, child: Row(children: [
+      for (final destination in mobileItems)
+        Expanded(child: Pressable(
+          key: ValueKey(destination.index == -2
+            ? 'mobile-action-create' : 'mobile-nav-${destination.index}'),
+          onTap: destination.index == -2
+            ? _showCreateMenu : () => go(destination.index),
+          haptic: false,
+          builder: (context, hovered) => Center(
+            child: destination.index == -2
+              ? Container(
+                  width: 46, height: 46,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: ENetColors.mint,
+                    boxShadow: [BoxShadow(
+                      color: ENetColors.mint.withValues(alpha: .35),
+                      blurRadius: 17, spreadRadius: 1)],
+                  ),
+                  child: const Icon(Icons.add_rounded,
+                    color: ENetColors.onAccent, size: 29),
+                )
+              : Container(
+                  width: 46, height: 46,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: destination.index == index
+                      ? ENetColors.mint.withValues(alpha: .16)
+                      : Colors.transparent,
+                  ),
+                  child: _TintedIcon(
+                    destination.index == index
+                      ? destination.activeIcon : destination.icon,
+                    selected: destination.index == index, size: 23),
+                ),
+          ),
+        )),
+    ])),
+  );
 
   // ───────────────────────── Контент ─────────────────────────
 
@@ -498,6 +506,12 @@ class _ENetShellState extends State<ENetShell> {
         letterSpacing: 1.1,
       )),
       const Spacer(),
+      IconButton(
+        key: const ValueKey('mobile-nav-more'),
+        tooltip: 'Дополнительные разделы',
+        onPressed: _showMoreMenu,
+        icon: const Icon(Icons.more_horiz_rounded, color: ENetColors.cyan),
+      ),
       IconButton(
         tooltip: (_unreadCount ?? 0) > 0
           ? 'Уведомления: $_unreadCount непрочитанных'
