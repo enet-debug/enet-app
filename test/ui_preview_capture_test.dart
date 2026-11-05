@@ -50,6 +50,21 @@ Future<void> _loadReadableFont() async {
   final loader = FontLoader('Roboto');
   loader.addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
   await loader.load();
+
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot == null || flutterRoot.isEmpty) {
+    throw StateError('Flutter root is required for real icon previews');
+  }
+  final iconFile = File(
+    '$flutterRoot/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
+  );
+  if (!iconFile.existsSync()) {
+    throw StateError('Material Icons font was not found in the Flutter SDK');
+  }
+  final iconBytes = await iconFile.readAsBytes();
+  final icons = FontLoader('MaterialIcons');
+  icons.addFont(Future<ByteData>.value(ByteData.sublistView(iconBytes)));
+  await icons.load();
 }
 
 Future<void> _saveCapture(WidgetTester tester, String filename) async {
@@ -137,8 +152,12 @@ void main() {
             ? find.text('Профиль').last
             : find.text('Профиль').first,
       );
+      // Reveal widgets are staggered. Drive multiple frames so both the page
+      // transition and delayed cards reach their final visible state.
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 800));
+      for (var frame = 0; frame < 12; frame++) {
+        await tester.pump(const Duration(milliseconds: 200));
+      }
       expect(find.text('00000000-0000-4000-8000-000000000001'),
           findsOneWidget);
       await _saveCapture(tester, 'enet-profile-$device');
