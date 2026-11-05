@@ -19,7 +19,7 @@ try {
   flutter pub get
 
   try {
-    Invoke-RestMethod -Uri "$ApiUrl/health" -TimeoutSec 2 | Out-Null
+    Invoke-RestMethod -Uri "$ApiUrl/ready" -TimeoutSec 2 | Out-Null
     Write-Host 'Using existing eNet API on localhost:8787'
   } catch {
     $ApiProcess = Start-Process -FilePath 'node' -ArgumentList 'src/server.mjs' -WorkingDirectory (Join-Path $Root 'api') -WindowStyle Hidden -PassThru
@@ -30,7 +30,7 @@ try {
         throw 'eNet API stopped during startup. Check Node.js and api/data permissions.'
       }
       try {
-        Invoke-RestMethod -Uri "$ApiUrl/health" -TimeoutSec 2 | Out-Null
+        Invoke-RestMethod -Uri "$ApiUrl/ready" -TimeoutSec 2 | Out-Null
         $Ready = $true
         break
       } catch {}
