@@ -215,7 +215,7 @@ class _WorkspaceTaskSnapshotState extends State<WorkspaceTaskSnapshot> {
           ),
         ]),
         const SizedBox(height: 5),
-        Text(tasks == null ? (_error ?? 'Загрузка…') : '${open} в работе',
+        Text(tasks == null ? (_error ?? 'Загрузка…') : '$open в работе',
           style: const TextStyle(color: ENetColors.text,
             fontSize: 22, fontWeight: FontWeight.w800)),
         const SizedBox(height: 5),
