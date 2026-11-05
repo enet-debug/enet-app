@@ -122,6 +122,7 @@ flutter run -d linux --dart-define=ENET_API_URL=http://127.0.0.1:8787
 - интеграционный тест API (команда `npm test`);
 - GitHub Actions для проверки API и сборок Linux, Windows и iOS;
 - выбор адреса API на экране входа с безопасной проверкой HTTPS и сохранением в защищённом хранилище;
+- шаблоны развёртывания API на Ubuntu через systemd/Caddy и ежедневное резервное копирование SQLite;
 - подпись устройства в списке сеансов различается для Linux, Windows, iOS, macOS и Android.
 
 ## Что пока НЕ сделано
