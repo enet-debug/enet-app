@@ -36,6 +36,18 @@ class _PreviewRepository extends DemoAuthRepository {
           url: 'https://prodayzer.ru',
         ),
       ];
+
+  @override
+  Future<List<AccountSession>> listSessions() async => [
+        AccountSession(
+          id: 'preview-session',
+          device: 'Linux (текущее)',
+          createdAt: DateTime.utc(2026, 11, 5, 8),
+          lastSeenAt: DateTime.utc(2026, 11, 5, 12, 30),
+          expiresAt: DateTime.utc(2026, 11, 6, 8),
+          current: true,
+        ),
+      ];
 }
 
 const _captureKey = ValueKey<String>('real-app-capture-root');
