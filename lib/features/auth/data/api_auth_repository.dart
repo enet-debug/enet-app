@@ -1,37 +1,91 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../domain/auth_repository.dart';
 
-/// Real eNet ID backend. Use HTTPS when the API is outside localhost.
+/// Real eNet ID backend. Remote endpoints must use HTTPS.
 class ApiAuthRepository implements AuthRepository {
   ApiAuthRepository({http.Client? client}) : _client = client ?? http.Client();
 
-  static const apiUrl = String.fromEnvironment(
-    'ENET_API_URL', defaultValue: 'http://127.0.0.1:8787',
+  static const defaultApiUrl = String.fromEnvironment(
+    'ENET_API_URL',
+    defaultValue: 'http://127.0.0.1:8787',
   );
   static const _sessionKey = 'enet_id_session';
+  static const _apiUrlKey = 'enet.api_base_url';
+
   final http.Client _client;
-  String get _clientLabel {
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android: return 'eNet APP / Android';
-      case TargetPlatform.iOS: return 'eNet APP / iOS';
-      case TargetPlatform.windows: return 'eNet APP / Windows';
-      case TargetPlatform.macOS: return 'eNet APP / macOS';
-      case TargetPlatform.linux: return 'eNet APP / Linux';
-      case TargetPlatform.fuchsia: return 'eNet APP / Fuchsia';
-    }
-  }
+  final SharedPreferencesAsync _preferences = SharedPreferencesAsync();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  String _apiUrl = defaultApiUrl;
+  bool _initialized = false;
+
+  @override
+  String get apiBaseUrl => _apiUrl;
+
+  String get _clientLabel {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return 'eNet APP / Android';
+      case TargetPlatform.iOS:
+        return 'eNet APP / iOS';
+      case TargetPlatform.windows:
+        return 'eNet APP / Windows';
+      case TargetPlatform.macOS:
+        return 'eNet APP / macOS';
+      case TargetPlatform.linux:
+        return 'eNet APP / Linux';
+      case TargetPlatform.fuchsia:
+        return 'eNet APP / Fuchsia';
+    }
+  }
+
+  @override
+  Future<void> initialize() async {
+    if (_initialized) return;
+    final saved = await _preferences.getString(_apiUrlKey);
+    if (saved != null && saved.trim().isNotEmpty) {
+      try {
+        _apiUrl = normalizeApiBaseUrl(saved);
+      } on FormatException {
+        await _preferences.remove(_apiUrlKey);
+      }
+    }
+    _initialized = true;
+  }
+
+  @override
+  Future<void> updateApiBaseUrl(String value) async {
+    await initialize();
+    final normalized = normalizeApiBaseUrl(value);
+    if (normalized == _apiUrl) return;
+
+    final token = await _storage.read(key: _sessionKey);
+    if (token != null) {
+      try {
+        await _request('POST', '/v1/auth/logout', token: token);
+      } catch (_) {
+        // The old API may be offline; local credentials are still removed.
+      }
+      await _storage.delete(key: _sessionKey);
+    }
+    await _preferences.setString(_apiUrlKey, normalized);
+    _apiUrl = normalized;
+  }
+
   Uri _uri(String path) => Uri.parse(
-    '${apiUrl.replaceAll(RegExp(r'/$'), '')}$path',
+    '${_apiUrl.replaceAll(RegExp(r'/$'), '')}$path',
   );
 
   Future<Map<String, dynamic>> _request(
-    String method, String path, {
+    String method,
+    String path, {
     Map<String, dynamic>? body,
     String? token,
   }) async {
@@ -55,6 +109,7 @@ class ApiAuthRepository implements AuthRepository {
     } on http.ClientException {
       throw Exception('Нет соединения с eNet API. Проверьте адрес сервера.');
     }
+
     Map<String, dynamic> result;
     try {
       result = Map<String, dynamic>.from(jsonDecode(response.body) as Map);
@@ -64,14 +119,19 @@ class ApiAuthRepository implements AuthRepository {
     if (response.statusCode >= 400) {
       final error = result['error'];
       final message = error is Map ? error['message'] : null;
-      throw Exception(message is String ? message : 'Ошибка API: ${response.statusCode}');
+      throw Exception(message is String
+        ? message
+        : 'Ошибка API: ${response.statusCode}');
     }
     return result;
   }
 
   AuthUser _user(Map<String, dynamic> data) {
     final item = Map<String, dynamic>.from(data['user'] as Map);
-    return AuthUser(email: item['email'] as String, name: item['name'] as String);
+    return AuthUser(
+      email: item['email'] as String,
+      name: item['name'] as String,
+    );
   }
 
   Future<AuthUser> _setSession(Map<String, dynamic> response) async {
@@ -81,27 +141,39 @@ class ApiAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<AuthUser> signIn({required String email, required String password}) async =>
-      _setSession(await _request('POST', '/v1/auth/login', body: {
-        'email': email.trim(), 'password': password,
-      }));
+  Future<AuthUser> signIn({
+    required String email,
+    required String password,
+  }) async => _setSession(await _request(
+    'POST',
+    '/v1/auth/login',
+    body: {'email': email.trim(), 'password': password},
+  ));
 
   @override
   Future<AuthUser> signUp({
-    required String name, required String email, required String password,
-  }) async => _setSession(await _request('POST', '/v1/auth/register', body: {
-        'name': name.trim(), 'email': email.trim(), 'password': password,
-      }));
+    required String name,
+    required String email,
+    required String password,
+  }) async => _setSession(await _request(
+    'POST',
+    '/v1/auth/register',
+    body: {
+      'name': name.trim(),
+      'email': email.trim(),
+      'password': password,
+    },
+  ));
 
   @override
   Future<AuthUser?> restoreSession() async {
+    await initialize();
     final token = await _storage.read(key: _sessionKey);
     if (token == null || token.isEmpty) return null;
     try {
       return _user(await _request('GET', '/v1/auth/me', token: token));
     } catch (_) {
-      // The session may have expired or the local API may be offline.
-      // Do not expose an unverified account as authenticated.
+      // The session may have expired or the API may be offline.
       return null;
     }
   }
@@ -126,9 +198,15 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<List<EcosystemService>> listServices() async {
-    final result = await _request('GET', '/v1/services', token: await _token());
+    final result = await _request(
+      'GET',
+      '/v1/services',
+      token: await _token(),
+    );
     final services = result['services'];
-    if (services is! List) throw const FormatException('Некорректный каталог сервисов');
+    if (services is! List) {
+      throw const FormatException('Некорректный каталог сервисов');
+    }
     return services.map((value) {
       final item = Map<String, dynamic>.from(value as Map);
       return EcosystemService(
@@ -141,31 +219,53 @@ class ApiAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> changePassword(String currentPassword, String nextPassword) async {
-    await _request('POST', '/v1/auth/change-password', token: await _token(), body: {
-      'current_password': currentPassword,
-      'new_password': nextPassword,
-    });
+  Future<void> changePassword(
+    String currentPassword,
+    String nextPassword,
+  ) async {
+    await _request(
+      'POST',
+      '/v1/auth/change-password',
+      token: await _token(),
+      body: {
+        'current_password': currentPassword,
+        'new_password': nextPassword,
+      },
+    );
   }
 
   @override
   Future<int> revokeOtherSessions() async {
-    final response = await _request('POST', '/v1/auth/logout-others', token: await _token());
+    final response = await _request(
+      'POST',
+      '/v1/auth/logout-others',
+      token: await _token(),
+    );
     return response['revoked'] as int;
   }
 
   @override
   Future<AuthUser> updateName(String name) async {
-    final result = await _request('POST', '/v1/auth/profile',
-      token: await _token(), body: {'name': name});
+    final result = await _request(
+      'POST',
+      '/v1/auth/profile',
+      token: await _token(),
+      body: {'name': name},
+    );
     return _user(result);
   }
 
   @override
   Future<List<AccountSession>> listSessions() async {
-    final response = await _request('GET', '/v1/auth/sessions', token: await _token());
+    final response = await _request(
+      'GET',
+      '/v1/auth/sessions',
+      token: await _token(),
+    );
     final sessions = response['sessions'];
-    if (sessions is! List) throw const FormatException('Некорректные данные сессий');
+    if (sessions is! List) {
+      throw const FormatException('Некорректные данные сессий');
+    }
     return sessions.map((value) {
       final item = Map<String, dynamic>.from(value as Map);
       return AccountSession(
@@ -181,8 +281,12 @@ class ApiAuthRepository implements AuthRepository {
 
   @override
   Future<void> revokeSession(String sessionId) async {
-    await _request('POST', '/v1/auth/sessions/revoke',
-      token: await _token(), body: {'session_id': sessionId});
+    await _request(
+      'POST',
+      '/v1/auth/sessions/revoke',
+      token: await _token(),
+      body: {'session_id': sessionId},
+    );
   }
 
   @override
