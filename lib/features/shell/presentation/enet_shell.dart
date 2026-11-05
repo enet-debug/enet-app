@@ -741,7 +741,6 @@ class _FeatureTile extends StatelessWidget {
     required this.heading,
     required this.body,
     required this.onTap,
-    this.soon = false,
   });
 
   final IconData icon;
@@ -749,7 +748,6 @@ class _FeatureTile extends StatelessWidget {
   final String heading;
   final String body;
   final VoidCallback? onTap;
-  final bool soon;
 
   @override
   Widget build(BuildContext context) {
@@ -779,16 +777,6 @@ class _FeatureTile extends StatelessWidget {
                   child: Icon(icon, color: Colors.white, size: 25),
                 ),
                 const Spacer(),
-                if (soon)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text('СКОРО', style: TextStyle(color: ENetColors.muted, fontSize: 9.5, letterSpacing: 1.2, fontWeight: FontWeight.w800)),
-                  )
-                else
                   AnimatedSlide(
                     duration: ENetMotion.quick,
                     offset: Offset(hovered ? .2 : 0, 0),
