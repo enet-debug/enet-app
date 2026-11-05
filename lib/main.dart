@@ -35,7 +35,7 @@ class _ENetAppState extends State<ENetApp> {
     super.initState();
     auth = AuthController(widget.authRepository ?? ApiAuthRepository());
     auth.addListener(_update);
-    auth.restoreSession();
+    auth.initialize();
   }
 
   void _update() => setState(() {});
