@@ -103,6 +103,65 @@ class _MountainScenePainter extends CustomPainter {
   bool shouldRepaint(covariant _MountainScenePainter oldDelegate) => false;
 }
 
+/// Restrained luminous trails inspired by the supplied desktop mockup.
+/// Purely decorative. Does not imply any connected service.
+class WorkspaceLightTrails extends StatelessWidget {
+  const WorkspaceLightTrails({super.key});
+
+  @override
+  Widget build(BuildContext context) => const IgnorePointer(
+    child: RepaintBoundary(
+      child: CustomPaint(painter: _WorkspaceLightTrailPainter()),
+    ),
+  );
+}
+
+class _WorkspaceLightTrailPainter extends CustomPainter {
+  const _WorkspaceLightTrailPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final clip = Rect.fromLTWH(0, 0, w, h);
+    canvas.save();
+    canvas.clipRect(clip);
+
+    final highlight = Paint()..shader = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [
+        ENetColors.mint.withValues(alpha: 0),
+        ENetColors.mint.withValues(alpha: .1),
+        ENetColors.cyan.withValues(alpha: .84),
+      ],
+    ).createShader(clip);
+
+    for (var i = 0; i < 3; i++) {
+      final path = Path()
+        ..moveTo(w * (.35 + i * .04), h * 1.35)
+        ..cubicTo(
+          w * (.52 + i * .02), h * .60,
+          w * (.65 + i * .01), h * 1.15,
+          w * 1.12, -h * (.38 + i * .12),
+        );
+
+      canvas.drawPath(path, Paint()
+        ..color = ENetColors.mint.withValues(alpha: .13)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 12 - i * 2
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15));
+
+      canvas.drawPath(path, highlight
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = i == 0 ? 2.0 : 1.2);
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _WorkspaceLightTrailPainter oldDelegate) => false;
+}
+
 /// A real account-backed metric replaces the speculative balance from the mockup.
 class WorkspaceTaskSnapshot extends StatefulWidget {
   const WorkspaceTaskSnapshot({super.key, required this.auth, required this.onOpenTasks});
