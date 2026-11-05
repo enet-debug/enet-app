@@ -140,7 +140,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
         Row(children: [
           const Expanded(child: Text('Сервисы eNet', style: TextStyle(
             color: ENetColors.text,
-            fontSize: 21,
+            fontSize: 24,
             fontWeight: FontWeight.w800,
             letterSpacing: -.55,
           ))),
@@ -158,9 +158,9 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
               ]),
             ),
         ]),
-        const SizedBox(height: 8),
+        const SizedBox(height: 11),
         SizedBox(
-          height: 43,
+          height: 45,
           child: TextField(
             key: const ValueKey('dashboard-service-search'),
             controller: _search,
@@ -197,7 +197,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
             ),
           ),
         ),
-        const SizedBox(height: 11),
+        const SizedBox(height: 16),
         if (_loading && _services.isEmpty)
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
@@ -727,111 +727,157 @@ class _DashboardServiceTile extends StatelessWidget {
   final VoidCallback? onOpen;
   final VoidCallback? onFavorite;
 
-  @override
-  Widget build(BuildContext context) => Glass(
-    radius: 16,
-    blur: 11,
-    shadow: false,
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    tint: color,
-    child: Row(children: [
-      Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [color.withValues(alpha: .95), color.withValues(alpha: .48)],
-          ),
-          boxShadow: [
-            BoxShadow(color: color.withValues(alpha: .18), blurRadius: 16, offset: const Offset(0, 5)),
-          ],
-        ),
-        child: Icon(icon, color: Colors.white, size: 29),
-      ),
-      const SizedBox(width: 13),
-      Expanded(child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(children: [
-            Flexible(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: ENetColors.text,
-                fontSize: 14, fontWeight: FontWeight.w800))),
-            if (popular) ...[
-              const SizedBox(width: 7),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF9A6B23).withValues(alpha: .25),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFFFC85B).withValues(alpha: .22)),
-                ),
-                child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.local_fire_department_rounded,
-                    color: Color(0xFFFFD06D), size: 11),
-                  SizedBox(width: 3),
-                  Text('Популярный', style: TextStyle(
-                    color: Color(0xFFFFD06D), fontSize: 9,
-                    fontWeight: FontWeight.w700)),
-                ]),
-              ),
-            ],
-          ]),
-          const SizedBox(height: 4),
-          Text(description, maxLines: 2, overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: ENetColors.muted, fontSize: 10.5, height: 1.3)),
-        ],
+  Widget _popularBadge(bool compact) => Container(
+    padding: EdgeInsets.symmetric(
+      horizontal: compact ? 7 : 9,
+      vertical: compact ? 3 : 4,
+    ),
+    decoration: BoxDecoration(
+      color: const Color(0xFF9A6B23).withValues(alpha: .25),
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: const Color(0xFFFFC85B).withValues(alpha: .22)),
+    ),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
+      Icon(Icons.local_fire_department_rounded,
+        color: const Color(0xFFFFD06D), size: compact ? 11 : 13),
+      const SizedBox(width: 3),
+      Text('Популярный', style: TextStyle(
+        color: const Color(0xFFFFD06D),
+        fontSize: compact ? 9 : 10,
+        fontWeight: FontWeight.w700,
       )),
-      const SizedBox(width: 8),
-      if (active)
-        FilledButton(
-          onPressed: onOpen,
-          style: FilledButton.styleFrom(
-            backgroundColor: ENetColors.mint,
-            foregroundColor: ENetColors.onAccent,
-            minimumSize: const Size(88, 36),
-            padding: const EdgeInsets.symmetric(horizontal: 11),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            textStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 11, fontWeight: FontWeight.w800),
-          ),
-          child: const Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.open_in_new_rounded, size: 14),
-            SizedBox(width: 5),
-            Text('Открыть', style: TextStyle(fontFamily: 'Roboto')),
-          ]),
-        )
-      else
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .06),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withValues(alpha: .07)),
-          ),
-          child: const Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.schedule_rounded, size: 13, color: ENetColors.muted),
-            SizedBox(width: 5),
-            Text('Скоро', style: TextStyle(color: ENetColors.text,
-              fontSize: 10.5, fontWeight: FontWeight.w700)),
-          ]),
-        ),
-      if (!active) ...[
-        const SizedBox(width: 4),
-        const Icon(Icons.star_border_rounded, color: ENetColors.muted, size: 20),
-      ],
-      if (active) ...[
-        const SizedBox(width: 4),
-        IconButton(
-          tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
-          visualDensity: VisualDensity.compact,
-          onPressed: onFavorite,
-          icon: Icon(favorite ? Icons.star_rounded : Icons.star_border_rounded,
-            color: favorite ? const Color(0xFFFFC85B) : ENetColors.muted, size: 20),
-        ),
-      ],
     ]),
   );
+
+  Widget _statusButton(bool compact) {
+    if (active) {
+      return FilledButton(
+        onPressed: onOpen,
+        style: FilledButton.styleFrom(
+          backgroundColor: ENetColors.mint,
+          foregroundColor: ENetColors.onAccent,
+          minimumSize: Size(compact ? 84 : 124, compact ? 34 : 42),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 9 : 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          textStyle: TextStyle(
+            fontFamily: 'Roboto',
+            fontSize: compact ? 10 : 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.open_in_new_rounded, size: compact ? 12 : 15),
+          const SizedBox(width: 5),
+          Text('Открыть', style: TextStyle(
+            fontFamily: 'Roboto', fontSize: compact ? 10 : 12)),
+        ]),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 9 : 14,
+        vertical: compact ? 8 : 11,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: .06),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: .07)),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.schedule_rounded, size: compact ? 12 : 15,
+          color: ENetColors.muted),
+        const SizedBox(width: 5),
+        Text('Скоро', style: TextStyle(
+          color: ENetColors.text,
+          fontSize: compact ? 10 : 12,
+          fontWeight: FontWeight.w700,
+        )),
+      ]),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    return Glass(
+      radius: 17,
+      blur: 11,
+      shadow: false,
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 13,
+        vertical: compact ? 11 : 16,
+      ),
+      tint: color,
+      child: Row(children: [
+        Container(
+          width: compact ? 58 : 68,
+          height: compact ? 58 : 68,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [color.withValues(alpha: .95), color.withValues(alpha: .48)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: .18),
+                blurRadius: 16,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: Colors.white, size: compact ? 27 : 34),
+        ),
+        SizedBox(width: compact ? 10 : 15),
+        Expanded(child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: ENetColors.text,
+                fontSize: compact ? 14 : 17,
+                fontWeight: FontWeight.w800,
+              )),
+            const SizedBox(height: 5),
+            Text(description, maxLines: 2, overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: ENetColors.muted,
+                fontSize: compact ? 10.5 : 12.5,
+                height: 1.35,
+              )),
+          ],
+        )),
+        SizedBox(width: compact ? 5 : 10),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (popular) ...[
+              _popularBadge(compact),
+              SizedBox(height: compact ? 5 : 7),
+            ],
+            _statusButton(compact),
+          ],
+        ),
+        SizedBox(width: compact ? 1 : 5),
+        if (active)
+          IconButton(
+            tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
+            visualDensity: VisualDensity.compact,
+            onPressed: onFavorite,
+            icon: Icon(
+              favorite ? Icons.star_rounded : Icons.star_border_rounded,
+              color: favorite ? const Color(0xFFFFC85B) : ENetColors.muted,
+              size: compact ? 19 : 22,
+            ),
+          )
+        else
+          Icon(Icons.star_border_rounded,
+            color: ENetColors.muted, size: compact ? 19 : 22),
+      ]),
+    );
+  }
 }
