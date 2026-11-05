@@ -75,7 +75,18 @@ function setupDb(path) {
       user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
       favorite_services TEXT NOT NULL DEFAULT '[]',
       updated_at TEXT NOT NULL
-    );`);
+    );
+    CREATE TABLE IF NOT EXISTS notifications(
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      read_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_notifications_user_created
+      ON notifications(user_id, created_at DESC);`);
   // Backward compatible migration: preserve login sessions created by earlier API releases.
   const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
   if (!columns.has('session_id')) {
@@ -144,6 +155,18 @@ export function createApp(options = {}) {
   const updatePassword = db.prepare('UPDATE users SET password_hash=? WHERE id=?');
   const userById = db.prepare('SELECT * FROM users WHERE id=?');
   const clearSessions = db.prepare('DELETE FROM sessions WHERE expires_at<=?');
+  const insertNotification = db.prepare(
+    'INSERT INTO notifications(id,user_id,type,title,body,created_at,read_at) VALUES(?,?,?,?,?,?,NULL)');
+  const listNotifications = db.prepare(
+    'SELECT id,type,title,body,created_at,read_at FROM notifications ' +
+    'WHERE user_id=? ORDER BY created_at DESC, rowid DESC LIMIT 50');
+  const unreadNotifications = db.prepare(
+    'SELECT COUNT(*) AS count FROM notifications WHERE user_id=? AND read_at IS NULL');
+  const ownNotification = db.prepare('SELECT id FROM notifications WHERE user_id=? AND id=?');
+  const markNotification = db.prepare(
+    'UPDATE notifications SET read_at=COALESCE(read_at,?) WHERE user_id=? AND id=?');
+  const markAllNotifications = db.prepare(
+    'UPDATE notifications SET read_at=? WHERE user_id=? AND read_at IS NULL');
   function auth(req) {
     const match = /^Bearer ([A-Za-z0-9_-]{32,256})$/.exec(req.headers.authorization || '');
     if (!match) return null;
@@ -156,7 +179,7 @@ export function createApp(options = {}) {
     }
     return { user: publicUser(row), tokenHash };
   }
-  function newSession(user, req) {
+  function newSession(user, req, firstLogin = false) {
     const now = Date.now();
     clearSessions.run(now);
     const token = randomBytes(32).toString('base64url');
@@ -164,6 +187,14 @@ export function createApp(options = {}) {
     const label = String(req.headers['x-enet-client'] || req.headers['user-agent'] || 'Неизвестное устройство')
       .replace(/[\x00-\x1f\x7f]/g, '').slice(0, 90) || 'Неизвестное устройство';
     insertSession.run(digest(token), user.id, expiresAt, randomUUID(), now, now, label);
+    insertNotification.run(
+      randomUUID(), user.id, firstLogin ? 'welcome' : 'security',
+      firstLogin ? 'Добро пожаловать в eNet' : 'Новый вход в eNet ID',
+      firstLogin
+        ? 'Аккаунт создан. Вы можете управлять сервисами и безопасностью в одном приложении.'
+        : 'Выполнен вход с устройства: ' + label,
+      new Date(now).toISOString(),
+    );
     return { token, expires_at: new Date(expiresAt).toISOString(), user: publicUser(user) };
   }
   const server = http.createServer(async (req, res) => {
@@ -202,7 +233,7 @@ export function createApp(options = {}) {
       if (path === '/v1/meta' && req.method === 'GET') {
         return json(res, 200, {
           api: 'enet', version: '0.4.0', auth: 'bearer',
-          capabilities: ['accounts', 'sessions', 'services', 'favorites'],
+          capabilities: ['accounts', 'sessions', 'services', 'favorites', 'notifications'],
           services: { catalog: true, single_sign_on: false },
         });
       }
@@ -227,7 +258,7 @@ export function createApp(options = {}) {
           if (String(e.code || '').startsWith('SQLITE_CONSTRAINT')) return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
           throw e;
         }
-        return json(res, 201, newSession(user, req));
+        return json(res, 201, newSession(user, req, true));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
         const ipRetry = throttle('login-ip:' + clientIp(req), 30);
@@ -340,6 +371,34 @@ export function createApp(options = {}) {
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
         revokeSession.run(session.tokenHash);
         return json(res, 200, { ok: true });
+      }
+      if (path === '/v1/notifications' && req.method === 'GET') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        return json(res, 200, {
+          notifications: listNotifications.all(session.user.id),
+          unread_count: Number(unreadNotifications.get(session.user.id).count),
+        });
+      }
+      if (path === '/v1/notifications/read' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const body = await bodyOf(req);
+        if (typeof body.id !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.id)) {
+          return error(res, 400, 'invalid_input', 'Некорректный идентификатор уведомления.');
+        }
+        if (!ownNotification.get(session.user.id, body.id)) {
+          return error(res, 404, 'not_found', 'Уведомление не найдено.');
+        }
+        markNotification.run(new Date().toISOString(), session.user.id, body.id);
+        return json(res, 200, { ok: true });
+      }
+      if (path === '/v1/notifications/read-all' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const result = markAllNotifications.run(new Date().toISOString(), session.user.id);
+        return json(res, 200, { ok: true, updated: Number(result.changes) });
       }
       if (path === '/v1/me/preferences' && req.method === 'GET') {
         const session = auth(req);
