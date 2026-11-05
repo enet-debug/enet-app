@@ -20,6 +20,7 @@ class DashboardStatus extends StatefulWidget {
 class _DashboardStatusState extends State<DashboardStatus> {
   bool _checking = true;
   bool _online = false;
+  int? _serviceCount;
 
   @override
   void initState() {
@@ -31,10 +32,19 @@ class _DashboardStatusState extends State<DashboardStatus> {
     if (!mounted) return;
     setState(() => _checking = true);
     final result = await widget.auth.checkServer();
+    int? serviceCount;
+    if (result) {
+      try {
+        serviceCount = (await widget.auth.listServices()).length;
+      } catch (_) {
+        // API health is independent from an optional service-catalog response.
+      }
+    }
     if (!mounted) return;
     setState(() {
       _checking = false;
       _online = result;
+      _serviceCount = serviceCount;
     });
   }
 
@@ -107,6 +117,21 @@ class _DashboardStatusState extends State<DashboardStatus> {
           : _online ? 'Сервер отвечает на запросы' : 'Сервер не отвечает',
         style: const TextStyle(color: ENetColors.muted, fontSize: 10.5),
       ),
+      const SizedBox(height: 9),
+      _StatusDetailRow(
+        icon: Icons.fingerprint_rounded,
+        label: 'eNet ID',
+        value: widget.auth.user == null ? 'Не активен' : 'Активен',
+        color: widget.auth.user == null ? ENetColors.muted : ENetColors.mint,
+      ),
+      const SizedBox(height: 7),
+      _StatusDetailRow(
+        icon: Icons.apps_rounded,
+        label: 'Сервисы',
+        value: _checking ? 'Проверка' : _serviceCount == null
+          ? 'Нет данных' : '$_serviceCount подключено',
+        color: _serviceCount == null ? ENetColors.muted : ENetColors.mint,
+      ),
       const SizedBox(height: 6),
       Align(
         alignment: Alignment.centerRight,
@@ -122,4 +147,28 @@ class _DashboardStatusState extends State<DashboardStatus> {
       ),
     ]),
   );
+}
+
+class _StatusDetailRow extends StatelessWidget {
+  const _StatusDetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+    Icon(icon, color: color, size: 15),
+    const SizedBox(width: 8),
+    Expanded(child: Text(label, style: const TextStyle(
+      color: ENetColors.muted, fontSize: 10.5))),
+    Text(value, style: TextStyle(
+      color: color, fontSize: 10, fontWeight: FontWeight.w700)),
+  ]);
 }
