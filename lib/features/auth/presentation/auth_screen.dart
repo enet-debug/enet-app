@@ -8,6 +8,7 @@ import '../../../core/widgets/glass_controls.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/reveal.dart';
 import '../application/auth_controller.dart';
+import 'api_endpoint_panel.dart';
 
 enum _AuthMode { signIn, signUp, reset }
 
@@ -99,6 +100,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       const Reveal(child: BrandLogo(size: 48)),
                       const SizedBox(height: 28),
                       card,
+                      const SizedBox(height: 12),
+                      ApiEndpointPanel(auth: widget.auth),
                     ]),
                   ),
                 )
@@ -114,7 +117,11 @@ class _AuthScreenState extends State<AuthScreen> {
                           width: 450,
                           child: SingleChildScrollView(
                             padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: card,
+                            child: Column(mainAxisSize: MainAxisSize.min, children: [
+                              card,
+                              const SizedBox(height: 12),
+                              ApiEndpointPanel(auth: widget.auth),
+                            ]),
                           ),
                         ),
                       ]),
