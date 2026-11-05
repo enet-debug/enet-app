@@ -213,8 +213,8 @@ class _DashboardSessionsSnapshotState extends State<DashboardSessionsSnapshot> {
           child: const Padding(
             padding: EdgeInsets.symmetric(vertical: 4),
             child: Row(children: [
-              const Icon(Icons.devices_rounded, color: ENetColors.cyan, size: 15),
-              const SizedBox(width: 8),
+              Icon(Icons.devices_rounded, color: ENetColors.cyan, size: 15),
+              SizedBox(width: 8),
               Expanded(child: Text('Управление сеансами', style: TextStyle(
                 color: ENetColors.cyan, fontSize: 10.5, fontWeight: FontWeight.w700))),
               Icon(Icons.chevron_right_rounded, color: ENetColors.cyan, size: 17),
