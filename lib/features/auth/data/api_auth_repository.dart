@@ -120,7 +120,7 @@ class ApiAuthRepository implements AuthRepository {
       throw Exception(
         message is String
             ? message
-            : 'Ошибка API: ' + response.statusCode.toString(),
+            : 'Ошибка API: ${response.statusCode}',
       );
     }
     return result;
