@@ -8,6 +8,11 @@ class AuthController extends ChangeNotifier {
   bool busy = false;
   bool initializing = true;
 
+  String get apiEndpoint => _repository.apiEndpoint;
+
+  Future<void> configureApiEndpoint(String endpoint) =>
+      _execute(() => _repository.configureApiEndpoint(endpoint));
+
   Future<void> restoreSession() async {
     try {
       user = await _repository.restoreSession();
