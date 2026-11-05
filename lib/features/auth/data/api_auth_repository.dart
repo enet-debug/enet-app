@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:http/http.dart' as http;
 import '../domain/auth_repository.dart';
+import 'api_endpoint_policy.dart';
 
 /// Real eNet ID backend. Use HTTPS when the API is outside localhost.
 class ApiAuthRepository implements AuthRepository {
@@ -12,12 +15,28 @@ class ApiAuthRepository implements AuthRepository {
     'ENET_API_URL', defaultValue: 'http://127.0.0.1:8787',
   );
   static const _sessionKey = 'enet_id_session';
+  static const _endpointKey = 'enet.api.endpoint';
   final http.Client _client;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final SharedPreferencesAsync _prefs = SharedPreferencesAsync();
 
-  Uri _uri(String path) => Uri.parse(
-    '${apiUrl.replaceAll(RegExp(r'/$'), '')}$path',
-  );
+  @override
+  Future<String> getApiEndpoint() async {
+    final stored = await _prefs.getString(_endpointKey);
+    return stored ?? ApiEndpointPolicy.normalize(apiUrl);
+  }
+
+  @override
+  Future<void> setApiEndpoint(String value) async {
+    final normalized = ApiEndpointPolicy.normalize(value);
+    final current = await getApiEndpoint();
+    if (current == normalized) return;
+    await _prefs.setString(_endpointKey, normalized);
+    await _storage.delete(key: _sessionKey);
+  }
+
+  Future<Uri> _uri(String path) async =>
+      Uri.parse('${await getApiEndpoint()}$path');
 
   Future<Map<String, dynamic>> _request(
     String method, String path, {
@@ -26,16 +45,16 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     final headers = <String, String>{
       'Accept': 'application/json',
-      'X-eNet-Client': 'eNet APP Flutter',
+      'X-eNet-Client': 'eNet APP / ${defaultTargetPlatform.name}',
       if (body != null) 'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
     final http.Response response;
     try {
       response = await (method == 'GET'
-        ? _client.get(_uri(path), headers: headers)
+        ? _client.get(await _uri(path), headers: headers)
         : _client.post(
-            _uri(path),
+            await _uri(path),
             headers: headers,
             body: body == null ? null : jsonEncode(body),
           )).timeout(const Duration(seconds: 12));
@@ -106,8 +125,8 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<bool> checkServer() async {
     try {
-      final response = await _request('GET', '/health');
-      return response['status'] == 'ok';
+      final response = await _request('GET', '/ready');
+      return response['status'] == 'ready';
     } catch (_) {
       return false;
     }
@@ -127,6 +146,23 @@ class ApiAuthRepository implements AuthRepository {
         url: item['url'] as String,
       );
     }).toList(growable: false);
+  }
+
+  @override
+  Future<List<String>> favoriteServices() async {
+    final response = await _request('GET', '/v1/me/preferences', token: await _token());
+    final favorites = response['favorite_services'];
+    if (favorites is! List) throw const FormatException('Некорректные избранные сервисы');
+    return favorites.cast<String>().toList(growable: false);
+  }
+
+  @override
+  Future<List<String>> saveFavoriteServices(List<String> serviceIds) async {
+    final response = await _request('POST', '/v1/me/preferences',
+      token: await _token(), body: {'favorite_services': serviceIds});
+    final favorites = response['favorite_services'];
+    if (favorites is! List) throw const FormatException('Некорректное избранное');
+    return favorites.cast<String>().toList(growable: false);
   }
 
   @override
