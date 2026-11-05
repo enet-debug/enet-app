@@ -239,11 +239,11 @@ class MobileWelcomeScene extends StatelessWidget {
       onTap: onOpenProfile,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        height: 177,
+        height: 235,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: ENetColors.cyan.withValues(alpha: .23)),
+          border: Border.all(color: ENetColors.cyan.withValues(alpha: .08)),
         ),
         child: Stack(fit: StackFit.expand, children: [
           const CustomPaint(painter: _MobileMountainPainter()),
@@ -259,7 +259,7 @@ class MobileWelcomeScene extends StatelessWidget {
                 const Text('Добро пожаловать,', style: TextStyle(
                   color: ENetColors.text,
                   fontSize: 16, fontWeight: FontWeight.w600)),
-                Text(name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                Text('$name 👋', maxLines: 1, overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: ENetColors.text,
                     fontSize: 23, fontWeight: FontWeight.w800)),
               ],

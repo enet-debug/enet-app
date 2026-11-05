@@ -49,7 +49,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
     padding: const EdgeInsets.fromLTRB(13, 11, 13, 9),
     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Row(children: [
-        const Expanded(child: Text('СТАТУС СИСТЕМЫ', style: TextStyle(
+        const Expanded(child: Text('Состояние сервисов', style: TextStyle(
           color: ENetColors.text,
           fontSize: 11,
           fontWeight: FontWeight.w800,

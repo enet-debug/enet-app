@@ -672,7 +672,7 @@ class _ENetShellState extends State<ENetShell> {
         intro,
         const SizedBox(height: 17),
         shortcuts,
-        const SizedBox(height: 17),
+        const SizedBox(height: 60),
         _mobileQuickAccess(),
       ],
     );
