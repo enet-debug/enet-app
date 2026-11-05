@@ -256,10 +256,16 @@ class MobileWelcomeScene extends StatelessWidget {
           border: Border.all(color: ENetColors.cyan.withValues(alpha: .08)),
         ),
         child: Stack(fit: StackFit.expand, children: [
-          const CustomPaint(painter: _MobileMountainPainter()),
-          const Positioned(
-            top: 8, left: 0, right: 0,
-            child: Center(child: ENetMark(size: 46)),
+          // Approved artwork extracted from the user's visual reference.
+          // Only the backdrop is a raster asset; cards/text/actions are Flutter.
+          Positioned.fill(
+            child: Image.asset(
+              'assets/brand/approved_mobile_mountains.jpg',
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.medium,
+              errorBuilder: (context, error, stackTrace) =>
+                const CustomPaint(painter: _MobileMountainPainter()),
+            ),
           ),
           Positioned(
             left: 18, right: 55, bottom: 17,

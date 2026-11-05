@@ -20,3 +20,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/enet_logo.jpg
+    - assets/brand/approved_mobile_mountains.jpg
