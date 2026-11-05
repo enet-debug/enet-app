@@ -159,8 +159,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
       await tester.pump(const Duration(milliseconds: 800));
 
-      expect(find.text('Мои сервисы'), findsOneWidget);
-      expect(find.text('ВОЗМОЖНОСТИ eNet'), findsOneWidget);
+      expect(find.text('Сервисы eNet'), findsOneWidget);
+      expect(find.text('Мой профиль'), findsOneWidget);
       final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
       if (size.width > 600) {
         expect(heroSize.width, greaterThan(680));
@@ -203,7 +203,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-7')));
       } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-7')));
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-more')));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.tap(find.byKey(const ValueKey('more-nav-7')));
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -227,7 +229,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-5')));
       } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-5')));
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-0')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 450));
+        await tester.tap(find.text('Управление сеансами'));
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
