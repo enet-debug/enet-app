@@ -605,28 +605,15 @@ class _ENetShellState extends State<ENetShell> {
     final rail = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 112),
-          child: _accountSummaryCard(),
-        ),
-        const SizedBox(height: 14),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 126),
-          child: DashboardStatus(auth: widget.auth),
-        ),
-        const SizedBox(height: 14),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 180),
-          child: DashboardSessionsSnapshot(
-            auth: widget.auth,
-            onManage: () => go(5),
-          ),
-        ),
-        const SizedBox(height: 14),
-        ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 200),
-          child: _quickActionsCard(),
-        ),
+        _accountSummaryCard(),
+        const SizedBox(height: 11),
+        _balancePreviewCard(),
+        const SizedBox(height: 11),
+        DashboardStatus(auth: widget.auth),
+        const SizedBox(height: 11),
+        _quickActionsCard(),
+        const SizedBox(height: 11),
+        DashboardSessionsSnapshot(auth: widget.auth, onManage: () => go(5)),
       ],
     );
 
@@ -745,6 +732,21 @@ class _ENetShellState extends State<ENetShell> {
     ],
   );
 
+  Widget _balancePreviewCard() => Glass(
+    radius: 17, blur: 12,
+    padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Баланс', style: TextStyle(color: ENetColors.text,
+        fontSize: 12, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 8),
+      const Text('Нет данных', style: TextStyle(color: ENetColors.text,
+        fontSize: 22, fontWeight: FontWeight.w800)),
+      const SizedBox(height: 4),
+      const Text('Оплата ещё не подключена к eNet ID',
+        style: TextStyle(color: ENetColors.muted, fontSize: 10)),
+    ]),
+  );
+
   Widget _accountSummaryCard() => Pressable(
     onTap: () => go(3),
     haptic: false,
@@ -790,19 +792,19 @@ class _ENetShellState extends State<ENetShell> {
       ]),
       const SizedBox(height: 7),
       _QuickAction(
-        icon: Icons.key_rounded,
-        label: 'Сменить пароль',
-        onTap: () => go(4),
+        icon: Icons.shopping_bag_outlined,
+        label: 'Создать объявление',
+        onTap: () => go(1),
+      ),
+      _QuickAction(
+        icon: Icons.checklist_rounded,
+        label: 'Новая задача',
+        onTap: () => go(7),
       ),
       _QuickAction(
         icon: Icons.devices_rounded,
-        label: 'Завершить другие сеансы',
+        label: 'Управление сеансами',
         onTap: () => go(5),
-      ),
-      _QuickAction(
-        icon: Icons.brush_outlined,
-        label: 'Изменить оформление',
-        onTap: () => go(6),
       ),
     ]),
   );
