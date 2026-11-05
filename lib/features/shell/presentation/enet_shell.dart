@@ -247,13 +247,17 @@ class _ENetShellState extends State<ENetShell> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
           padding: EdgeInsets.only(left: 5),
-          child: Row(children: [
-            BrandLogo(size: 43),
-            SizedBox(width: 6),
-            Text('APP', style: TextStyle(
-              color: ENetColors.text, fontSize: 12,
-              fontWeight: FontWeight.w800, letterSpacing: 1.1)),
-          ]),
+          child: FittedBox(
+            alignment: Alignment.centerLeft,
+            fit: BoxFit.scaleDown,
+            child: Row(children: [
+              BrandLogo(size: 38),
+              SizedBox(width: 5),
+              Text('APP', style: TextStyle(
+                color: ENetColors.text, fontSize: 11,
+                fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+            ]),
+          ),
         ),
         const Padding(
           padding: EdgeInsets.only(left: 8, top: 2, bottom: 25),
@@ -719,8 +723,10 @@ class _ENetShellState extends State<ENetShell> {
       const Row(children: [
         Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 19),
         SizedBox(width: 7),
-        Text('Быстрые действия', style: TextStyle(
-          color: ENetColors.text, fontSize: 13, fontWeight: FontWeight.w800)),
+        Expanded(child: Text('Быстрые действия',
+          maxLines: 1, overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: ENetColors.text, fontSize: 12, fontWeight: FontWeight.w800))),
       ]),
       const SizedBox(height: 7),
       _QuickAction(
