@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - fix/enet-072-session-recovery
+      - feat/enet-brandmark-reference
   workflow_dispatch:
 
 permissions:
