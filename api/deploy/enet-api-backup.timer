@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily eNet API SQLite backup
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=15m
+Unit=enet-api-backup.service
+
+[Install]
+WantedBy=timers.target
