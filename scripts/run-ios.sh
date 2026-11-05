@@ -11,7 +11,7 @@ if ! command -v flutter >/dev/null 2>&1; then
   echo "Flutter SDK is required. Install Flutter and retry." >&2
   exit 1
 fi
-if [[ -z "\${ENET_API_URL:-}" ]]; then
+if [[ -z "${ENET_API_URL:-}" ]]; then
   echo "Set ENET_API_URL to the public HTTPS address of your deployed eNet API." >&2
   echo "Example: export ENET_API_URL=https://api.your-domain.example" >&2
   exit 1
