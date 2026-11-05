@@ -939,7 +939,9 @@ class _ENetShellState extends State<ENetShell> {
                           )),
                         SizedBox(height: compact ? 4 : 8),
                         Text(
-                          'Ваш единый аккаунт для всех сервисов eNet',
+                          compact
+                            ? 'Единый доступ ко всем сервисам eNet'
+                            : 'Ваш единый аккаунт для всех сервисов eNet',
                           maxLines: compact ? 2 : 3,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
