@@ -88,6 +88,15 @@ class _ENetShellState extends State<ENetShell> {
     _Dest(-1, Icons.more_horiz_rounded, Icons.more_horiz_rounded, 'Ещё'),
   ];
 
+  static const moreItems = [
+    _Dest(7, Icons.checklist_outlined, Icons.checklist_rounded, 'Задачи'),
+    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
+    _Dest(5, Icons.devices_outlined, Icons.devices_rounded, 'Устройства'),
+    _Dest(4, Icons.shield_outlined, Icons.shield_rounded, 'Безопасность'),
+    _Dest(6, Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
+    _Dest(8, Icons.info_outline_rounded, Icons.info_rounded, 'О приложении'),
+  ];
+
   AuthUser get user => widget.auth.user!;
 
   Future<void> _refreshUnreadCount() async {
@@ -230,19 +239,20 @@ class _ENetShellState extends State<ENetShell> {
         SizedBox(
           height: desktopItems.length * (itemHeight + gap),
           child: Stack(children: [
-            AnimatedPositioned(
-              duration: ENetMotion.medium,
-              curve: ENetMotion.curve,
-              top: desktopItems.indexWhere((item) => item.index == index) * (itemHeight + gap),
-              left: 0, right: 0, height: itemHeight,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: ENetColors.mint.withValues(alpha: .18),
-                  border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
+            if (desktopItems.any((item) => item.index == index))
+              AnimatedPositioned(
+                duration: ENetMotion.medium,
+                curve: ENetMotion.curve,
+                top: desktopItems.indexWhere((item) => item.index == index) * (itemHeight + gap),
+                left: 0, right: 0, height: itemHeight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: ENetColors.mint.withValues(alpha: .18),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
+                  ),
                 ),
               ),
-            ),
             for (var i = 0; i < desktopItems.length; i++)
               Positioned(
                 top: i * (itemHeight + gap),
@@ -322,7 +332,7 @@ class _ENetShellState extends State<ENetShell> {
                   child: Text('ДОПОЛНИТЕЛЬНЫЕ РАЗДЕЛЫ', style: _eyebrow),
                 ),
               ),
-              for (final destination in desktopItems.where((item) => item.index >= 4))
+              for (final destination in moreItems)
                 ListTile(
                   key: ValueKey('more-nav-${destination.index}'),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
