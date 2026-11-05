@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:enet_app/features/auth/data/demo_auth_repository.dart';
@@ -47,8 +46,14 @@ Future<void> _loadReadableFont() async {
     throw StateError('Readable screenshot font was not installed');
   }
   final bytes = await source.readAsBytes();
+  final boldSource = File('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf');
+  if (!boldSource.existsSync()) {
+    throw StateError('Bold Cyrillic screenshot font was not installed');
+  }
+  final boldBytes = await boldSource.readAsBytes();
   final loader = FontLoader('Roboto');
   loader.addFont(Future<ByteData>.value(ByteData.sublistView(bytes)));
+  loader.addFont(Future<ByteData>.value(ByteData.sublistView(boldBytes)));
   await loader.load();
 
   final flutterRoot = Platform.environment['FLUTTER_ROOT'];
@@ -142,6 +147,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 800));
 
       expect(find.text('Приложения eNet'), findsOneWidget);
+      final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
+      if (size.width > 600) {
+        expect(heroSize.width, greaterThan(850));
+      } else {
+        expect(heroSize.width, greaterThan(300));
+      }
       final device = size.width < 600 ? 'mobile' : 'desktop';
       await _saveCapture(tester, 'enet-home-$device');
 

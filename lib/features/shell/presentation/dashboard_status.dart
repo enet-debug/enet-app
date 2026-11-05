@@ -71,18 +71,13 @@ class _DashboardStatusState extends State<DashboardStatus> {
           fontWeight: FontWeight.w700, fontSize: 11, letterSpacing: 2)),
         const SizedBox(height: 14),
         if (narrow)
-          SizedBox(
-            height: 90,
-            child: ListView(scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                SizedBox(width: 250, child: status),
-                const SizedBox(width: 12),
-                SizedBox(width: 250, child: account),
-                const SizedBox(width: 12),
-                SizedBox(width: 250, child: security),
-              ]),
-          )
+          Column(children: [
+            status,
+            const SizedBox(height: 10),
+            account,
+            const SizedBox(height: 10),
+            security,
+          ])
         else
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Expanded(child: status),

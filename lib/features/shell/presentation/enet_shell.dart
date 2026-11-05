@@ -430,7 +430,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная ─────────────────────────
 
   Widget _home(bool compact) {
-    final titleSize = compact ? 36.0 : 48.0;
+    final titleSize = compact ? 30.0 : 48.0;
     return Column(key: const ValueKey('home'), crossAxisAlignment: CrossAxisAlignment.start, children: [
       Reveal(
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -453,9 +453,9 @@ class _ENetShellState extends State<ENetShell> {
       const SizedBox(height: 8),
       const Text('Все твои инструменты в одном пространстве.',
           style: TextStyle(color: ENetColors.muted, fontSize: 14.5)),
-      const SizedBox(height: 26),
+      SizedBox(height: compact ? 18 : 26),
       Reveal(delay: const Duration(milliseconds: 120), child: _hero(compact)),
-      const SizedBox(height: 28),
+      SizedBox(height: compact ? 22 : 28),
       DashboardStatus(auth: widget.auth, openAccount: () => go(2), openSettings: () => go(3)),
       const SizedBox(height: 34),
       ServiceCatalogPanel(auth: widget.auth),
@@ -518,9 +518,11 @@ class _ENetShellState extends State<ENetShell> {
         : 720.0;
 
     return Container(
+      key: const ValueKey('workspace-hero'),
+      width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -547,7 +549,7 @@ class _ENetShellState extends State<ENetShell> {
           ),
         ],
         Padding(
-          padding: EdgeInsets.all(compact ? 24 : 38),
+          padding: EdgeInsets.all(compact ? 20 : 38),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: contentWidth),
             child: Column(
@@ -578,12 +580,12 @@ class _ENetShellState extends State<ENetShell> {
                     ),
                   ]),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: compact ? 18 : 24),
                 Text(
-                  'Твоя цифровая среда.\nВ одном месте.',
+                  compact ? 'Твоя цифровая среда.' : 'Твоя цифровая среда.\nВ одном месте.',
                   style: TextStyle(
                     color: ENetColors.text,
-                    fontSize: compact ? 28 : 39,
+                    fontSize: compact ? 25 : 39,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -1.35,
                     height: 1.12,
@@ -598,13 +600,15 @@ class _ENetShellState extends State<ENetShell> {
                     height: 1.6,
                   ),
                 ),
-                const SizedBox(height: 22),
-                Wrap(spacing: 9, runSpacing: 9, children: const [
-                  _HeroTag(icon: Icons.fingerprint_rounded, label: 'eNet ID'),
-                  _HeroTag(icon: Icons.grid_view_rounded, label: 'Приложения'),
-                  _HeroTag(icon: Icons.shield_outlined, label: 'Безопасность'),
-                ]),
-                const SizedBox(height: 24),
+                if (!compact) ...[
+                  const SizedBox(height: 22),
+                  Wrap(spacing: 9, runSpacing: 9, children: const [
+                    _HeroTag(icon: Icons.fingerprint_rounded, label: 'eNet ID'),
+                    _HeroTag(icon: Icons.grid_view_rounded, label: 'Приложения'),
+                    _HeroTag(icon: Icons.shield_outlined, label: 'Безопасность'),
+                  ]),
+                ],
+                SizedBox(height: compact ? 18 : 24),
                 PrimaryButton(
                   label: 'Открыть профиль',
                   icon: Icons.arrow_forward_rounded,
