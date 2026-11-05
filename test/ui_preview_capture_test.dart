@@ -24,6 +24,9 @@ class _PreviewRepository extends DemoAuthRepository {
       );
 
   @override
+  Future<bool> checkServer() async => true;
+
+  @override
   Future<List<EcosystemService>> listServices() async => const [
         EcosystemService(
           id: 'prodayzer',
