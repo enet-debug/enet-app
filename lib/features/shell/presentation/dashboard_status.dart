@@ -61,7 +61,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
         icon: Icons.shield_outlined,
         title: 'Безопасность',
         subtitle: 'Пароли и устройства',
-        color: ENetColors.violet,
+        color: ENetColors.blue,
         onTap: widget.openSettings,
         actionIcon: Icons.arrow_forward_rounded,
         actionLabel: 'Открыть настройки безопасности',

@@ -77,6 +77,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Продайзер'), findsOneWidget);
     expect(find.text('eNet Studio'), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.code_rounded), findsOneWidget);
     await tester.enterText(find.byKey(const ValueKey('service-search')), 'Студи');
     await tester.pumpAndSettle();
     expect(find.text('Продайзер'), findsNothing);

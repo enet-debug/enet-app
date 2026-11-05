@@ -460,13 +460,13 @@ class _ENetShellState extends State<ENetShell> {
       const SizedBox(height: 34),
       ServiceCatalogPanel(auth: widget.auth),
       const SizedBox(height: 30),
-      const Reveal(delay: Duration(milliseconds: 200), child: Text('ПРОСТРАНСТВО', style: _eyebrow)),
+      const Reveal(delay: Duration(milliseconds: 200), child: Text('БЫСТРЫЙ ДОСТУП', style: _eyebrow)),
       const SizedBox(height: 16),
       LayoutBuilder(builder: (context, constraints) {
         final tiles = [
           _FeatureTile(
             icon: Icons.person_rounded,
-            gradient: ENetColors.violetGradient,
+            gradient: ENetColors.accent,
             heading: 'Профиль',
             body: 'Персональное пространство и данные аккаунта.',
             onTap: () => go(2),
@@ -480,7 +480,7 @@ class _ENetShellState extends State<ENetShell> {
           ),
           _FeatureTile(
             icon: Icons.notifications_active_outlined,
-            gradient: ENetColors.amberGradient,
+            gradient: ENetColors.violetGradient,
             heading: 'Уведомления',
             body: 'История входов и сообщения аккаунта.',
             onTap: () => go(1),
@@ -511,7 +511,12 @@ class _ENetShellState extends State<ENetShell> {
     ]);
   }
 
-  Widget _hero(bool compact) {
+  Widget _hero(bool compact) => LayoutBuilder(builder: (context, constraints) {
+    final showVisual = !compact && constraints.maxWidth >= 820;
+    final contentWidth = showVisual
+        ? math.min(560.0, constraints.maxWidth * .58)
+        : 720.0;
+
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
@@ -524,64 +529,95 @@ class _ENetShellState extends State<ENetShell> {
         ),
         border: Border.all(color: ENetColors.mint.withValues(alpha: .30)),
         boxShadow: [
-          BoxShadow(color: ENetColors.mint.withValues(alpha: .10),
-            blurRadius: 54, offset: const Offset(0, 18)),
+          BoxShadow(
+            color: ENetColors.mint.withValues(alpha: .10),
+            blurRadius: 54,
+            offset: const Offset(0, 18),
+          ),
         ],
       ),
       child: Stack(children: [
-        const Positioned.fill(child: _HeroOrbits()),
+        if (showVisual) ...[
+          const Positioned.fill(child: _HeroOrbits()),
+          const Positioned.fill(
+            child: Align(
+              alignment: Alignment(.72, -.02),
+              child: _HeroBrandMark(),
+            ),
+          ),
+        ],
         Padding(
-          padding: EdgeInsets.all(compact ? 26 : 40),
+          padding: EdgeInsets.all(compact ? 24 : 38),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 540),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: ENetColors.mint.withValues(alpha: .12),
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: ENetColors.mint.withValues(alpha: .27)),
+            constraints: BoxConstraints(maxWidth: contentWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: ENetColors.mint.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(100),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .27)),
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 14),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        compact ? 'ENET · WORKSPACE' : 'ENET · DEVELOPER PLATFORM',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: ENetColors.cyan,
+                          fontSize: 10,
+                          letterSpacing: 1.4,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ]),
                 ),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 14),
-                  const SizedBox(width: 6),
-                  Flexible(child: Text(
-                    compact ? 'ENET · WORKSPACE' : 'ENET • DEVELOPER PLATFORM',
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: ENetColors.cyan, fontSize: 10,
-                      letterSpacing: 1.4, fontWeight: FontWeight.w800))),
-                ]),
-              ),
-              const SizedBox(height: 25),
-              Text('Одна платформа.\nВсе твои сервисы.',
-                style: TextStyle(color: ENetColors.text,
-                  fontSize: compact ? 29 : 39, fontWeight: FontWeight.w800,
-                  letterSpacing: -1.3, height: 1.12)),
-              const SizedBox(height: 12),
-              const Text('eNet ID, рабочие инструменты и приложения.\nБыстрый доступ без лишних переходов.',
-                style: TextStyle(color: Color(0xFFB5DBCA), fontSize: 14.5, height: 1.6)),
-              if (!compact) ...[
-                const SizedBox(height: 25),
+                const SizedBox(height: 24),
+                Text(
+                  'Твоя цифровая среда.\\nВ одном месте.',
+                  style: TextStyle(
+                    color: ENetColors.text,
+                    fontSize: compact ? 28 : 39,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -1.35,
+                    height: 1.12,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'eNet ID, приложения и инструменты команды — в одном интерфейсе.',
+                  style: TextStyle(
+                    color: Color(0xFFB5DBCA),
+                    fontSize: 14.5,
+                    height: 1.6,
+                  ),
+                ),
+                const SizedBox(height: 22),
                 Wrap(spacing: 9, runSpacing: 9, children: const [
-                  _HeroTag(icon: Icons.verified_user_outlined, label: 'eNet ID'),
-                  _HeroTag(icon: Icons.extension_outlined, label: 'Сервисы'),
-                  _HeroTag(icon: Icons.security_outlined, label: 'Безопасность'),
+                  _HeroTag(icon: Icons.fingerprint_rounded, label: 'eNet ID'),
+                  _HeroTag(icon: Icons.grid_view_rounded, label: 'Приложения'),
+                  _HeroTag(icon: Icons.shield_outlined, label: 'Безопасность'),
                 ]),
+                const SizedBox(height: 24),
+                PrimaryButton(
+                  label: 'Открыть профиль',
+                  icon: Icons.arrow_forward_rounded,
+                  expand: false,
+                  onPressed: () => go(2),
+                ),
               ],
-              SizedBox(height: compact ? 16 : 26),
-              PrimaryButton(
-                label: 'Управление аккаунтом',
-                icon: Icons.arrow_forward_rounded,
-                expand: false,
-                onPressed: () => go(2),
-              ),
-            ]),
+            ),
           ),
         ),
       ]),
     );
-  }
-
+  });
   // ───────────────────────── Уведомления ─────────────────────────
 
   Widget _notifications() => NotificationsPanel(
@@ -990,6 +1026,84 @@ class _FeatureTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Фирменный знак в центре орбитальной композиции приветственного блока.
+class _HeroBrandMark extends StatelessWidget {
+  const _HeroBrandMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: SizedBox(
+        width: 286,
+        height: 286,
+        child: Stack(alignment: Alignment.center, children: [
+          Container(
+            width: 252,
+            height: 252,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: ENetColors.cyan.withValues(alpha: .12)),
+            ),
+          ),
+          Transform.rotate(
+            angle: -.48,
+            child: Container(
+              width: 270,
+              height: 104,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: ENetColors.cyan.withValues(alpha: .24)),
+              ),
+            ),
+          ),
+          Transform.rotate(
+            angle: .62,
+            child: Container(
+              width: 214,
+              height: 82,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.white.withValues(alpha: .12)),
+              ),
+            ),
+          ),
+          Container(
+            width: 148,
+            height: 148,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const RadialGradient(
+                colors: [Color(0xFF245B43), Color(0xFF0B2119)],
+              ),
+              border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
+              boxShadow: [
+                BoxShadow(
+                  color: ENetColors.mint.withValues(alpha: .22),
+                  blurRadius: 44,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: const Center(child: BrandLogo(size: 78, showName: false)),
+          ),
+          Positioned(top: 42, right: 50, child: _orbitalDot(ENetColors.cyan, 7)),
+          Positioned(bottom: 48, left: 34, child: _orbitalDot(ENetColors.mint, 5)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _orbitalDot(Color color, double size) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: color,
+      boxShadow: [BoxShadow(color: color.withValues(alpha: .65), blurRadius: 16)],
+    ),
+  );
 }
 
 /// Анимированные орбиты на карточке-приветствии.

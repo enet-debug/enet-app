@@ -234,6 +234,33 @@ class _ServiceCard extends StatelessWidget {
   final VoidCallback? onFavorite;
   final VoidCallback open;
 
+  IconData get _serviceIcon {
+    final id = service.id.toLowerCase();
+    final name = service.name.toLowerCase();
+    if (id.contains('prodayzer') || name.contains('продайзер')) {
+      return Icons.auto_awesome_rounded;
+    }
+    if (id.contains('studio') || name.contains('studio')) {
+      return Icons.code_rounded;
+    }
+    if (id == 'enet-id' || name == 'enet id') {
+      return Icons.fingerprint_rounded;
+    }
+    return Icons.apps_rounded;
+  }
+
+  Gradient get _serviceGradient {
+    final id = service.id.toLowerCase();
+    final name = service.name.toLowerCase();
+    if (id.contains('studio') || name.contains('studio')) {
+      return ENetColors.violetGradient;
+    }
+    if (id == 'enet-id' || name == 'enet id') {
+      return ENetColors.mintGradient;
+    }
+    return ENetColors.accent;
+  }
+
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -245,47 +272,88 @@ class _ServiceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         child: Glass(
           radius: 26,
-          blur: 20,
-          padding: const EdgeInsets.all(22),
+          blur: 18,
+          padding: const EdgeInsets.all(21),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
               Container(
-                width: 52, height: 52,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(17),
-                  gradient: ENetColors.accent,
-                  boxShadow: [BoxShadow(
-                    color: ENetColors.mint.withValues(alpha: .19),
-                    blurRadius: 26, offset: const Offset(0, 10))],
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: _serviceGradient,
+                  boxShadow: [
+                    BoxShadow(
+                      color: ENetColors.mint.withValues(alpha: .17),
+                      blurRadius: 24,
+                      offset: const Offset(0, 9),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.dashboard_customize_rounded,
-                  color: ENetColors.onAccent, size: 27),
+                child: Icon(_serviceIcon, color: ENetColors.onAccent, size: 27),
               ),
               const Spacer(),
               IconButton(
                 key: ValueKey('favorite-${service.id}'),
                 tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
                 onPressed: onFavorite,
-                icon: Icon(favorite ? Icons.star_rounded : Icons.star_border_rounded,
-                  color: favorite ? ENetColors.mint : ENetColors.muted, size: 24),
+                icon: Icon(
+                  favorite ? Icons.star_rounded : Icons.star_border_rounded,
+                  color: favorite ? ENetColors.mint : ENetColors.muted,
+                  size: 23,
+                ),
               ),
-              const SizedBox(width: 4),
-              const Icon(Icons.north_east_rounded, color: ENetColors.cyan, size: 21),
             ]),
-            const SizedBox(height: 20),
-            Text(service.name, maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: ENetColors.text, fontSize: 20,
-                fontWeight: FontWeight.w800, letterSpacing: -.4)),
-            const SizedBox(height: 8),
-            Text(service.description, maxLines: 3, overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: ENetColors.muted, fontSize: 13,
-                height: 1.5)),
-            const SizedBox(height: 18),
-            const Row(children: [
-              Text('Открыть сервис', style: TextStyle(
-                color: ENetColors.cyan, fontSize: 12.5, fontWeight: FontWeight.w700)),
-              SizedBox(width: 6),
-              Icon(Icons.arrow_forward_rounded, color: ENetColors.cyan, size: 16),
+            const SizedBox(height: 19),
+            Text(
+              service.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: ENetColors.text,
+                fontSize: 19,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -.45,
+              ),
+            ),
+            const SizedBox(height: 7),
+            Text(
+              service.description,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: ENetColors.muted,
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 17),
+            Container(height: 1, color: ENetColors.border),
+            const SizedBox(height: 13),
+            Row(children: [
+              const Text(
+                'Открыть сервис',
+                style: TextStyle(
+                  color: ENetColors.cyan,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  color: ENetColors.mint.withValues(alpha: .10),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: ENetColors.mint.withValues(alpha: .18)),
+                ),
+                child: const Icon(
+                  Icons.arrow_outward_rounded,
+                  color: ENetColors.cyan,
+                  size: 16,
+                ),
+              ),
             ]),
           ]),
         ),
