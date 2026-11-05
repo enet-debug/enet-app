@@ -6,6 +6,8 @@ import 'package:enet_app/features/shell/presentation/enet_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
 class _InboxRepository extends DemoAuthRepository {
   @override
@@ -28,6 +30,10 @@ class _InboxRepository extends DemoAuthRepository {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
+  });
 
   for (final size in [const Size(1280, 900), const Size(390, 844)]) {
     testWidgets('Unread badge and navigation work at $size', (tester) async {
