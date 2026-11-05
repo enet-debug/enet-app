@@ -118,11 +118,20 @@ class ApiAuthRepository implements AuthRepository {
     if (response.statusCode >= 400) {
       final error = result['error'];
       final message = error is Map ? error['message'] : null;
-      throw Exception(
-        message is String
-            ? message
-            : 'Ошибка API: ${response.statusCode}',
-      );
+      final text = message is String ? message : 'Ошибка API: ${response.statusCode}';
+      if (response.statusCode == 429) {
+        final retryAfter = response.headers['retry-after'];
+        throw Exception(retryAfter == null
+          ? text
+          : '$text Повторите попытку через $retryAfter сек.');
+      }
+      if (response.statusCode >= 500) {
+        final requestId = response.headers['x-request-id'];
+        throw Exception(requestId == null || requestId.isEmpty
+          ? text
+          : '$text Код обращения: $requestId');
+      }
+      throw Exception(text);
     }
     return result;
   }
