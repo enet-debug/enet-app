@@ -40,17 +40,24 @@ Future<void> _saveCapture(WidgetTester tester, String filename) async {
   await tester.pump();
   final boundary =
       tester.renderObject<RenderRepaintBoundary>(find.byKey(_captureKey));
-  final image = await boundary.toImage(pixelRatio: 1.0);
-  try {
-    final data = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (data == null) {
-      throw StateError('Flutter renderer did not return screenshot bytes');
+  // Image encoding and filesystem writes need a real async zone in widget tests.
+  final saved = await tester.runAsync(() async {
+    final image = await boundary.toImage(pixelRatio: 1.0);
+    try {
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (data == null) {
+        throw StateError('Flutter renderer did not return screenshot bytes');
+      }
+      Directory('ui_previews').createSync(recursive: true);
+      File('ui_previews/$filename.png')
+          .writeAsBytesSync(data.buffer.asUint8List());
+      return true;
+    } finally {
+      image.dispose();
     }
-    Directory('ui_previews').createSync(recursive: true);
-    File('ui_previews/$filename.png')
-        .writeAsBytesSync(data.buffer.asUint8List());
-  } finally {
-    image.dispose();
+  });
+  if (saved != true) {
+    throw StateError('Flutter screenshot capture did not complete');
   }
 }
 
