@@ -5,12 +5,12 @@ import '../domain/auth_repository.dart';
 class DemoAuthRepository implements AuthRepository {
   @override
   Future<AuthUser> signIn({required String email, required String password}) async {
-    return AuthUser(email: email.trim(), name: email.trim().split('@').first);
+    return AuthUser(id: 'demo-user', email: email.trim(), name: email.trim().split('@').first);
   }
 
   @override
   Future<AuthUser> signUp({required String name, required String email, required String password}) async {
-    return AuthUser(email: email.trim(), name: name.trim());
+    return AuthUser(id: 'demo-user', email: email.trim(), name: name.trim());
   }
 
   @override
@@ -35,7 +35,7 @@ class DemoAuthRepository implements AuthRepository {
 
   @override
   Future<AuthUser> updateName(String name) async =>
-      AuthUser(email: 'demo@example.org', name: name);
+      AuthUser(id: 'demo-user', email: 'demo@example.org', name: name);
 
   @override
   Future<List<AccountSession>> listSessions() async => const [];

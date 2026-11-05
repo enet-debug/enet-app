@@ -14,7 +14,7 @@ class _RecoveryRepository extends DemoAuthRepository {
   @override
   Future<AuthUser?> restoreSession() async {
     if (offline) throw Exception('offline');
-    return const AuthUser(email: 'saved@example.org', name: 'Saved User');
+    return const AuthUser(id: 'saved-account-id', email: 'saved@example.org', name: 'Saved User');
   }
 
   @override
@@ -56,6 +56,16 @@ void main() {
       expect(retry, findsNothing);
       expect(find.byTooltip('Открыть уведомления'), findsOneWidget);
       expect(tester.takeException(), isNull);
+
+      final profileTab = find.text('Профиль').first;
+      await tester.ensureVisible(profileTab);
+      await tester.tap(profileTab);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(find.text('saved-account-id'), findsOneWidget);
+      await tester.tap(find.byTooltip('Открыть уведомления'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
 
       repository.expired = true;
       await tester.tap(find.byTooltip('Открыть уведомления'));

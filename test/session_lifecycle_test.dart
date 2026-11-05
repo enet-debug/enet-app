@@ -15,7 +15,7 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 const _sessionKey = 'enet_id_session';
 const _oldToken = 'old-session-token-for-regression-testing';
 const _newToken = 'new-session-token-for-regression-testing';
-const _account = AuthUser(email: 'user@example.org', name: 'User');
+const _account = AuthUser(id: 'account-id', email: 'user@example.org', name: 'User');
 
 String _accountResponse({String? token}) => jsonEncode({
   'user': {'id': 'account-id', 'email': _account.email, 'name': _account.name},
@@ -64,6 +64,16 @@ void main() {
     await expectLater(repository.listServices(), throwsA(isA<SessionExpiredException>()));
     expect(await const FlutterSecureStorage().read(key: _sessionKey), isNull);
     expect(await repository.restoreSession(), isNull);
+  });
+
+  test('restoreSession preserves the server-generated eNet ID', () async {
+    final repository = ApiAuthRepository(client: MockClient((request) async {
+      expect(request.url.path, '/v1/auth/me');
+      return http.Response(_accountResponse(), 200);
+    }));
+
+    final restored = await repository.restoreSession();
+    expect(restored?.id, 'account-id');
   });
 
   test('incorrect login credentials do not expire an existing session', () async {

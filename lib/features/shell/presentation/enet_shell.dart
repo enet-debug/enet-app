@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/ambient_background.dart';
@@ -594,6 +595,21 @@ class _ENetShellState extends State<ENetShell> {
 
   // ───────────────────────── Профиль ─────────────────────────
 
+  Future<void> _copyEnetId() async {
+    try {
+      await Clipboard.setData(ClipboardData(text: user.id));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('eNet ID скопирован')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Не удалось скопировать eNet ID')),
+      );
+    }
+  }
+
   Widget _profile(bool compact) {
     final info = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(user.name, maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -624,6 +640,50 @@ class _ENetShellState extends State<ENetShell> {
               ],
             ),
           ),
+        ),
+      ),
+      const SizedBox(height: 18),
+      Reveal(
+        delay: const Duration(milliseconds: 140),
+        child: Glass(
+          radius: 22,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Row(children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: ENetColors.mint.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: ENetColors.mint.withValues(alpha: .25)),
+              ),
+              child: const Icon(Icons.fingerprint_rounded, color: ENetColors.cyan),
+            ),
+            const SizedBox(width: 13),
+            Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('ENET ID', style: _eyebrow),
+                const SizedBox(height: 5),
+                const Text('Постоянный идентификатор аккаунта',
+                  style: TextStyle(color: ENetColors.muted, fontSize: 11.5)),
+                const SizedBox(height: 7),
+                SelectableText(user.id, style: const TextStyle(
+                  color: ENetColors.text,
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  height: 1.45,
+                  letterSpacing: .15,
+                )),
+              ],
+            )),
+            const SizedBox(width: 6),
+            IconButton(
+              tooltip: 'Скопировать eNet ID',
+              onPressed: _copyEnetId,
+              icon: const Icon(Icons.copy_rounded, color: ENetColors.cyan, size: 20),
+            ),
+          ]),
         ),
       ),
       const SizedBox(height: 24),

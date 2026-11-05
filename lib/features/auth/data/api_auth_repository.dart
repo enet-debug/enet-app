@@ -118,7 +118,11 @@ class ApiAuthRepository implements AuthRepository {
 
   AuthUser _user(Map<String, dynamic> data) {
     final item = Map<String, dynamic>.from(data['user'] as Map);
-    return AuthUser(email: item['email'] as String, name: item['name'] as String);
+    return AuthUser(
+      id: item['id'] as String,
+      email: item['email'] as String,
+      name: item['name'] as String,
+    );
   }
 
   Future<AuthUser> _setSession(Map<String, dynamic> response) async {
