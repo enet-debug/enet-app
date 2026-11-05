@@ -220,7 +220,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
           for (final service in matches) ...[
             _DashboardServiceTile(
               title: service.name,
-              description: service.description,
+              description: _dashboardDescription(service),
               icon: _dashboardIcon(service),
               color: _dashboardColor(service),
               active: true,
@@ -235,7 +235,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
           if (showCloud) ...[
             const _DashboardServiceTile(
               title: 'eNet Cloud',
-              description: 'Облачное хранилище для файлов и проектов',
+              description: 'Облачное хранилище для ваших файлов и проектов',
               icon: Icons.cloud_outlined,
               color: Color(0xFF42C8F5),
               active: false,
@@ -245,7 +245,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
           if (showAi) ...[
             const _DashboardServiceTile(
               title: 'eNet AI',
-              description: 'Инструменты искусственного интеллекта',
+              description: 'Единый доступ к нейросетям для создания текстов, изображений и контента',
               icon: Icons.auto_awesome_rounded,
               color: Color(0xFFB58BFF),
               active: false,
@@ -266,6 +266,21 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
           ),
       ],
     );
+  }
+
+  String _dashboardDescription(EcosystemService service) {
+    final id = service.id.toLowerCase();
+    final name = service.name.toLowerCase();
+    if (id.contains('prodayzer') || name.contains('продайзер')) {
+      return 'Генерация объявлений, улучшение фото и помощь в продаже товаров';
+    }
+    if (id.contains('cloud') || name.contains('cloud')) {
+      return 'Облачное хранилище для ваших файлов и проектов';
+    }
+    if (id.contains('ai') || name.contains('ai')) {
+      return 'Единый доступ к нейросетям для создания текстов, изображений и контента';
+    }
+    return service.description;
   }
 
   IconData _dashboardIcon(EcosystemService service) {
@@ -754,8 +769,14 @@ class _DashboardServiceTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFFFFC85B).withValues(alpha: .22)),
                 ),
-                child: const Text('Популярный', style: TextStyle(
-                  color: Color(0xFFFFD06D), fontSize: 9, fontWeight: FontWeight.w700)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.local_fire_department_rounded,
+                    color: Color(0xFFFFD06D), size: 11),
+                  SizedBox(width: 3),
+                  Text('Популярный', style: TextStyle(
+                    color: Color(0xFFFFD06D), fontSize: 9,
+                    fontWeight: FontWeight.w700)),
+                ]),
               ),
             ],
           ]),
@@ -797,6 +818,10 @@ class _DashboardServiceTile extends StatelessWidget {
               fontSize: 10.5, fontWeight: FontWeight.w700)),
           ]),
         ),
+      if (!active) ...[
+        const SizedBox(width: 4),
+        const Icon(Icons.star_border_rounded, color: ENetColors.muted, size: 20),
+      ],
       if (active) ...[
         const SizedBox(width: 4),
         IconButton(
