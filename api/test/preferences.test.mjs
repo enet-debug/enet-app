@@ -27,12 +27,13 @@ test('readiness, capability discovery and account-isolated favorites', async () 
   try {
     const health = await call('/health');
     assert.equal(health.status, 200);
-    assert.equal(health.body.version, '0.4.0');
+    assert.equal(health.body.version, '0.5.0');
     assert.match(health.requestId, /^[a-f\d-]{36}$/i);
     assert.deepEqual((await call('/ready')).body, { status: 'ready', storage: 'sqlite' });
     const meta = await call('/v1/meta');
     assert.equal(meta.body.services.single_sign_on, false);
     assert.ok(meta.body.capabilities.includes('favorites'));
+    assert.ok(meta.body.capabilities.includes('tasks'));
 
     const first = await call('/v1/auth/register', 'POST', undefined, {
       email: 'first@example.org', name: 'First', password: 'Password-First-2026!',
