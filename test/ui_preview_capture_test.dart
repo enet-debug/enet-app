@@ -182,6 +182,41 @@ void main() {
       expect(find.text('00000000-0000-4000-8000-000000000001'),
           findsOneWidget);
       await _saveCapture(tester, 'enet-profile-$device');
+
+      // Capture the actual API-backed feature pages, not invented mock screens.
+      if (size.width < 600) {
+        await tester.tap(find.byKey(const ValueKey('mobile-nav-1')));
+      } else {
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-1')));
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Сервисы'), findsOneWidget);
+      await _saveCapture(tester, 'enet-services-$device');
+
+      if (size.width < 600) {
+        await tester.tap(find.byKey(const ValueKey('mobile-nav-more')));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.tap(find.byKey(const ValueKey('more-nav-4')));
+      } else {
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-4')));
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Защита аккаунта и управление доступом.'), findsOneWidget);
+      await _saveCapture(tester, 'enet-security-$device');
+
+      if (size.width < 600) {
+        await tester.tap(find.byKey(const ValueKey('mobile-nav-more')));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.tap(find.byKey(const ValueKey('more-nav-5')));
+      } else {
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-5')));
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Активные сеансы твоего eNet ID.'), findsOneWidget);
+      await _saveCapture(tester, 'enet-devices-$device');
     });
   }
 }
