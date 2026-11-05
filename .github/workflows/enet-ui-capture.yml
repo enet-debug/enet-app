@@ -5,6 +5,7 @@ on:
     branches:
       - fix/enet-072-session-recovery
       - feat/enet-brandmark-reference
+      - feat/enet-mockup-dashboard-v2
   workflow_dispatch:
 
 permissions:
