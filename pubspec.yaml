@@ -1,7 +1,7 @@
 name: enet_app
 publish_to: none
 description: eNet desktop client with API-based identity, service catalog and account controls.
-version: 0.3.0+3
+version: 0.4.0+4
 environment:
   sdk: '>=3.6.0 <4.0.0'
 dependencies:
