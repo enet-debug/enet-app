@@ -41,6 +41,8 @@ jobs:
         run: flutter pub get
       - name: Analyze
         run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
       - name: Build Linux desktop application
         run: flutter build linux --release --dart-define=ENET_API_URL=http://127.0.0.1:8787
       - name: Publish desktop bundle
