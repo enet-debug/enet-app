@@ -20,7 +20,7 @@ class DashboardStatus extends StatefulWidget {
 class _DashboardStatusState extends State<DashboardStatus> {
   bool _checking = true;
   bool _online = false;
-  int? _serviceCount;
+  int? _responseMs;
 
   @override
   void initState() {
@@ -31,20 +31,14 @@ class _DashboardStatusState extends State<DashboardStatus> {
   Future<void> _check() async {
     if (!mounted) return;
     setState(() => _checking = true);
+    final timer = Stopwatch()..start();
     final result = await widget.auth.checkServer();
-    int? serviceCount;
-    if (result) {
-      try {
-        serviceCount = (await widget.auth.listServices()).length;
-      } catch (_) {
-        // API health is independent from an optional service-catalog response.
-      }
-    }
+    timer.stop();
     if (!mounted) return;
     setState(() {
       _checking = false;
       _online = result;
-      _serviceCount = serviceCount;
+      _responseMs = result ? timer.elapsedMilliseconds : null;
     });
   }
 
@@ -114,23 +108,10 @@ class _DashboardStatusState extends State<DashboardStatus> {
       Text(
         _checking
           ? 'Проверяем соединение с сервером'
-          : _online ? 'Сервер отвечает на запросы' : 'Сервер не отвечает',
+          : _online
+            ? 'Время ответа: ${_responseMs ?? 0} мс'
+            : 'Сервер не отвечает',
         style: const TextStyle(color: ENetColors.muted, fontSize: 10.5),
-      ),
-      const SizedBox(height: 9),
-      _StatusDetailRow(
-        icon: Icons.fingerprint_rounded,
-        label: 'eNet ID',
-        value: widget.auth.user == null ? 'Не активен' : 'Активен',
-        color: widget.auth.user == null ? ENetColors.muted : ENetColors.mint,
-      ),
-      const SizedBox(height: 7),
-      _StatusDetailRow(
-        icon: Icons.apps_rounded,
-        label: 'Сервисы',
-        value: _checking ? 'Проверка' : _serviceCount == null
-          ? 'Нет данных' : '$_serviceCount подключено',
-        color: _serviceCount == null ? ENetColors.muted : ENetColors.mint,
       ),
       const SizedBox(height: 6),
       Align(
@@ -147,28 +128,4 @@ class _DashboardStatusState extends State<DashboardStatus> {
       ),
     ]),
   );
-}
-
-class _StatusDetailRow extends StatelessWidget {
-  const _StatusDetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Row(children: [
-    Icon(icon, color: color, size: 15),
-    const SizedBox(width: 8),
-    Expanded(child: Text(label, style: const TextStyle(
-      color: ENetColors.muted, fontSize: 10.5))),
-    Text(value, style: TextStyle(
-      color: color, fontSize: 10, fontWeight: FontWeight.w700)),
-  ]);
 }
