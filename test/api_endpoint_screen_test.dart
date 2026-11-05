@@ -32,7 +32,8 @@ void main() {
       theme: ENetTheme.dark,
       home: AuthScreen(auth: auth),
     ));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Настроить адрес API'), findsOneWidget);
     await tester.tap(find.text('Настроить адрес API'));
