@@ -39,5 +39,22 @@ class AuthController extends ChangeNotifier {
     user = null;
   });
 
+  Future<bool> checkServer() => _repository.checkServer();
+  Future<List<EcosystemService>> listServices() => _repository.listServices();
+  Future<void> changePassword(String currentPassword, String nextPassword) =>
+      _execute(() => _repository.changePassword(currentPassword, nextPassword));
+
+  Future<int> revokeOtherSessions() async {
+    if (busy) throw StateError('Дождитесь завершения предыдущей операции.');
+    busy = true;
+    notifyListeners();
+    try {
+      return await _repository.revokeOtherSessions();
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> requestPasswordReset(String email) => _execute(() => _repository.requestPasswordReset(email));
 }
