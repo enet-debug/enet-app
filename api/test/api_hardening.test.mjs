@@ -39,6 +39,49 @@ test('API exposes readiness and security response headers', async () => {
   }
 });
 
+test('trusted proxy IP is used only when proxy trust is enabled', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'enet-proxy-rate-test-'));
+  const { server, close } = createApp({
+    dbPath: join(directory, 'api.sqlite'),
+    allowedOrigins: '',
+    trustProxy: true,
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const base = 'http://127.0.0.1:' + server.address().port;
+  try {
+    let finalResponse;
+    for (let i = 0; i < 31; i++) {
+      finalResponse = await fetch(base + '/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Real-IP': '203.0.113.10',
+        },
+        body: JSON.stringify({
+          email: 'proxy-' + i + '@example.org',
+          password: 'Wrong-Password-For-Proxy-Test',
+        }),
+      });
+    }
+    assert.equal(finalResponse.status, 429);
+    const otherClient = await fetch(base + '/v1/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Real-IP': '203.0.113.11',
+      },
+      body: JSON.stringify({
+        email: 'other-proxy@example.org',
+        password: 'Wrong-Password-For-Proxy-Test',
+      }),
+    });
+    assert.equal(otherClient.status, 401);
+  } finally {
+    await close();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('login attempts are throttled by account and return Retry-After', async () => {
   const directory = mkdtempSync(join(tmpdir(), 'enet-rate-test-'));
   const { server, close } = createApp({ dbPath: join(directory, 'api.sqlite'), allowedOrigins: '' });
