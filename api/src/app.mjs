@@ -212,7 +212,7 @@ export function createApp(options = {}) {
         if (!emailPattern.test(email) || typeof b.password !== 'string' || b.password.length > 128) {
           return error(res, 400, 'invalid_input', 'Укажите email и пароль.');
         }
-        const emailRetry = throttle('login-email:' + email, 8);
+        const emailRetry = throttle('login-email:' + digest(email), 8);
         if (emailRetry) {
           res.setHeader('Retry-After', String(emailRetry));
           return error(res, 429, 'rate_limited', 'Слишком много попыток входа для этого аккаунта. Попробуйте позже.');
@@ -221,7 +221,7 @@ export function createApp(options = {}) {
         if (!user || !(await comparePassword(b.password, user.password_hash))) {
           return error(res, 401, 'invalid_credentials', 'Неверная почта или пароль.');
         }
-        attempts.delete('login-email:' + email);
+        attempts.delete('login-email:' + digest(email));
         return json(res, 200, newSession(user, req));
       }
       if (path === '/v1/auth/reset-password' && req.method === 'POST') {
