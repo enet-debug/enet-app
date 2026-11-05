@@ -617,7 +617,7 @@ class _TintedIcon extends StatelessWidget {
 }
 
 class _DemoBadge extends StatelessWidget {
-  const _DemoBadge({this.label = 'ДЕМО'});
+  const _DemoBadge({this.label = 'ENET ID'});
   final String label;
 
   @override
