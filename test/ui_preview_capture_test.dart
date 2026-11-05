@@ -20,7 +20,7 @@ class _PreviewRepository extends DemoAuthRepository {
   Future<AuthUser?> restoreSession() async => const AuthUser(
         id: '00000000-0000-4000-8000-000000000001',
         email: 'user@enet-dev.ru',
-        name: 'eNet User',
+        name: 'Виталий',
       );
 
   @override

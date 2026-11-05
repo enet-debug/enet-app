@@ -202,16 +202,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
               active: false,
             ),
           ],
-          if (showCloud) ...[
-            const _DashboardServiceTile(
-              title: 'eNet Cloud',
-              description: 'Облачное хранилище для ваших файлов и проектов',
-              icon: Icons.cloud_outlined,
-              color: Color(0xFF42C8F5),
-              active: false,
-            ),
-            const SizedBox(height: 9),
-          ],
+          // Cloud remains accessible via the shortcut and full catalog.
           if (matches.isEmpty && !showCloud && !showAi)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),

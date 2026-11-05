@@ -113,7 +113,26 @@ class _DashboardStatusState extends State<DashboardStatus> {
             : 'Сервер не отвечает',
         style: const TextStyle(color: ENetColors.muted, fontSize: 10.5),
       ),
-      const SizedBox(height: 6),
+      const SizedBox(height: 9),
+      const Divider(height: 12, color: ENetColors.border),
+      const Row(children: [
+        Icon(Icons.storage_outlined, color: ENetColors.muted, size: 15),
+        SizedBox(width: 7),
+        Expanded(child: Text('База данных', style: TextStyle(
+          color: ENetColors.muted, fontSize: 10.5))),
+        Text('Нет отдельной проверки', style: TextStyle(
+          color: ENetColors.faint, fontSize: 9.5)),
+      ]),
+      const SizedBox(height: 8),
+      const Row(children: [
+        Icon(Icons.cloud_outlined, color: ENetColors.muted, size: 15),
+        SizedBox(width: 7),
+        Expanded(child: Text('eNet Cloud', style: TextStyle(
+          color: ENetColors.muted, fontSize: 10.5))),
+        Text('Не подключено', style: TextStyle(
+          color: ENetColors.faint, fontSize: 9.5)),
+      ]),
+      const SizedBox(height: 7),
       Align(
         alignment: Alignment.centerRight,
         child: TextButton(

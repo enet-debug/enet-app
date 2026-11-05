@@ -178,15 +178,7 @@ class _ENetShellState extends State<ENetShell> {
                               fontSize: 12,
                               fontWeight: FontWeight.w800,
                             )),
-                            const Expanded(
-                              child: Center(child: Text('eNet APP',
-                                style: TextStyle(
-                                  color: ENetColors.muted,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: .3,
-                                ))),
-                            ),
+                            const Spacer(),
                             IconButton(
                               tooltip: (_unreadCount ?? 0) > 0
                                 ? 'Уведомления: $_unreadCount непрочитанных'
@@ -222,7 +214,7 @@ class _ENetShellState extends State<ENetShell> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8),
-                            child: SizedBox(width: 200, child: _sidebar()),
+                            child: SizedBox(width: 246, child: _sidebar()),
                           ),
                           Container(width: 1, color: ENetColors.border),
                           Expanded(child: _content(compact)),
@@ -604,7 +596,7 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
     final split = !compact && constraints.maxWidth >= 710;
-    final railWidth = constraints.maxWidth >= 1050 ? 265.0 : 235.0;
+    final railWidth = constraints.maxWidth >= 1050 ? 296.0 : 250.0;
 
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -818,8 +810,8 @@ class _ENetShellState extends State<ENetShell> {
         onTap: () => go(7),
       ),
       _QuickAction(
-        icon: Icons.devices_rounded,
-        label: 'Файлы и облако',
+        icon: Icons.cloud_upload_outlined,
+        label: 'Загрузить файлы',
         onTap: () => go(9),
       ),
     ]),
