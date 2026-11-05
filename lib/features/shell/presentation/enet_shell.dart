@@ -1000,50 +1000,33 @@ class _ENetShellState extends State<ENetShell> {
           ),
           child: Stack(children: [
             const Positioned.fill(child: HeroRibbonArtwork()),
-            Positioned(
-              right: compact ? -12 : 18,
-              top: compact ? 7 : 8,
-              child: Transform.rotate(
-                angle: -.16,
-                child: Container(
-                  width: compact ? 70 : 155,
-                  height: compact ? 90 : 116,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(compact ? 17 : 23),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF102B29), Color(0xFF041514)],
+            // Cropped from the approved eNet artwork: only this decorative
+            // background is a raster. Text, navigation and eNet ID stay live.
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: FractionallySizedBox(
+                  widthFactor: .54,
+                  heightFactor: 1,
+                  child: ShaderMask(
+                    blendMode: BlendMode.dstIn,
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      stops: [0, .16, .4, 1],
+                      colors: [
+                        Colors.transparent, Color(0xAAFFFFFF),
+                        Colors.white, Colors.white,
+                      ],
+                    ).createShader(bounds),
+                    child: Image.asset(
+                      'assets/brand/approved_hero_graphic.jpg',
+                      fit: BoxFit.fill,
+                      filterQuality: FilterQuality.medium,
+                      errorBuilder: (context, error, stackTrace) =>
+                        const SizedBox.expand(),
                     ),
-                    border: Border.all(color: ENetColors.cyan.withValues(alpha: .48)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: ENetColors.mint.withValues(alpha: .22),
-                        blurRadius: 25,
-                        spreadRadius: 1,
-                      ),
-                    ],
                   ),
-                  child: Stack(children: [
-                    Positioned.fill(child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(compact ? 17 : 23),
-                        gradient: RadialGradient(
-                          center: const Alignment(.2, -.3),
-                          radius: 1.1,
-                          colors: [
-                            ENetColors.cyan.withValues(alpha: .24),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    )),
-                    Center(child: BrandLogo(
-                      size: compact ? 42 : 79,
-                      showName: false,
-                    )),
-
-                  ]),
                 ),
               ),
             ),

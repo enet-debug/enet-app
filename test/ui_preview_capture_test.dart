@@ -171,20 +171,21 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
       await tester.pump(const Duration(milliseconds: 800));
 
-      if (size.width < 600) {
-        // The image codec is asynchronous in flutter_test. Precache the real
-        // bundled asset so screenshots cannot accidentally capture its blank
-        // loading frame instead of the approved mountain artwork.
-        final loaded = await tester.runAsync(() async {
-          await precacheImage(
-            const AssetImage('assets/brand/approved_mobile_mountains.jpg'),
-            tester.element(find.byKey(const ValueKey('workspace-hero'))),
-          );
-          return true;
-        });
-        expect(loaded, isTrue);
-        await tester.pump(const Duration(milliseconds: 150));
-      }
+      // Raster decorations are bundled offline and remain separate from
+      // interactive Flutter widgets. Ensure both screenshot viewports render
+      // loaded assets rather than a transient image-decoding frame.
+      final artwork = size.width < 600
+          ? const AssetImage('assets/brand/approved_mobile_mountains.jpg')
+          : const AssetImage('assets/brand/approved_hero_graphic.jpg');
+      final loaded = await tester.runAsync(() async {
+        await precacheImage(
+          artwork,
+          tester.element(find.byKey(const ValueKey('workspace-hero'))),
+        );
+        return true;
+      });
+      expect(loaded, isTrue);
+      await tester.pump(const Duration(milliseconds: 150));
 
       if (size.width < 600) {
         expect(find.text('Быстрый доступ'), findsOneWidget);
