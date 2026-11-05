@@ -36,6 +36,33 @@ class AccountSession {
   final bool current;
 }
 
+class AccountNotification {
+  const AccountNotification({
+    required this.id,
+    required this.type,
+    required this.title,
+    required this.body,
+    required this.createdAt,
+    required this.readAt,
+  });
+
+  final String id;
+  final String type;
+  final String title;
+  final String body;
+  final DateTime createdAt;
+  final DateTime? readAt;
+
+  bool get unread => readAt == null;
+}
+
+class NotificationFeed {
+  const NotificationFeed({required this.notifications, required this.unreadCount});
+
+  final List<AccountNotification> notifications;
+  final int unreadCount;
+}
+
 /// Abstract authentication and account services. Demo implementation is only for tests.
 abstract class AuthRepository {
   Future<AuthUser> signIn({required String email, required String password});
@@ -54,4 +81,7 @@ abstract class AuthRepository {
   Future<void> setApiEndpoint(String value);
   Future<List<String>> favoriteServices();
   Future<List<String>> saveFavoriteServices(List<String> serviceIds);
+  Future<NotificationFeed> listNotifications();
+  Future<void> readNotification(String id);
+  Future<int> readAllNotifications();
 }

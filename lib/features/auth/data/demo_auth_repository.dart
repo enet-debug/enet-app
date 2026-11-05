@@ -57,5 +57,15 @@ class DemoAuthRepository implements AuthRepository {
       List.unmodifiable(serviceIds);
 
   @override
+  Future<NotificationFeed> listNotifications() async =>
+      const NotificationFeed(notifications: [], unreadCount: 0);
+
+  @override
+  Future<void> readNotification(String id) async {}
+
+  @override
+  Future<int> readAllNotifications() async => 0;
+
+  @override
   Future<void> signOut() async {}
 }
