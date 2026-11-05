@@ -144,12 +144,12 @@ class _ENetShellState extends State<ENetShell> {
                   ),
                 ])
               : Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(4),
                   child: Container(
                     clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      color: const Color(0xE8071714),
-                      borderRadius: BorderRadius.circular(26),
+                      color: const Color(0xD0071714),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: ENetColors.cyan.withValues(alpha: .22),
                       ),
@@ -164,7 +164,7 @@ class _ENetShellState extends State<ENetShell> {
                     ),
                     child: Column(children: [
                       SizedBox(
-                        height: 42,
+                        height: 45,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 17),
                           child: Row(children: [
@@ -218,8 +218,8 @@ class _ENetShellState extends State<ENetShell> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.all(11),
-                            child: SizedBox(width: 244, child: _sidebar()),
+                            padding: const EdgeInsets.all(8),
+                            child: SizedBox(width: 258, child: _sidebar()),
                           ),
                           Container(width: 1, color: ENetColors.border),
                           Expanded(child: _content(compact)),
@@ -454,7 +454,7 @@ class _ENetShellState extends State<ENetShell> {
         ),
       Expanded(
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 24, pad, 24),
+          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 20, pad, 24),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1260.0);
             return Align(
@@ -539,7 +539,7 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
     final split = !compact && constraints.maxWidth >= 850;
-    final railWidth = constraints.maxWidth >= 1050 ? 335.0 : 285.0;
+    final railWidth = constraints.maxWidth >= 1050 ? 350.0 : 285.0;
 
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -558,7 +558,7 @@ class _ENetShellState extends State<ENetShell> {
               text: const TextSpan(
                 style: TextStyle(
                   color: ENetColors.text,
-                  fontSize: 35,
+                  fontSize: 37,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -1,
                 ),
@@ -576,7 +576,7 @@ class _ENetShellState extends State<ENetShell> {
             fontSize: compact ? 12 : 13,
           ),
         ),
-        SizedBox(height: compact ? 14 : 18),
+        SizedBox(height: compact ? 14 : 29),
         _hero(compact),
       ],
     );
@@ -592,17 +592,17 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 118),
+          constraints: const BoxConstraints(minHeight: 112),
           child: _accountSummaryCard(),
         ),
         const SizedBox(height: 12),
         ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 145),
+          constraints: const BoxConstraints(minHeight: 126),
           child: DashboardStatus(auth: widget.auth),
         ),
         const SizedBox(height: 12),
         ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 170),
+          constraints: const BoxConstraints(minHeight: 180),
           child: DashboardSessionsSnapshot(
             auth: widget.auth,
             onManage: () => go(5),
@@ -610,7 +610,7 @@ class _ENetShellState extends State<ENetShell> {
         ),
         const SizedBox(height: 12),
         ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 190),
+          constraints: const BoxConstraints(minHeight: 200),
           child: _quickActionsCard(),
         ),
       ],
