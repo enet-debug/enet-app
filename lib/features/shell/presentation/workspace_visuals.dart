@@ -257,13 +257,17 @@ class MobileWelcomeScene extends StatelessWidget {
         child: Stack(fit: StackFit.expand, children: [
           // Approved artwork extracted from the user's visual reference.
           // Only the backdrop is a raster asset; cards/text/actions are Flutter.
+          // Keep a valid scenic fallback while the approved JPEG is decoded.
+          // This also prevents blank frames on slow devices or test renderers.
+          const CustomPaint(painter: _MobileMountainPainter()),
           Positioned.fill(
             child: Image.asset(
               'assets/brand/approved_mobile_mountains.jpg',
               fit: BoxFit.cover,
               filterQuality: FilterQuality.medium,
+              gaplessPlayback: true,
               errorBuilder: (context, error, stackTrace) =>
-                const CustomPaint(painter: _MobileMountainPainter()),
+                const SizedBox.expand(),
             ),
           ),
           Positioned(
