@@ -539,13 +539,13 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
     final split = !compact && constraints.maxWidth >= 850;
-    final railWidth = constraints.maxWidth >= 1250 ? 320.0 : 285.0;
+    final railWidth = constraints.maxWidth >= 1050 ? 335.0 : 285.0;
 
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          compact ? 'Добро пожаловать, ${user.name} 👋' : 'Добро пожаловать в eNet',
+          compact ? 'Добро пожаловать, ${user.name}' : 'Добро пожаловать в eNet',
           maxLines: compact ? 2 : 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
@@ -578,16 +578,28 @@ class _ENetShellState extends State<ENetShell> {
     final rail = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _accountSummaryCard(),
-        const SizedBox(height: 12),
-        DashboardStatus(auth: widget.auth),
-        const SizedBox(height: 12),
-        DashboardSessionsSnapshot(
-          auth: widget.auth,
-          onManage: () => go(5),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 118),
+          child: _accountSummaryCard(),
         ),
         const SizedBox(height: 12),
-        _quickActionsCard(),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 145),
+          child: DashboardStatus(auth: widget.auth),
+        ),
+        const SizedBox(height: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 170),
+          child: DashboardSessionsSnapshot(
+            auth: widget.auth,
+            onManage: () => go(5),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 190),
+          child: _quickActionsCard(),
+        ),
       ],
     );
 
@@ -827,13 +839,13 @@ class _ENetShellState extends State<ENetShell> {
           child: Stack(children: [
             const Positioned.fill(child: HeroRibbonArtwork()),
             Positioned(
-              right: compact ? -18 : 12,
+              right: compact ? -12 : 12,
               top: compact ? 8 : -4,
               bottom: compact ? 8 : -4,
               child: Transform.rotate(
                 angle: -.16,
                 child: Container(
-                  width: compact ? 104 : 218,
+                  width: compact ? 80 : 218,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(compact ? 17 : 23),
                     gradient: const LinearGradient(
@@ -913,7 +925,7 @@ class _ENetShellState extends State<ENetShell> {
                 SizedBox(width: compact ? 12 : 22),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(right: compact ? 76 : 185),
+                    padding: EdgeInsets.only(right: compact ? 54 : 185),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
