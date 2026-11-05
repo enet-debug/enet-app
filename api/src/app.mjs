@@ -36,17 +36,6 @@ async function comparePassword(password, stored) {
   const actual = await scrypt(password, Buffer.from(parts[1], 'hex'), 64);
   return timingSafeEqual(expected, actual);
 }
-function throttle(ip) {
-  const now = Date.now();
-  if (attempts.size > 5000) {
-    for (const [key, value] of attempts) if (value.until < now) attempts.delete(key);
-  }
-  let entry = attempts.get(ip);
-  if (!entry || entry.until < now) entry = { count: 0, until: now + 60_000 };
-  entry.count++;
-  attempts.set(ip, entry);
-  return entry.count > failLimit;
-}
 async function bodyOf(req) {
   const chunks = [];
   let size = 0;
