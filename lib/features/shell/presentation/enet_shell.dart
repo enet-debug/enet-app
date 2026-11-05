@@ -831,14 +831,14 @@ class _ENetShellState extends State<ENetShell> {
         onTap: () => go(1),
       ),
       _QuickAction(
-        icon: Icons.checklist_rounded,
-        label: 'Новая задача',
-        onTap: () => go(7),
-      ),
-      _QuickAction(
         icon: Icons.cloud_upload_outlined,
         label: 'Загрузить файлы',
         onTap: () => go(9),
+      ),
+      _QuickAction(
+        icon: Icons.checklist_rounded,
+        label: 'Новая задача',
+        onTap: () => go(7),
       ),
     ]),
   );
@@ -1543,9 +1543,9 @@ class _QuickAction extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(11),
       child: SizedBox(
-        height: 36,
+        height: 48,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(children: [
             Icon(icon, color: ENetColors.cyan, size: 18),
             const SizedBox(width: 10),
@@ -1553,7 +1553,7 @@ class _QuickAction extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: ENetColors.text,
-                fontSize: 11.5,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ))),
             const Icon(Icons.chevron_right_rounded,

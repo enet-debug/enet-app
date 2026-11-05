@@ -198,7 +198,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
               title: 'eNet AI',
               description: 'Единый доступ к нейросетям для создания текстов, изображений и контента',
               icon: Icons.auto_awesome_rounded,
-              color: Color(0xFFB58BFF),
+              color: Color(0xFF359ED3),
               active: false,
             ),
           ],
@@ -256,7 +256,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       return const Color(0xFF42C8F5);
     }
     if (id.contains('ai') || name.contains('ai')) {
-      return const Color(0xFFB58BFF);
+      return const Color(0xFF359ED3);
     }
     return ENetColors.cyan;
   }
@@ -685,16 +685,16 @@ class _DashboardServiceTile extends StatelessWidget {
       vertical: compact ? 3 : 4,
     ),
     decoration: BoxDecoration(
-      color: const Color(0xFF9A6B23).withValues(alpha: .25),
+      color: ENetColors.mint.withValues(alpha: .13),
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFFFC85B).withValues(alpha: .22)),
+      border: Border.all(color: ENetColors.mint.withValues(alpha: .25)),
     ),
     child: Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(Icons.local_fire_department_rounded,
-        color: const Color(0xFFFFD06D), size: compact ? 11 : 13),
+      Icon(Icons.check_circle_rounded,
+        color: ENetColors.cyan, size: compact ? 11 : 13),
       const SizedBox(width: 3),
-      Text('Популярный', style: TextStyle(
-        color: const Color(0xFFFFD06D),
+      Text('Активен', style: TextStyle(
+        color: ENetColors.cyan,
         fontSize: compact ? 9 : 10,
         fontWeight: FontWeight.w700,
       )),
@@ -706,9 +706,10 @@ class _DashboardServiceTile extends StatelessWidget {
       return FilledButton(
         onPressed: onOpen,
         style: FilledButton.styleFrom(
-          backgroundColor: ENetColors.mint,
-          foregroundColor: ENetColors.onAccent,
-          minimumSize: Size(compact ? 84 : 124, compact ? 34 : 42),
+          backgroundColor: const Color(0xFF17443D),
+          foregroundColor: ENetColors.text,
+          side: BorderSide(color: ENetColors.mint.withValues(alpha: .23)),
+          minimumSize: Size(compact ? 84 : 106, compact ? 34 : 38),
           padding: EdgeInsets.symmetric(horizontal: compact ? 9 : 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: TextStyle(
