@@ -82,7 +82,12 @@ function setupDb(path) {
       token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       expires_at INTEGER NOT NULL
     );
-    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);`);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+    CREATE TABLE IF NOT EXISTS favorite_services(
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      service_id TEXT NOT NULL,
+      PRIMARY KEY(user_id, service_id)
+    );`);
   // Backward compatible migration: preserve login sessions created by earlier API releases.
   const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
   if (!columns.has('session_id')) {
@@ -135,6 +140,9 @@ export function createApp(options = {}) {
   const updatePassword = db.prepare('UPDATE users SET password_hash=? WHERE id=?');
   const userById = db.prepare('SELECT * FROM users WHERE id=?');
   const clearSessions = db.prepare('DELETE FROM sessions WHERE expires_at<=?');
+  const userFavorites = db.prepare('SELECT service_id FROM favorite_services WHERE user_id=?');
+  const addFavorite = db.prepare('INSERT OR IGNORE INTO favorite_services(user_id,service_id) VALUES(?,?)');
+  const removeFavorite = db.prepare('DELETE FROM favorite_services WHERE user_id=? AND service_id=?');
   function auth(req) {
     const match = /^Bearer ([A-Za-z0-9_-]{32,256})$/.exec(req.headers.authorization || '');
     if (!match) return null;
@@ -326,8 +334,26 @@ export function createApp(options = {}) {
         return json(res, 200, { ok: true });
       }
       if (path === '/v1/services' && req.method === 'GET') {
-        if (!auth(req)) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
-        return json(res, 200, { services });
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const favorites = new Set(userFavorites.all(session.user.id).map(row => row.service_id));
+        return json(res, 200, { services: services.map(service => ({
+          ...service,
+          favorite: favorites.has(service.id),
+        })) });
+      }
+      if (path === '/v1/services/favorite' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const payload = await bodyOf(req);
+        if (typeof payload.service_id !== 'string' ||
+            typeof payload.favorite !== 'boolean' ||
+            !services.some(service => service.id === payload.service_id)) {
+          return error(res, 400, 'invalid_input', 'Неизвестный сервис или некорректный статус избранного.');
+        }
+        if (payload.favorite) addFavorite.run(session.user.id, payload.service_id);
+        else removeFavorite.run(session.user.id, payload.service_id);
+        return json(res, 200, { service_id: payload.service_id, favorite: payload.favorite });
       }
       return error(res, 404, 'not_found', 'Маршрут не найден.');
     } catch (e) {
