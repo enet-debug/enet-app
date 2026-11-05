@@ -48,6 +48,36 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now enet-api
 sudo systemctl status enet-api
 curl http://127.0.0.1:8787/ready
+
+## Резервное копирование SQLite
+
+Установить CLI и создать каталог резервных копий:
+
+```bash
+sudo apt install -y sqlite3
+sudo install -d -o enet-api -g enet-api -m 0700 /var/backups/enet-api
+sudo cp /opt/enet-app/api/deploy/enet-api-backup.service /etc/systemd/system/
+sudo cp /opt/enet-app/api/deploy/enet-api-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now enet-api-backup.timer
+sudo systemctl start enet-api-backup.service
+sudo systemctl status enet-api-backup.service
+```
+
+Таймер запускает согласованную SQLite-копию раз в сутки, хранит локальные копии 14 дней. Проверять таймер: `systemctl list-timers enet-api-backup.timer`. Для защиты от потери самого VPS копии дополнительно следует выгружать в отдельное хранилище.
+
+Восстановление из выбранной копии выполняется при остановленном API:
+
+```bash
+sudo systemctl stop enet-api
+sudo cp /var/backups/enet-api/ИМЯ-КОПИИ.sqlite /var/lib/enet-api/enet.sqlite
+sudo rm -f /var/lib/enet-api/enet.sqlite-wal /var/lib/enet-api/enet.sqlite-shm
+sudo chown enet-api:enet-api /var/lib/enet-api/enet.sqlite
+sudo chmod 0600 /var/lib/enet-api/enet.sqlite
+sudo systemctl start enet-api
+sudo systemctl status enet-api
+curl http://127.0.0.1:8787/ready
+```
 ```
 
 ## DNS и HTTPS
