@@ -662,7 +662,7 @@ class _ENetShellState extends State<ENetShell> {
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.5.0 (5)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.6.0 (6)'),
           ],
         ),
       ),
