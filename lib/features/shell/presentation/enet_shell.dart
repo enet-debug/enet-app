@@ -546,39 +546,17 @@ class _ENetShellState extends State<ENetShell> {
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        compact
-          ? Text('Добро пожаловать, ${user.name}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: ENetColors.text,
-                fontSize: 25,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -1,
-              ))
-          : RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  color: ENetColors.text,
-                  fontSize: 37,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -1,
-                ),
-                children: [
-                  TextSpan(text: 'Добро пожаловать в '),
-                  TextSpan(text: 'eNet', style: TextStyle(color: ENetColors.mint)),
-                ],
-              ),
-            ),
-        const SizedBox(height: 6),
-        Text(
-          'Единая платформа для ваших цифровых сервисов',
-          style: TextStyle(
-            color: ENetColors.muted,
-            fontSize: compact ? 12 : 13,
-          ),
-        ),
-        SizedBox(height: compact ? 14 : 29),
+        if (compact)
+          MobileWelcomeScene(name: user.name, onOpenProfile: () => go(3))
+        else ...[
+          const Text('Добро пожаловать в eNet',
+            style: TextStyle(color: ENetColors.text, fontSize: 26,
+              fontWeight: FontWeight.w800, letterSpacing: -.8)),
+          const SizedBox(height: 4),
+          const Text('Ваша единая платформа для работы, автоматизации и ИИ',
+            style: TextStyle(color: ENetColors.muted, fontSize: 12)),
+        ],
+        SizedBox(height: compact ? 10 : 15),
         _hero(compact),
       ],
     );
@@ -622,9 +600,9 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         shortcuts,
-        const SizedBox(height: 22),
+        const SizedBox(height: 17),
         catalog,
       ],
     );
@@ -666,47 +644,40 @@ class _ENetShellState extends State<ENetShell> {
   Widget _shortcutStrip() {
     final items = <_HomeShortcutData>[
       _HomeShortcutData(
-        icon: Icons.person_outline_rounded,
-        title: 'Мой профиль',
-        subtitle: 'Личные данные',
-        color: ENetColors.cyan,
-        onTap: () => go(3),
-      ),
-      _HomeShortcutData(
-        icon: Icons.shield_outlined,
-        title: 'Безопасность',
-        subtitle: 'Сеансы и защита',
-        color: ENetColors.mint,
-        onTap: () => go(4),
-      ),
-      _HomeShortcutData(
-        icon: Icons.apps_rounded,
-        title: 'Сервисы',
-        subtitle: 'Каталог eNet',
-        color: ENetColors.cyan,
+        icon: Icons.shopping_bag_outlined, title: 'Продайзер',
+        subtitle: 'Объявления', color: ENetColors.violet,
         onTap: () => go(1),
       ),
       _HomeShortcutData(
-        icon: Icons.settings_outlined,
-        title: 'Настройки',
-        subtitle: 'Внешний вид и другое',
-        color: ENetColors.cyan,
-        onTap: () => go(6),
+        icon: Icons.auto_awesome_rounded, title: 'eNet AI',
+        subtitle: 'Скоро', color: Color(0xFF48BFFB),
+        onTap: () => go(1),
+      ),
+      _HomeShortcutData(
+        icon: Icons.cloud_outlined, title: 'eNet Cloud',
+        subtitle: 'Скоро', color: Color(0xFF4DDFF0),
+        onTap: () => go(1),
+      ),
+      _HomeShortcutData(
+        icon: Icons.folder_outlined, title: 'Проекты',
+        subtitle: 'Задачи', color: ENetColors.mint,
+        onTap: () => go(7),
+      ),
+      _HomeShortcutData(
+        icon: Icons.bar_chart_rounded, title: 'Аналитика',
+        subtitle: 'Устройства', color: Color(0xFFFFC75B),
+        onTap: () => go(5),
       ),
     ];
     return LayoutBuilder(builder: (context, constraints) {
-      final compact = constraints.maxWidth < 560;
-      const gap = 10.0;
-      final columns = compact ? 2 : 4;
-      final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
-      return Wrap(
-        spacing: gap,
-        runSpacing: gap,
-        children: [
-          for (final item in items)
-            SizedBox(width: width, child: _HomeShortcut(data: item)),
+      const gap = 8.0;
+      final width = (constraints.maxWidth - gap * 4) / 5;
+      return Row(children: [
+        for (var i = 0; i < items.length; i++) ...[
+          if (i > 0) const SizedBox(width: gap),
+          SizedBox(width: width, child: _HomeShortcut(data: items[i])),
         ],
-      );
+      ]);
     });
   }
 
@@ -1184,71 +1155,47 @@ class _HomeShortcutData {
 class _HomeShortcut extends StatelessWidget {
   const _HomeShortcut({required this.data});
   final _HomeShortcutData data;
-
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 820;
     return Tooltip(
       message: data.subtitle,
       child: Pressable(
-        onTap: data.onTap,
-        pressedScale: .98,
-        haptic: false,
+        onTap: data.onTap, pressedScale: .97, haptic: false,
         builder: (context, hovered) => AnimatedContainer(
           duration: ENetMotion.quick,
-          height: compact ? 91 : 129,
+          height: compact ? 75 : 85,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(17),
+            borderRadius: BorderRadius.circular(14),
             gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
               colors: [
-                const Color(0xFF102C2A),
-                const Color(0xFF071C1B),
+                data.color.withValues(alpha: hovered ? .40 : .23),
+                const Color(0xFF051B1B),
               ],
             ),
-            border: Border.all(
-              color: data.color.withValues(alpha: hovered ? .52 : .25),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: data.color.withValues(alpha: hovered ? .12 : .035),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-            ],
+            border: Border.all(color:
+              data.color.withValues(alpha: hovered ? .65 : .30)),
+            boxShadow: [BoxShadow(
+              color: data.color.withValues(alpha: .09),
+              blurRadius: 12, offset: const Offset(0, 3),
+            )],
           ),
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 7 : 13,
-            vertical: compact ? 9 : 13,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(data.icon, color: data.color, size: compact ? 26 : 34),
-              SizedBox(height: compact ? 6 : 10),
-              Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: ENetColors.text,
-                  fontSize: compact ? 10.5 : 14,
-                  fontWeight: FontWeight.w800,
-                )),
-              const SizedBox(height: 3),
-              Text(data.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: ENetColors.muted,
-                  fontSize: compact ? 9 : 10.5,
-                )),
-            ],
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(data.icon, color: data.color, size: compact ? 23 : 28),
+            const SizedBox(height: 7),
+            Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: ENetColors.text,
+                fontSize: compact ? 8.5 : 10.5,
+                fontWeight: FontWeight.w800)),
+          ]),
         ),
       ),
     );
   }
 }
-
-// ═════════════════════════ Вспомогательные виджеты ═════════════════════════
 
 class _UnreadChip extends StatelessWidget {
   const _UnreadChip({required this.count});
