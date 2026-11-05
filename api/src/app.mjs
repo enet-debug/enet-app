@@ -9,7 +9,7 @@ const scrypt = promisify(scryptCallback);
 const sessionMs = 7 * 24 * 60 * 60 * 1000;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const failLimit = 8;
-const attempts = new Map();
+const registerLimit = 5;
 const services = Object.freeze([
   { id: 'prodayzer', name: 'Продайзер', type: 'external', url: 'https://prodayzer.ru',
     description: 'Создание и улучшение объявлений. Единый вход пока не подключён.' },
@@ -81,7 +81,15 @@ function setupDb(path) {
       token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       expires_at INTEGER NOT NULL
     );
-    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);`);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+    CREATE TABLE IF NOT EXISTS auth_rate_limits(
+      bucket TEXT PRIMARY KEY,
+      attempts INTEGER NOT NULL,
+      window_started_at INTEGER NOT NULL,
+      blocked_until INTEGER NOT NULL DEFAULT 0
+    );
+    CREATE INDEX IF NOT EXISTS idx_auth_rate_limits_expiry
+      ON auth_rate_limits(blocked_until, window_started_at);`);
   // Backward compatible migration: preserve login sessions created by earlier API releases.
   const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
   if (!columns.has('session_id')) {
@@ -107,6 +115,44 @@ function setupDb(path) {
 }
 export function createApp(options = {}) {
   const db = setupDb(options.dbPath || process.env.ENET_DB_PATH || './data/enet.sqlite');
+  const rateWindowMs = options.authRateLimitWindowMs ?? 60_000;
+  const authLimit = options.authRateLimitMax ?? failLimit;
+  const signupLimit = options.registerRateLimitMax ?? registerLimit;
+  const rateLimitRow = db.prepare('SELECT attempts,window_started_at,blocked_until FROM auth_rate_limits WHERE bucket=?');
+  const saveRateLimit = db.prepare('INSERT INTO auth_rate_limits(bucket,attempts,window_started_at,blocked_until) VALUES(?,?,?,?) ON CONFLICT(bucket) DO UPDATE SET attempts=excluded.attempts, window_started_at=excluded.window_started_at, blocked_until=excluded.blocked_until');
+  const clearRateLimit = db.prepare('DELETE FROM auth_rate_limits WHERE bucket=?');
+  const cleanupRateLimits = db.prepare('DELETE FROM auth_rate_limits WHERE window_started_at<? AND blocked_until<?');
+  function rateLimitWait(bucket, now = Date.now()) {
+    const row = rateLimitRow.get(bucket);
+    if (!row) return 0;
+    if (Number(row.blocked_until) > now) return Number(row.blocked_until) - now;
+    if (now - Number(row.window_started_at) >= rateWindowMs) clearRateLimit.run(bucket);
+    return 0;
+  }
+  function recordFailure(bucket, now = Date.now()) {
+    const row = rateLimitRow.get(bucket);
+    const inWindow = row && now - Number(row.window_started_at) < rateWindowMs;
+    const attempts = inWindow ? Number(row.attempts) + 1 : 1;
+    const started = inWindow ? Number(row.window_started_at) : now;
+    const blockedUntil = attempts >= authLimit ? now + rateWindowMs : 0;
+    saveRateLimit.run(bucket, attempts, started, blockedUntil);
+    return Math.max(0, blockedUntil - now);
+  }
+  function consumeRateLimit(bucket, limit, now = Date.now()) {
+    const wait = rateLimitWait(bucket, now);
+    if (wait > 0) return wait;
+    const row = rateLimitRow.get(bucket);
+    const inWindow = row && now - Number(row.window_started_at) < rateWindowMs;
+    const attempts = inWindow ? Number(row.attempts) + 1 : 1;
+    const started = inWindow ? Number(row.window_started_at) : now;
+    const blockedUntil = attempts > limit ? now + rateWindowMs : 0;
+    saveRateLimit.run(bucket, attempts, started, blockedUntil);
+    return Math.max(0, blockedUntil - now);
+  }
+  function sendRateLimited(res, wait) {
+    res.setHeader('Retry-After', String(Math.max(1, Math.ceil(wait / 1000))));
+    return error(res, 429, 'rate_limited', 'Слишком много попыток. Попробуйте позже.');
+  }
   const allowed = new Set((options.allowedOrigins ?? process.env.ENET_ALLOWED_ORIGINS ?? '')
     .split(',').map(x => x.trim()).filter(Boolean));
   const userByEmail = db.prepare('SELECT * FROM users WHERE email=?');
@@ -164,10 +210,9 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.3.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.4.0' });
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
-        if (throttle('register:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
         const b = await bodyOf(req);
         const email = cleanEmail(b.email);
         const name = typeof b.name === 'string' ? b.name.trim() : '';
@@ -175,6 +220,10 @@ export function createApp(options = {}) {
             typeof b.password !== 'string' || b.password.length < 12 || b.password.length > 128) {
           return error(res, 400, 'invalid_input', 'Нужно имя, корректный email и пароль от 12 до 128 символов.');
         }
+        const registerBucket = 'register:' + digest(req.socket.remoteAddress || 'unknown');
+        cleanupRateLimits.run(Date.now() - rateWindowMs * 4, Date.now());
+        const registerWait = consumeRateLimit(registerBucket, signupLimit);
+        if (registerWait > 0) return sendRateLimited(res, registerWait);
         if (userByEmail.get(email)) return error(res, 409, 'already_exists', 'Этот email уже зарегистрирован.');
         const user = { id: randomUUID(), email, name };
         const hashed = await passwordHash(b.password);
@@ -186,16 +235,27 @@ export function createApp(options = {}) {
         return json(res, 201, newSession(user, req));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
-        if (throttle('login:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
         const b = await bodyOf(req);
         const email = cleanEmail(b.email);
         if (!emailPattern.test(email) || typeof b.password !== 'string' || b.password.length > 128) {
           return error(res, 400, 'invalid_input', 'Укажите email и пароль.');
         }
+        const ipBucket = 'login-ip:' + digest(req.socket.remoteAddress || 'unknown');
+        const accountBucket = 'login-account:' + digest(email);
+        const wait = Math.max(rateLimitWait(ipBucket), rateLimitWait(accountBucket));
+        if (wait > 0) return sendRateLimited(res, wait);
         const user = userByEmail.get(email);
-        if (!user || !(await comparePassword(b.password, user.password_hash))) {
+        const valid = user
+          ? await comparePassword(b.password, user.password_hash)
+          : (await scrypt(b.password, Buffer.alloc(16), 64), false);
+        if (!valid) {
+          const ipWait = recordFailure(ipBucket);
+          const accountWait = recordFailure(accountBucket);
+          const retry = Math.max(ipWait, accountWait);
+          if (retry > 0) return sendRateLimited(res, retry);
           return error(res, 401, 'invalid_credentials', 'Неверная почта или пароль.');
         }
+        clearRateLimit.run(accountBucket);
         return json(res, 200, newSession(user, req));
       }
       if (path === '/v1/auth/reset-password' && req.method === 'POST') {
@@ -246,9 +306,10 @@ export function createApp(options = {}) {
       if (path === '/v1/auth/change-password' && req.method === 'POST') {
         const session = auth(req);
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
-        if (throttle('password:' + req.socket.remoteAddress)) {
-          return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
-        }
+        const ipBucket = 'password-ip:' + digest(req.socket.remoteAddress || 'unknown');
+        const accountBucket = 'password-account:' + digest(session.user.id);
+        const wait = Math.max(rateLimitWait(ipBucket), rateLimitWait(accountBucket));
+        if (wait > 0) return sendRateLimited(res, wait);
         const body = await bodyOf(req);
         if (typeof body.current_password !== 'string' ||
             typeof body.new_password !== 'string' ||
@@ -259,8 +320,13 @@ export function createApp(options = {}) {
         }
         const account = userById.get(session.user.id);
         if (!account || !(await comparePassword(body.current_password, account.password_hash))) {
+          const ipWait = recordFailure(ipBucket);
+          const accountWait = recordFailure(accountBucket);
+          const retry = Math.max(ipWait, accountWait);
+          if (retry > 0) return sendRateLimited(res, retry);
           return error(res, 403, 'invalid_password', 'Неверный текущий пароль.');
         }
+        clearRateLimit.run(accountBucket);
         const hash = await passwordHash(body.new_password);
         db.exec('BEGIN IMMEDIATE');
         try {
