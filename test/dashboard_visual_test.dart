@@ -48,6 +48,24 @@ void main() {
     expect(openedSettings, true);
   });
 
+  testWidgets('Favorites can be saved and filtered across service cards', (tester) async {
+    final auth = AuthController(_CatalogRepository());
+    addTearDown(auth.dispose);
+    await tester.pumpWidget(MaterialApp(
+      theme: ENetTheme.dark,
+      home: Scaffold(body: SingleChildScrollView(
+        child: ServiceCatalogPanel(auth: auth))),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('favorite-prodayzer')));
+    await tester.pumpAndSettle();
+    expect(find.text('Избранное (1)'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('favorites-only')));
+    await tester.pumpAndSettle();
+    expect(find.text('Продайзер'), findsOneWidget);
+    expect(find.text('eNet Studio'), findsNothing);
+  });
+
   testWidgets('Search filters services and clear restores the full catalog', (tester) async {
     final auth = AuthController(_CatalogRepository());
     addTearDown(auth.dispose);
