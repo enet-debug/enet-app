@@ -135,9 +135,9 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
               fontWeight: FontWeight.w800, letterSpacing: -.35)),
           ],
         )),
-        if (onSeeAll != null)
+        if (widget.onSeeAll != null)
           TextButton(
-            onPressed: onSeeAll,
+            onPressed: widget.onSeeAll,
             child: const Row(mainAxisSize: MainAxisSize.min, children: [
               Text('Все сервисы'),
               SizedBox(width: 3),
@@ -204,7 +204,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
   @override
   Widget build(BuildContext context) {
     final matches = _matches;
-    if (compact) return _buildCompact(matches);
+    if (widget.compact) return _buildCompact(matches);
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
