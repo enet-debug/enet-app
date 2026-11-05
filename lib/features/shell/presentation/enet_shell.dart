@@ -236,6 +236,8 @@ class _ENetShellState extends State<ENetShell> {
     return Glass(
       radius: 19,
       blur: 14,
+      tint: const Color(0xFF001512),
+      strength: 4,
       padding: const EdgeInsets.fromLTRB(15, 20, 15, 15),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
@@ -269,8 +271,10 @@ class _ENetShellState extends State<ENetShell> {
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: ENetColors.mint.withValues(alpha: .18),
-                    border: Border.all(color: ENetColors.mint.withValues(alpha: .34)),
+                    gradient: const LinearGradient(
+                      begin: Alignment.centerLeft, end: Alignment.centerRight,
+                      colors: [Color(0xFF0FAF87), Color(0xFF0A5D51)]),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .48)),
                   ),
                 ),
               ),
@@ -343,7 +347,7 @@ class _ENetShellState extends State<ENetShell> {
             destination.label,
             maxLines: 1, overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              color: selected ? ENetColors.text : ENetColors.muted,
+              color: selected ? ENetColors.text : const Color(0xFFD2E5DF),
               fontSize: 13,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             ),
@@ -611,7 +615,7 @@ class _ENetShellState extends State<ENetShell> {
           const Text('Ваша единая платформа для работы, автоматизации и ИИ',
             style: TextStyle(color: ENetColors.muted, fontSize: 12)),
         ],
-        SizedBox(height: compact ? 10 : 15),
+        SizedBox(height: compact ? 10 : 23),
         _hero(compact),
       ],
     );
@@ -642,9 +646,9 @@ class _ENetShellState extends State<ENetShell> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         intro,
-        const SizedBox(height: 12),
-        shortcuts,
         const SizedBox(height: 17),
+        shortcuts,
+        const SizedBox(height: 22),
         catalog,
       ],
     );
@@ -927,7 +931,7 @@ class _ENetShellState extends State<ENetShell> {
         ),
       );
     }
-    const height = 162.0;
+    const height = 184.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1300,7 +1304,7 @@ class _HomeShortcut extends StatelessWidget {
         onTap: data.onTap, pressedScale: .97, haptic: false,
         builder: (context, hovered) => AnimatedContainer(
           duration: ENetMotion.quick,
-          height: compact ? 85 : 105,
+          height: compact ? 85 : 116,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
             gradient: LinearGradient(

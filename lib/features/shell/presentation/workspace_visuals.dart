@@ -276,52 +276,102 @@ class MobileWelcomeScene extends StatelessWidget {
   );
 }
 
+/// Layered alpine valley artwork based on the approved phone reference.
+/// Entirely rendered in Flutter so it scales cleanly without external images.
 class _MobileMountainPainter extends CustomPainter {
   const _MobileMountainPainter();
 
   @override
   void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
     final bounds = Offset.zero & size;
-    final w = size.width, h = size.height;
+    canvas.save();
+    canvas.clipRect(bounds);
     canvas.drawRect(bounds, Paint()..shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
+      stops: [0.0, .42, .7, 1.0],
       colors: [
-        Color(0xFF071B23),
-        Color(0xFF154951),
-        Color(0xFF092522),
-        Color(0xFF03110F),
+        Color(0xFF03131D),
+        Color(0xFF0B3540),
+        Color(0xFF17535B),
+        Color(0xFF051617),
       ],
     ).createShader(bounds));
-    final glow = Offset(w * .53, h * .35);
-    canvas.drawCircle(glow, w * .45,
-      Paint()..shader = RadialGradient(colors: [
-        ENetColors.cyan.withValues(alpha: .3),
-        Colors.transparent,
-      ]).createShader(Rect.fromCircle(center: glow, radius: w * .45)));
 
-    for (final (phase, peak, base, color) in <(double,double,double,Color)>[
-      (.2,.18,.62,Color(0xFF2D7377)),
-      (1.6,.15,.72,Color(0xFF1B4E51)),
-      (3.0,.10,.84,Color(0xFF0C2E30)),
-      (2.2,.06,.93,Color(0xFF071B1C)),
-    ]) {
-      final ridge = Path()..moveTo(0,h)..lineTo(0,h*base);
-      for (var i=0; i<=36; i++) {
-        final t=i/36.0;
-        final undulation=math.sin(t*math.pi*4.5+phase)*h*peak;
-        final peaks=math.pow(math.sin(t*math.pi*7.5+phase),5).toDouble()*h*peak*.4;
-        ridge.lineTo(w*t,h*base-undulation-peaks);
+    final dawn = Offset(w * .52, h * .57);
+    canvas.drawCircle(dawn, w * .65,
+      Paint()..shader = RadialGradient(colors: [
+        const Color(0xFF7BDFE3).withValues(alpha: .29),
+        const Color(0xFF1897A4).withValues(alpha: .12),
+        Colors.transparent,
+      ]).createShader(Rect.fromCircle(center: dawn, radius: w * .65)));
+
+    void ridge(List<Offset> points, Color color) {
+      final path = Path()..moveTo(0, h);
+      for (final p in points) {
+        path.lineTo(p.dx * w, p.dy * h);
       }
-      ridge..lineTo(w,h)..close();
-      canvas.drawPath(ridge,Paint()..color=color);
+      path..lineTo(w, h)..close();
+      canvas.drawPath(path, Paint()..color = color);
     }
-    canvas.drawRect(bounds,Paint()..shader=const LinearGradient(
-      begin: Alignment.topCenter,end:Alignment.bottomCenter,
-      colors:[Color(0x00031212),Color(0xC4031212)],
+
+    // Distant snowy ridges create the deep mountain valley from the reference.
+    ridge(const [
+      Offset(0, .64), Offset(.11, .48), Offset(.18, .54),
+      Offset(.29, .40), Offset(.38, .56), Offset(.47, .51),
+      Offset(.58, .59), Offset(.69, .43), Offset(.76, .50),
+      Offset(.88, .38), Offset(1, .54),
+    ], const Color(0xFF3B7480));
+    ridge(const [
+      Offset(0, .73), Offset(.14, .52), Offset(.21, .59),
+      Offset(.31, .47), Offset(.40, .62), Offset(.50, .58),
+      Offset(.60, .64), Offset(.72, .50), Offset(.82, .58),
+      Offset(.92, .47), Offset(1, .60),
+    ], const Color(0xFF245B65));
+
+    final snow = Paint()..color = const Color(0xFFB6E9E8).withValues(alpha: .33);
+    canvas.drawPath(Path()
+      ..moveTo(w * .28, h * .43)..lineTo(w * .32, h * .49)
+      ..lineTo(w * .30, h * .47)..lineTo(w * .23, h * .54)
+      ..lineTo(w * .28, h * .43)..close(), snow);
+    canvas.drawPath(Path()
+      ..moveTo(w * .88, h * .38)..lineTo(w * .92, h * .49)
+      ..lineTo(w * .87, h * .45)..lineTo(w * .81, h * .54)
+      ..lineTo(w * .88, h * .38)..close(), snow);
+
+    ridge(const [
+      Offset(0, .53), Offset(.07, .58), Offset(.16, .70),
+      Offset(.23, .66), Offset(.35, .82), Offset(.49, .88),
+      Offset(.58, .83), Offset(.68, .73), Offset(.79, .63),
+      Offset(.9, .55), Offset(1, .60),
+    ], const Color(0xFF123B42));
+    ridge(const [
+      Offset(0, .64), Offset(.09, .70), Offset(.18, .79),
+      Offset(.28, .83), Offset(.40, .95), Offset(.53, 1.0),
+      Offset(.65, .90), Offset(.80, .77), Offset(.91, .70),
+      Offset(1, .68),
+    ], const Color(0xFF092B31));
+
+    final mist = Rect.fromLTWH(0, h * .60, w, h * .36);
+    canvas.drawRect(mist, Paint()..shader = LinearGradient(
+      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+      colors: [
+        const Color(0xFF91D9D7).withValues(alpha: .12),
+        const Color(0xFF073031).withValues(alpha: .04),
+        const Color(0xFF021314).withValues(alpha: .82),
+      ],
+    ).createShader(mist));
+    canvas.drawRect(bounds, Paint()..shader = const LinearGradient(
+      begin: Alignment.topCenter, end: Alignment.bottomCenter,
+      stops: [0, .48, 1],
+      colors: [Color(0x22020F10), Color(0x00020F10), Color(0xF0031010)],
     ).createShader(bounds));
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant _MobileMountainPainter oldDelegate)=>false;
+  bool shouldRepaint(covariant _MobileMountainPainter oldDelegate) => false;
 }
+
