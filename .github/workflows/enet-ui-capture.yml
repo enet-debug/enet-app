@@ -6,6 +6,7 @@ on:
       - fix/enet-072-session-recovery
       - feat/enet-brandmark-reference
       - feat/enet-mockup-dashboard-v2
+      - fix/enet-dashboard-reference-05
   workflow_dispatch:
 
 permissions:
