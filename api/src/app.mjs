@@ -214,7 +214,7 @@ export function createApp(options = {}) {
         return json(res, 201, newSession(user, req));
       }
       if (path === '/v1/auth/login' && req.method === 'POST') {
-        const ipRetry = throttle('login-ip:' + (req.socket.remoteAddress || 'unknown'), 30);
+        const ipRetry = throttle('login-ip:' + clientIp(req), 30);
         if (ipRetry) {
           res.setHeader('Retry-After', String(ipRetry));
           return error(res, 429, 'rate_limited', 'Слишком много запросов с этого адреса. Попробуйте позже.');
@@ -284,7 +284,7 @@ export function createApp(options = {}) {
       if (path === '/v1/auth/change-password' && req.method === 'POST') {
         const session = auth(req);
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
-        const retryAfter = throttle('password:' + (req.socket.remoteAddress || 'unknown'), 8);
+        const retryAfter = throttle('password:' + clientIp(req), 8);
         if (retryAfter) {
           res.setHeader('Retry-After', String(retryAfter));
           return error(res, 429, 'rate_limited', 'Слишком много попыток смены пароля. Попробуйте позже.');
