@@ -214,7 +214,9 @@ class _ENetShellState extends State<ENetShell> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8),
-                            child: SizedBox(width: 246, child: _sidebar()),
+                            child: SizedBox(
+                              width: MediaQuery.sizeOf(context).width >= 1360 ? 282 : 246,
+                              child: _sidebar()),
                           ),
                           Container(width: 1, color: ENetColors.border),
                           Expanded(child: _content(compact)),
@@ -471,7 +473,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Контент ─────────────────────────
 
   Widget _content(bool compact) {
-    final pad = compact ? 16.0 : 24.0;
+    final pad = compact ? 16.0 : MediaQuery.sizeOf(context).width >= 1360 ? 30.0 : 24.0;
     return Column(children: [
       if (compact)
         Padding(
@@ -600,7 +602,7 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
     final split = !compact && constraints.maxWidth >= 710;
-    final railWidth = constraints.maxWidth >= 1050 ? 296.0 : 250.0;
+    final railWidth = constraints.maxWidth >= 1050 ? 340.0 : 250.0;
 
     final intro = Container(
       decoration: compact ? null : BoxDecoration(
@@ -667,7 +669,7 @@ class _ENetShellState extends State<ENetShell> {
         intro,
         const SizedBox(height: 21),
         shortcuts,
-        const SizedBox(height: 30),
+        const SizedBox(height: 33),
         catalog,
       ],
     );
