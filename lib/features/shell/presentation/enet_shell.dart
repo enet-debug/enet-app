@@ -12,6 +12,8 @@ import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_repository.dart';
 import 'account_security_panel.dart';
 import 'service_catalog_panel.dart';
+import 'device_sessions_panel.dart';
+import 'profile_edit_button.dart';
 
 class _Dest {
   const _Dest(this.icon, this.activeIcon, this.label);
@@ -545,6 +547,7 @@ class _ENetShellState extends State<ENetShell> {
           ],
         ),
       ),
+      ProfileEditButton(auth: widget.auth),
       const SizedBox(height: 24),
       Reveal(
         delay: const Duration(milliseconds: 260),
@@ -584,13 +587,15 @@ class _ENetShellState extends State<ENetShell> {
       const SizedBox(height: 24),
       AccountSecurityPanel(auth: widget.auth),
       const SizedBox(height: 24),
+      DeviceSessionsPanel(auth: widget.auth),
+      const SizedBox(height: 24),
       const Reveal(
         delay: Duration(milliseconds: 180),
         child: _Group(
           header: 'О ПРИЛОЖЕНИИ',
           footer: 'Другие настройки появятся вместе с новыми функциями eNet.',
           children: [
-            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.3.0 (3)'),
+            _RowTile(icon: Icons.info_rounded, gradient: ENetColors.amberGradient, title: 'Версия', value: '0.4.0 (4)'),
           ],
         ),
       ),

@@ -18,6 +18,24 @@ class EcosystemService {
   final String url;
 }
 
+class AccountSession {
+  const AccountSession({
+    required this.id,
+    required this.device,
+    required this.createdAt,
+    required this.lastSeenAt,
+    required this.expiresAt,
+    required this.current,
+  });
+
+  final String id;
+  final String device;
+  final DateTime createdAt;
+  final DateTime lastSeenAt;
+  final DateTime expiresAt;
+  final bool current;
+}
+
 /// Abstract authentication and account services. Demo implementation is only for tests.
 abstract class AuthRepository {
   Future<AuthUser> signIn({required String email, required String password});
@@ -29,4 +47,7 @@ abstract class AuthRepository {
   Future<List<EcosystemService>> listServices();
   Future<void> changePassword(String currentPassword, String nextPassword);
   Future<int> revokeOtherSessions();
+  Future<AuthUser> updateName(String name);
+  Future<List<AccountSession>> listSessions();
+  Future<void> revokeSession(String sessionId);
 }
