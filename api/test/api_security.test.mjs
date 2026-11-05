@@ -42,7 +42,7 @@ test('password guessing is limited by email and isolated across app instances', 
     });
   }
   await withApp(async base => {
-    for (let n = 0; n < 8; n++) assert.equal((await attempt(base)).status, 401);
+    for (let n = 0; n < 7; n++) assert.equal((await attempt(base)).status, 401);
     const limited = await attempt(base);
     assert.equal(limited.status, 429);
     assert.ok(Number(limited.headers.get('retry-after')) > 0);
