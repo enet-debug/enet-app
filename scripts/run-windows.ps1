@@ -2,6 +2,7 @@ $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $ApiUrl = 'http://127.0.0.1:8787'
 $ApiProcess = $null
+$ExistingApi = $false
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   throw 'Node.js 22.16+ is required. Install Node.js and retry.'
@@ -19,9 +20,18 @@ try {
   flutter pub get
 
   try {
-    Invoke-RestMethod -Uri "$ApiUrl/ready" -TimeoutSec 2 | Out-Null
+    Invoke-RestMethod -Uri "$ApiUrl/health" -TimeoutSec 2 | Out-Null
+    $ExistingApi = $true
+  } catch {}
+
+  if ($ExistingApi) {
+    try {
+      Invoke-RestMethod -Uri "$ApiUrl/ready" -TimeoutSec 2 | Out-Null
+    } catch {
+      throw 'An older or unhealthy eNet API is already using port 8787. Stop it and retry.'
+    }
     Write-Host 'Using existing eNet API on localhost:8787'
-  } catch {
+  } else {
     $ApiProcess = Start-Process -FilePath 'node' -ArgumentList 'src/server.mjs' -WorkingDirectory (Join-Path $Root 'api') -WindowStyle Hidden -PassThru
     $Ready = $false
     for ($i = 0; $i -lt 30; $i++) {
