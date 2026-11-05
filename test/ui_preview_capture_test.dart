@@ -156,7 +156,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
       await tester.pump(const Duration(milliseconds: 800));
 
-      expect(find.text('Подключённые приложения'), findsOneWidget);
+      expect(find.text('Мои сервисы'), findsOneWidget);
       expect(find.text('ВОЗМОЖНОСТИ eNet'), findsOneWidget);
       final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
       if (size.width > 600) {
