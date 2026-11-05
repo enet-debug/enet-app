@@ -38,6 +38,8 @@ class AccountSession {
 
 /// Abstract authentication and account services. Demo implementation is only for tests.
 abstract class AuthRepository {
+  String get apiEndpoint;
+  Future<void> configureApiEndpoint(String endpoint);
   Future<AuthUser> signIn({required String email, required String password});
   Future<AuthUser> signUp({required String name, required String email, required String password});
   Future<void> requestPasswordReset(String email);
