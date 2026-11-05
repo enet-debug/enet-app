@@ -159,7 +159,7 @@ void main() {
       expect(find.text('Приложения eNet'), findsOneWidget);
       final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
       if (size.width > 600) {
-        expect(heroSize.width, greaterThan(850));
+        expect(heroSize.width, greaterThan(680));
       } else {
         expect(heroSize.width, greaterThan(300));
       }

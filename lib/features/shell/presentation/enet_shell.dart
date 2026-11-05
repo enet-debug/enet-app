@@ -873,28 +873,6 @@ class _UnreadChip extends StatelessWidget {
   );
 }
 
-class _HeroTag extends StatelessWidget {
-  const _HeroTag({required this.icon, required this.label});
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-    decoration: BoxDecoration(
-      color: const Color(0xFF0A1F17).withValues(alpha: .62),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: ENetColors.mint.withValues(alpha: .18)),
-    ),
-    child: Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, color: ENetColors.cyan, size: 15),
-      const SizedBox(width: 7),
-      Text(label, style: const TextStyle(color: ENetColors.text,
-        fontSize: 11.5, fontWeight: FontWeight.w600)),
-    ]),
-  );
-}
-
 class _TintedIcon extends StatelessWidget {
   const _TintedIcon(this.icon, {required this.selected, required this.size});
   final IconData icon;
@@ -1058,67 +1036,6 @@ class _QuickAction extends StatelessWidget {
     trailing: const Icon(Icons.chevron_right_rounded, color: ENetColors.faint, size: 18),
     onTap: onTap,
   );
-}
-
-class _FeatureTile extends StatelessWidget {
-  const _FeatureTile({
-    required this.icon,
-    required this.gradient,
-    required this.heading,
-    required this.body,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Gradient gradient;
-  final String heading;
-  final String body;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Pressable(
-      onTap: onTap,
-      pressedScale: .975,
-      builder: (context, hovered) => AnimatedSlide(
-        duration: ENetMotion.medium,
-        curve: Curves.easeOutCubic,
-        offset: Offset(0, hovered ? -.02 : 0),
-        child: Glass(
-          radius: 26,
-          strength: hovered ? 1.5 : 1,
-          padding: const EdgeInsets.all(22),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 150),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Row(children: [
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    gradient: gradient,
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: .3), blurRadius: 16, offset: const Offset(0, 6))],
-                  ),
-                  child: Icon(icon, color: Colors.white, size: 25),
-                ),
-                const Spacer(),
-                  AnimatedSlide(
-                    duration: ENetMotion.quick,
-                    offset: Offset(hovered ? .2 : 0, 0),
-                    child: const Icon(Icons.arrow_forward_rounded, size: 20, color: ENetColors.muted),
-                  ),
-              ]),
-              const SizedBox(height: 20),
-              Text(heading, style: const TextStyle(fontSize: 17, color: ENetColors.text, fontWeight: FontWeight.w700, letterSpacing: -.3)),
-              const SizedBox(height: 7),
-              Text(body, style: const TextStyle(fontSize: 13.5, color: ENetColors.muted, height: 1.5)),
-            ]),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Фирменный знак в центре орбитальной композиции приветственного блока.
