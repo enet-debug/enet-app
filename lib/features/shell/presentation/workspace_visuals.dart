@@ -355,7 +355,9 @@ class _MobileMountainPainter extends CustomPainter {
       [const Offset(.92,.38),const Offset(.943,.439),const Offset(.917,.42),const Offset(.89,.45)],
     ]) {
       final snowcap = Path()..moveTo(peaks.first.dx*w,peaks.first.dy*h);
-      for(final p in peaks.skip(1)) snowcap.lineTo(p.dx*w,p.dy*h);
+      for (final p in peaks.skip(1)) {
+        snowcap.lineTo(p.dx * w, p.dy * h);
+      }
       canvas.drawPath(snowcap..close(),snow);
     }
 
