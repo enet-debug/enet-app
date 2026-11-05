@@ -15,10 +15,14 @@ class AuthController extends ChangeNotifier {
 
   String get apiBaseUrl => _repository.apiBaseUrl;
 
-  Future<void> updateApiBaseUrl(String value) => _execute(() async {
-    await _repository.updateApiBaseUrl(value);
-    user = null;
-  });
+  Future<void> updateApiBaseUrl(String value) async {
+    final normalized = normalizeApiBaseUrl(value);
+    if (normalized == apiBaseUrl) return;
+    await _execute(() async {
+      await _repository.updateApiBaseUrl(normalized);
+      user = null;
+    });
+  }
 
   Future<void> restoreSession() async {
     try {
