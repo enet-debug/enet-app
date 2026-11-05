@@ -28,7 +28,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if command -v curl >/dev/null 2>&1 && curl -fsS http://127.0.0.1:8787/health >/dev/null 2>&1; then
+if command -v curl >/dev/null 2>&1 && curl -fsS http://127.0.0.1:8787/ready >/dev/null 2>&1; then
   echo "Using existing eNet API on localhost:8787"
 else
   ( cd "$ROOT/api" && exec node src/server.mjs ) &
