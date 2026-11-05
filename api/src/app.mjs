@@ -142,7 +142,7 @@ export function createApp(options = {}) {
     const token = randomBytes(32).toString('base64url');
     const expiresAt = now + sessionMs;
     const label = String(req.headers['x-enet-client'] || req.headers['user-agent'] || 'Неизвестное устройство')
-      .replace(/[\\x00-\\x1f\\x7f]/g, '').slice(0, 90) || 'Неизвестное устройство';
+      .replace(/[\x00-\x1f\x7f]/g, '').slice(0, 90) || 'Неизвестное устройство';
     insertSession.run(digest(token), user.id, expiresAt, randomUUID(), now, now, label);
     return { token, expires_at: new Date(expiresAt).toISOString(), user: publicUser(user) };
   }
@@ -210,7 +210,7 @@ export function createApp(options = {}) {
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
         const payload = await bodyOf(req);
         const name = typeof payload.name === 'string' ? payload.name.trim() : '';
-        if (name.length < 2 || name.length > 80 || /[\\x00-\\x1f\\x7f]/.test(name)) {
+        if (name.length < 2 || name.length > 80 || /[\x00-\x1f\x7f]/.test(name)) {
           return error(res, 400, 'invalid_name', 'Имя должно содержать от 2 до 80 символов.');
         }
         updateProfile.run(name, session.user.id);
