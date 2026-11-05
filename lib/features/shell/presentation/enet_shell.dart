@@ -565,7 +565,7 @@ class _ENetShellState extends State<ENetShell> {
       ],
     );
 
-    final shortcuts = _shortcutStrip();
+    final shortcuts = _shortcutStrip(compact);
     final catalog = ServiceCatalogPanel(
       auth: widget.auth,
       dashboard: true,
@@ -628,7 +628,11 @@ class _ENetShellState extends State<ENetShell> {
         intro,
         const SizedBox(height: 17),
         shortcuts,
-        const SizedBox(height: 19),
+        const SizedBox(height: 17),
+        if (compact) ...[
+          _mobileQuickAccess(),
+          const SizedBox(height: 18),
+        ],
         catalog,
         const SizedBox(height: 16),
         _accountSummaryCard(),
@@ -645,45 +649,71 @@ class _ENetShellState extends State<ENetShell> {
     );
   });
 
-  Widget _shortcutStrip() {
-    final items = <_HomeShortcutData>[
-      _HomeShortcutData(
-        icon: Icons.shopping_bag_outlined, title: 'Продайзер',
-        subtitle: 'Объявления', color: ENetColors.violet,
-        onTap: () => go(1),
-      ),
-      _HomeShortcutData(
-        icon: Icons.auto_awesome_rounded, title: 'eNet AI',
-        subtitle: 'Скоро', color: Color(0xFF48BFFB),
-        onTap: () => go(1),
-      ),
-      _HomeShortcutData(
-        icon: Icons.cloud_outlined, title: 'eNet Cloud',
-        subtitle: 'Скоро', color: Color(0xFF4DDFF0),
-        onTap: () => go(1),
-      ),
-      _HomeShortcutData(
-        icon: Icons.folder_outlined, title: 'Проекты',
-        subtitle: 'Задачи', color: ENetColors.mint,
-        onTap: () => go(7),
-      ),
-      _HomeShortcutData(
-        icon: Icons.bar_chart_rounded, title: 'Аналитика',
-        subtitle: 'Устройства', color: Color(0xFFFFC75B),
-        onTap: () => go(5),
-      ),
-    ];
+  Widget _shortcutStrip(bool compact) {
+    final shortcuts = compact
+      ? <(IconData, String, Color, VoidCallback)>[
+          (Icons.grid_view_rounded, 'Сервисы', ENetColors.cyan, () => go(1)),
+          (Icons.notifications_none_rounded, 'Уведомления', ENetColors.cyan, () => go(2)),
+          (Icons.check_box_outlined, 'Задачи', ENetColors.cyan, () => go(7)),
+          (Icons.folder_outlined, 'Файлы', ENetColors.cyan, () => go(1)),
+        ]
+      : <(IconData, String, Color, VoidCallback)>[
+          (Icons.shopping_bag_outlined, 'Продайзер', ENetColors.violet, () => go(1)),
+          (Icons.auto_awesome_rounded, 'eNet AI', const Color(0xFF48BFFB), () => go(1)),
+          (Icons.cloud_outlined, 'eNet Cloud', const Color(0xFF4DDFF0), () => go(1)),
+          (Icons.folder_outlined, 'Проекты', ENetColors.mint, () => go(7)),
+          (Icons.bar_chart_rounded, 'Аналитика', const Color(0xFFFFC75B), () => go(5)),
+        ];
     return LayoutBuilder(builder: (context, constraints) {
-      const gap = 8.0;
-      final width = (constraints.maxWidth - gap * 4) / 5;
+      final gap = compact ? 7.0 : 8.0;
+      final width = (constraints.maxWidth - gap * (shortcuts.length - 1)) / shortcuts.length;
       return Row(children: [
-        for (var i = 0; i < items.length; i++) ...[
-          if (i > 0) const SizedBox(width: gap),
-          SizedBox(width: width, child: _HomeShortcut(data: items[i])),
+        for (var i = 0; i < shortcuts.length; i++) ...[
+          if (i > 0) SizedBox(width: gap),
+          SizedBox(width: width, child: _HomeShortcut(data: _HomeShortcutData(
+            icon: shortcuts[i].$1, title: shortcuts[i].$2,
+            subtitle: shortcuts[i].$2, color: shortcuts[i].$3,
+            onTap: shortcuts[i].$4))),
         ],
       ]);
     });
   }
+
+  Widget _mobileQuickAccess() => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const Text('Быстрый доступ', style: TextStyle(
+        color: ENetColors.text, fontSize: 16, fontWeight: FontWeight.w800)),
+      const SizedBox(height: 10),
+      Pressable(onTap: () => go(1), haptic: false,
+        builder: (context, hovered) => Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(17),
+            gradient: const LinearGradient(colors: [
+              Color(0xFF0B4C40), Color(0xFF06241F)]),
+            border: Border.all(color: ENetColors.mint.withValues(
+              alpha: hovered ? .76 : .40)),
+          ),
+          child: Row(children: [
+            Container(width: 50, height: 50,
+              decoration: BoxDecoration(
+                gradient: ENetColors.violetGradient,
+                borderRadius: BorderRadius.circular(14)),
+              child: const Icon(Icons.shopping_bag_outlined, color: Colors.white)),
+            const SizedBox(width: 12),
+            const Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Продайзер', style: TextStyle(color: ENetColors.text,
+                  fontSize: 15, fontWeight: FontWeight.w800)),
+                SizedBox(height: 4),
+                Text('Создание объявлений с помощью ИИ',
+                  style: TextStyle(color: ENetColors.muted, fontSize: 11)),
+              ])),
+            const Icon(Icons.chevron_right_rounded, color: ENetColors.cyan),
+          ]),
+        )),
+    ],
+  );
 
   Widget _accountSummaryCard() => Pressable(
     onTap: () => go(3),
