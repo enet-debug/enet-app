@@ -63,6 +63,10 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Validate Windows launcher syntax
+        shell: pwsh
+        run: |
+          $null = [scriptblock]::Create((Get-Content scripts/run-windows.ps1 -Raw))
       - name: Generate Windows runner
         run: flutter create --platforms=windows .
       - name: Resolve packages
