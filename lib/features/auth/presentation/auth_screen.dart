@@ -8,6 +8,7 @@ import '../../../core/widgets/glass_controls.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/reveal.dart';
 import '../application/auth_controller.dart';
+import '../data/api_auth_repository.dart';
 
 enum _AuthMode { signIn, signUp, reset }
 
@@ -69,6 +70,30 @@ class _AuthScreenState extends State<AuthScreen> {
         await widget.auth.signUp(name.text, email.text, password.text);
       } else {
         await widget.auth.signIn(email.text, password.text);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          notice = e.toString().replaceFirst('Exception: ', '');
+          noticeIsError = true;
+        });
+      }
+    }
+  }
+
+  Future<void> _configureApiEndpoint() async {
+    final endpoint = await showDialog<String>(
+      context: context,
+      builder: (_) => _ApiEndpointDialog(initial: widget.auth.apiEndpoint),
+    );
+    if (endpoint == null || !mounted) return;
+    try {
+      await widget.auth.configureApiEndpoint(endpoint);
+      if (mounted) {
+        setState(() {
+          notice = 'Адрес API сохранён. Теперь можно войти в eNet ID.';
+          noticeIsError = false;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -332,10 +357,99 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
           ]),
+          const SizedBox(height: 14),
+          Text(
+            'Сервер: ${widget.auth.apiEndpoint}',
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: ENetColors.faint, fontSize: 10.5),
+          ),
+          const SizedBox(height: 4),
+          TextButton.icon(
+            onPressed: busy ? null : _configureApiEndpoint,
+            icon: const Icon(Icons.dns_outlined, size: 17),
+            label: const Text('Настроить адрес API'),
+          ),
         ]),
       ),
     );
   }
+}
+
+class _ApiEndpointDialog extends StatefulWidget {
+  const _ApiEndpointDialog({required this.initial});
+  final String initial;
+
+  @override
+  State<_ApiEndpointDialog> createState() => _ApiEndpointDialogState();
+}
+
+class _ApiEndpointDialogState extends State<_ApiEndpointDialog> {
+  final _form = GlobalKey<FormState>();
+  late final TextEditingController _endpoint;
+
+  @override
+  void initState() {
+    super.initState();
+    _endpoint = TextEditingController(text: widget.initial);
+  }
+
+  @override
+  void dispose() {
+    _endpoint.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    if (_form.currentState?.validate() != true) return;
+    Navigator.pop(context, ApiAuthRepository.normalizeApiEndpoint(_endpoint.text));
+  }
+
+  String? _validate(String? value) {
+    try {
+      ApiAuthRepository.normalizeApiEndpoint(value ?? '');
+      return null;
+    } on FormatException catch (error) {
+      return error.message.toString();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Подключение к eNet API'),
+    content: SizedBox(
+      width: 420,
+      child: Form(
+        key: _form,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          TextFormField(
+            controller: _endpoint,
+            autofocus: true,
+            keyboardType: TextInputType.url,
+            autocorrect: false,
+            enableSuggestions: false,
+            decoration: const InputDecoration(
+              labelText: 'Адрес сервера',
+              hintText: 'https://api.example.ru',
+              prefixIcon: Icon(Icons.link_rounded),
+            ),
+            validator: _validate,
+            onFieldSubmitted: (_) => _save(),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Для удалённого сервера требуется HTTPS. HTTP разрешён только для localhost при локальной разработке. После смены адреса потребуется войти заново.',
+            style: TextStyle(color: ENetColors.muted, fontSize: 12, height: 1.5),
+          ),
+        ]),
+      ),
+    ),
+    actions: [
+      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Отмена')),
+      FilledButton(onPressed: _save, child: const Text('Сохранить')),
+    ],
+  );
 }
 
 class _FadeIn extends StatelessWidget {
