@@ -33,6 +33,9 @@ class DemoAuthRepository implements AuthRepository {
   Future<List<EcosystemService>> listServices() async => const [];
 
   @override
+  Future<void> setServiceFavorite(String serviceId, bool favorite) async {}
+
+  @override
   Future<void> changePassword(String currentPassword, String nextPassword) async {
     throw UnsupportedError('Демо-аккаунт');
   }
