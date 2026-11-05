@@ -20,7 +20,10 @@ class BrandLogo extends StatelessWidget {
           ],
         ),
         clipBehavior: Clip.antiAlias,
-        child: Image.asset('assets/enet_logo.jpg', fit: BoxFit.cover),
+        child: ColorFiltered(
+          colorFilter: ColorFilter.mode(ENetColors.mint, BlendMode.color),
+          child: Image.asset('assets/enet_logo.jpg', fit: BoxFit.cover),
+        ),
       ),
       if (showName) ...[
         SizedBox(width: size * .26),
