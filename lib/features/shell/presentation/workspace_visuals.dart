@@ -381,3 +381,75 @@ class _MobileMountainPainter extends CustomPainter {
   bool shouldRepaint(covariant _MobileMountainPainter oldDelegate) => false;
 }
 
+
+
+// Procedural cosmic orb from the original dashboard reference.
+// It is abstract artwork, not a profile photograph.
+class DashboardNebulaAvatar extends StatelessWidget {
+  const DashboardNebulaAvatar({super.key, this.size = 48});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: size, height: size,
+    child: const RepaintBoundary(child: CustomPaint(
+      painter: _DashboardNebulaPainter())),
+  );
+}
+
+class _DashboardNebulaPainter extends CustomPainter {
+  const _DashboardNebulaPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bounds = Offset.zero & size;
+    final center = Offset(size.width * .5, size.height * .5);
+    canvas.save();
+    canvas.clipPath(Path()..addOval(bounds));
+    canvas.drawRect(bounds, Paint()..shader = const RadialGradient(
+      center: Alignment(-.2, .1), radius: 1.0,
+      colors: [Color(0xFF6938B8), Color(0xFF1E1F5D), Color(0xFF011E24)],
+    ).createShader(bounds));
+
+    final warm = Offset(size.width * .31, size.height * .63);
+    canvas.drawCircle(warm, size.width * .39,
+      Paint()..shader = RadialGradient(colors: [
+        const Color(0xFFE76BE6).withValues(alpha: .82),
+        const Color(0xFF7347F2).withValues(alpha: .25),
+        Colors.transparent,
+      ]).createShader(Rect.fromCircle(center: warm, radius: size.width * .39)));
+    final cool = Offset(size.width * .69, size.height * .26);
+    canvas.drawCircle(cool, size.width * .36,
+      Paint()..shader = RadialGradient(colors: [
+        const Color(0xFF63FEE1).withValues(alpha: .8),
+        const Color(0xFF3199C5).withValues(alpha: .12),
+        Colors.transparent,
+      ]).createShader(Rect.fromCircle(center: cool, radius: size.width * .36)));
+
+    final trail = Path()
+      ..moveTo(size.width * .05, size.height * .82)
+      ..cubicTo(size.width * .36, size.height * .45,
+        size.width * .70, size.height * .72,
+        size.width * .95, size.height * .12);
+    canvas.drawPath(trail, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * .04
+      ..color = const Color(0xFFB3FFF1).withValues(alpha: .72)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2));
+    for (final p in const [
+      Offset(.13, .28), Offset(.74, .15), Offset(.82, .46),
+      Offset(.20, .81), Offset(.61, .77), Offset(.46, .34),
+    ]) {
+      canvas.drawCircle(Offset(p.dx * size.width, p.dy * size.height),
+        size.width * .013, Paint()..color = const Color(0xFFE3FFFC));
+    }
+    canvas.restore();
+    canvas.drawCircle(center, size.width * .5 - .8, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..color = ENetColors.cyan.withValues(alpha: .85));
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashboardNebulaPainter oldDelegate) => false;
+}

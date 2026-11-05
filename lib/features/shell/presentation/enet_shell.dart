@@ -627,18 +627,25 @@ class _ENetShellState extends State<ENetShell> {
       onSeeAll: () => go(1),
     );
 
+    // Keep the four-panel hierarchy of the approved desktop reference.
+    // Device sessions remain accessible without a fifth dashboard card.
     final rail = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _accountSummaryCard(),
-        const SizedBox(height: 11),
-        _balancePreviewCard(),
-        const SizedBox(height: 11),
+        SizedBox(height: 102, child: _accountSummaryCard()),
+        const SizedBox(height: 12),
+        SizedBox(height: 140, child: _balancePreviewCard()),
+        const SizedBox(height: 12),
         DashboardStatus(auth: widget.auth),
-        const SizedBox(height: 11),
-        _quickActionsCard(),
-        const SizedBox(height: 11),
-        DashboardSessionsSnapshot(auth: widget.auth, onManage: () => go(5)),
+        const SizedBox(height: 12),
+        SizedBox(height: 213, child: _quickActionsCard()),
+        Align(alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: () => go(5),
+            icon: const Icon(Icons.devices_outlined, size: 16),
+            label: const Text('Управление сеансами',
+              style: TextStyle(fontSize: 11)),
+          )),
       ],
     );
 
@@ -746,16 +753,34 @@ class _ENetShellState extends State<ENetShell> {
 
   Widget _balancePreviewCard() => Glass(
     radius: 17, blur: 12,
-    padding: const EdgeInsets.fromLTRB(14, 12, 14, 13),
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 13),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      const Text('Баланс', style: TextStyle(color: ENetColors.text,
-        fontSize: 12, fontWeight: FontWeight.w700)),
-      const SizedBox(height: 8),
-      const Text('Нет данных', style: TextStyle(color: ENetColors.text,
-        fontSize: 22, fontWeight: FontWeight.w800)),
-      const SizedBox(height: 4),
-      const Text('Оплата ещё не подключена к eNet ID',
-        style: TextStyle(color: ENetColors.muted, fontSize: 10)),
+      const Text('Баланс', style: TextStyle(
+        color: ENetColors.text, fontSize: 13, fontWeight: FontWeight.w700)),
+      const SizedBox(height: 15),
+      Row(children: [
+        const Expanded(child: Text('Нет данных', maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: ENetColors.text,
+            fontSize: 20, fontWeight: FontWeight.w800))),
+        Tooltip(
+          message: 'Подключение платежей ещё не завершено',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: ENetColors.mint.withValues(alpha: .12),
+              border: Border.all(
+                color: ENetColors.mint.withValues(alpha: .28)),
+            ),
+            child: const Text('Скоро', style: TextStyle(
+              color: ENetColors.cyan, fontSize: 10, fontWeight: FontWeight.w700)),
+          ),
+        ),
+      ]),
+      const SizedBox(height: 13),
+      const Text('Пополнение пока недоступно',
+        style: TextStyle(color: ENetColors.muted, fontSize: 11)),
     ]),
   );
 
@@ -767,7 +792,7 @@ class _ENetShellState extends State<ENetShell> {
       blur: 12,
       padding: const EdgeInsets.all(13),
       child: Row(children: [
-        ENetAvatar(name: user.name, size: 48),
+        const DashboardNebulaAvatar(size: 48),
         const SizedBox(width: 12),
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -778,10 +803,7 @@ class _ENetShellState extends State<ENetShell> {
             const SizedBox(height: 4),
             Text(user.email, maxLines: 1, overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
-            const SizedBox(height: 5),
-            const Text('eNet ID · Аккаунт',
-              style: TextStyle(color: ENetColors.cyan, fontSize: 9.5,
-                fontWeight: FontWeight.w700)),
+
           ],
         )),
         const Icon(Icons.chevron_right_rounded, color: ENetColors.cyan, size: 20),
