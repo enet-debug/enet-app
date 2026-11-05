@@ -703,9 +703,9 @@ class _ENetShellState extends State<ENetShell> {
         child: Text('ВОЗМОЖНОСТИ eNet', style: _eyebrow),
       ),
       LayoutBuilder(builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 1080
+        final columns = constraints.maxWidth >= 760
             ? 6
-            : constraints.maxWidth >= 680 ? 3 : 2;
+            : constraints.maxWidth >= 530 ? 3 : 2;
         const gap = 10.0;
         final itemWidth =
             (constraints.maxWidth - gap * (columns - 1)) / columns;
