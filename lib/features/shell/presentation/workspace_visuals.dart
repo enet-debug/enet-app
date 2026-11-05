@@ -259,9 +259,15 @@ class MobileWelcomeScene extends StatelessWidget {
                 const Text('Добро пожаловать,', style: TextStyle(
                   color: ENetColors.text,
                   fontSize: 16, fontWeight: FontWeight.w600)),
-                Text('$name 👋', maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: ENetColors.text,
-                    fontSize: 23, fontWeight: FontWeight.w800)),
+                Row(children: [
+                  Flexible(child: Text(name,
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: ENetColors.text,
+                      fontSize: 23, fontWeight: FontWeight.w800))),
+                  const SizedBox(width: 7),
+                  const Icon(Icons.waving_hand_rounded,
+                    color: Color(0xFFFFC15B), size: 19),
+                ]),
               ],
             ),
           ),

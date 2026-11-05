@@ -1336,7 +1336,7 @@ class _HomeShortcut extends StatelessWidget {
             Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: TextStyle(color: ENetColors.text,
-                fontSize: compact ? 9.5 : 12,
+                fontSize: compact ? 8.4 : 12,
                 fontWeight: FontWeight.w800)),
           ]),
         ),
