@@ -51,9 +51,12 @@ class AuthController extends ChangeNotifier {
   Future<String> getApiEndpoint() => _repository.getApiEndpoint();
 
   Future<void> setApiEndpoint(String value) => _execute(() async {
+    final previous = await _repository.getApiEndpoint();
     await _repository.setApiEndpoint(value);
-    // A session issued by one server must never be reused on another.
-    user = null;
+    final current = await _repository.getApiEndpoint();
+    // Never reuse a bearer session on a different server.
+    // Saving an unchanged endpoint must not log users out.
+    if (previous != current) user = null;
   });
 
   Future<List<String>> favoriteServices() => _repository.favoriteServices();
