@@ -25,3 +25,14 @@ macos/Flutter/ephemeral/
 *.mobileprovision
 *.provisionprofile
 AuthKey_*.p8
+
+# eNet API local data and credentials
+api/data/
+api/.env
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Linux runner (regenerated with flutter create)
+linux/flutter/ephemeral/
+linux/build/
