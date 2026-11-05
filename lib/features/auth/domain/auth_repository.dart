@@ -35,6 +35,26 @@ class EcosystemService {
   final String url;
 }
 
+class WorkspaceTask {
+  const WorkspaceTask({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.completed,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.dueAt,
+  });
+
+  final String id;
+  final String title;
+  final String description;
+  final bool completed;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? dueAt;
+}
+
 class AccountSession {
   const AccountSession({
     required this.id,
@@ -101,4 +121,18 @@ abstract class AuthRepository {
   Future<NotificationFeed> listNotifications();
   Future<void> readNotification(String id);
   Future<int> readAllNotifications();
+  Future<List<WorkspaceTask>> listTasks();
+  Future<WorkspaceTask> createTask({
+    required String title,
+    required String description,
+    DateTime? dueAt,
+  });
+  Future<WorkspaceTask> updateTask({
+    required String id,
+    required String title,
+    required String description,
+    DateTime? dueAt,
+  });
+  Future<WorkspaceTask> setTaskCompleted(String id, bool completed);
+  Future<void> deleteTask(String id);
 }
