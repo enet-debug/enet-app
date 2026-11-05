@@ -951,16 +951,19 @@ class _ENetShellState extends State<ENetShell> {
                             letterSpacing: -.7,
                           )),
                         SizedBox(height: compact ? 4 : 8),
-                        Text(
-                          compact
-                            ? 'Единый доступ ко всем сервисам eNet'
-                            : 'Ваш единый аккаунт для всех сервисов eNet',
-                          maxLines: compact ? 2 : 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: const Color(0xFFD2F8E9),
-                            fontSize: compact ? 10.5 : 16,
-                            height: 1.3,
+                        SizedBox(
+                          width: compact ? 190 : 340,
+                          child: Text(
+                            compact
+                              ? 'Единый доступ ко всем сервисам eNet'
+                              : 'Ваш единый аккаунт для всех сервисов eNet',
+                            maxLines: compact ? 2 : 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: const Color(0xFFD2F8E9),
+                              fontSize: compact ? 10.5 : 16,
+                              height: 1.3,
+                            ),
                           ),
                         ),
                       ],
