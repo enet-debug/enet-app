@@ -184,6 +184,22 @@ class _ENetShellState extends State<ENetShell> {
                                   letterSpacing: .3,
                                 ))),
                             ),
+                            IconButton(
+                              tooltip: (_unreadCount ?? 0) > 0
+                                ? 'Уведомления: $_unreadCount непрочитанных'
+                                : 'Открыть уведомления',
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () => go(2),
+                              icon: Badge(
+                                isLabelVisible: (_unreadCount ?? 0) > 0,
+                                backgroundColor: ENetColors.mint,
+                                textColor: ENetColors.onAccent,
+                                label: Text(_unreadCount == null ? '' :
+                                  _unreadCount! > 99 ? '99+' : '$_unreadCount'),
+                                child: const Icon(Icons.notifications_none_rounded,
+                                  color: ENetColors.cyan, size: 18),
+                              ),
+                            ),
                             const Text('v0.8.0', style: TextStyle(
                               color: ENetColors.faint,
                               fontSize: 10,
@@ -564,11 +580,7 @@ class _ENetShellState extends State<ENetShell> {
       children: [
         _accountSummaryCard(),
         const SizedBox(height: 12),
-        DashboardStatus(
-          auth: widget.auth,
-          openAccount: () => go(3),
-          openSettings: () => go(6),
-        ),
+        DashboardStatus(auth: widget.auth),
         const SizedBox(height: 12),
         DashboardSessionsSnapshot(
           auth: widget.auth,
@@ -612,11 +624,7 @@ class _ENetShellState extends State<ENetShell> {
         const SizedBox(height: 16),
         _accountSummaryCard(),
         const SizedBox(height: 12),
-        DashboardStatus(
-          auth: widget.auth,
-          openAccount: () => go(3),
-          openSettings: () => go(6),
-        ),
+        DashboardStatus(auth: widget.auth),
         const SizedBox(height: 12),
         DashboardSessionsSnapshot(
           auth: widget.auth,
