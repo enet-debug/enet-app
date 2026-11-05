@@ -81,7 +81,12 @@ function setupDb(path) {
       token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       expires_at INTEGER NOT NULL
     );
-    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);`);
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+    CREATE TABLE IF NOT EXISTS user_preferences (
+      user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      favorite_services TEXT NOT NULL DEFAULT '[]',
+      updated_at TEXT NOT NULL
+    );`);
   // Backward compatible migration: preserve login sessions created by earlier API releases.
   const columns = new Set(db.prepare('PRAGMA table_info(sessions)').all().map(row => row.name));
   if (!columns.has('session_id')) {
@@ -116,6 +121,10 @@ export function createApp(options = {}) {
   const removeSelectedSession = db.prepare('DELETE FROM sessions WHERE session_id=? AND user_id=? AND token_hash<>?');
   const updateSessionActivity = db.prepare('UPDATE sessions SET last_seen_at=? WHERE token_hash=?');
   const updateProfile = db.prepare('UPDATE users SET name=? WHERE id=?');
+  const getPreferences = db.prepare('SELECT favorite_services, updated_at FROM user_preferences WHERE user_id=?');
+  const savePreferences = db.prepare(`INSERT INTO user_preferences(user_id,favorite_services,updated_at)
+    VALUES(?,?,?) ON CONFLICT(user_id) DO UPDATE SET
+    favorite_services=excluded.favorite_services, updated_at=excluded.updated_at`);
   const findSession = db.prepare(`SELECT users.id,users.email,users.name,sessions.last_seen_at FROM sessions
     JOIN users ON sessions.user_id=users.id
     WHERE sessions.token_hash=? AND sessions.expires_at>?`);
@@ -150,6 +159,7 @@ export function createApp(options = {}) {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Request-Id', randomUUID());
     const origin = req.headers.origin;
     if (origin && allowed.has(origin)) {
       res.setHeader('Access-Control-Allow-Origin', origin);
@@ -164,7 +174,22 @@ export function createApp(options = {}) {
     const path = new URL(req.url || '/', 'http://localhost').pathname;
     try {
       if (path === '/health' && req.method === 'GET') {
-        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.3.0' });
+        return json(res, 200, { status: 'ok', service: 'enet-api', version: '0.4.0' });
+      }
+      if (path === '/ready' && req.method === 'GET') {
+        try {
+          db.prepare('SELECT 1').get();
+          return json(res, 200, { status: 'ready', storage: 'sqlite' });
+        } catch {
+          return error(res, 503, 'unavailable', 'База данных недоступна.');
+        }
+      }
+      if (path === '/v1/meta' && req.method === 'GET') {
+        return json(res, 200, {
+          api: 'enet', version: '0.4.0', auth: 'bearer',
+          capabilities: ['accounts', 'sessions', 'services', 'favorites'],
+          services: { catalog: true, single_sign_on: false },
+        });
       }
       if (path === '/v1/auth/register' && req.method === 'POST') {
         if (throttle('register:' + req.socket.remoteAddress)) return error(res, 429, 'rate_limited', 'Попробуйте через минуту.');
@@ -284,6 +309,31 @@ export function createApp(options = {}) {
         if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
         revokeSession.run(session.tokenHash);
         return json(res, 200, { ok: true });
+      }
+      if (path === '/v1/me/preferences' && req.method === 'GET') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const row = getPreferences.get(session.user.id);
+        return json(res, 200, {
+          favorite_services: row ? JSON.parse(row.favorite_services) : [],
+          updated_at: row?.updated_at || null,
+        });
+      }
+      if (path === '/v1/me/preferences' && req.method === 'POST') {
+        const session = auth(req);
+        if (!session) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
+        const payload = await bodyOf(req);
+        const favorites = payload.favorite_services;
+        const validServices = new Set(services.map(service => service.id));
+        if (!Array.isArray(favorites) || favorites.length > 20 ||
+            favorites.some(id => typeof id !== 'string' || !validServices.has(id)) ||
+            new Set(favorites).size !== favorites.length) {
+          return error(res, 400, 'invalid_preferences',
+            'Избранное должно содержать уникальные ID существующих сервисов (не более 20).');
+        }
+        const updated = new Date().toISOString();
+        savePreferences.run(session.user.id, JSON.stringify(favorites), updated);
+        return json(res, 200, { favorite_services: favorites, updated_at: updated });
       }
       if (path === '/v1/services' && req.method === 'GET') {
         if (!auth(req)) return error(res, 401, 'unauthorized', 'Требуется авторизация.');
