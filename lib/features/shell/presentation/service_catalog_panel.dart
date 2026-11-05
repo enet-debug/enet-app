@@ -19,6 +19,13 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
   List<EcosystemService> _services = const [];
   String? _error;
   String _query = '';
+  final TextEditingController _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
 
   List<EcosystemService> get _matches {
     final q = _query.trim().toLowerCase();
@@ -95,6 +102,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       if (_services.isNotEmpty) ...[
         TextField(
           key: const ValueKey('service-search'),
+          controller: _search,
           onChanged: (value) => setState(() => _query = value),
           style: const TextStyle(color: ENetColors.text),
           decoration: InputDecoration(
@@ -107,7 +115,10 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
                 : IconButton(
                     tooltip: 'Очистить поиск',
                     icon: const Icon(Icons.close_rounded),
-                    onPressed: () => setState(() => _query = ''),
+                    onPressed: () {
+                      _search.clear();
+                      setState(() => _query = '');
+                    },
                   ),
           ),
         ),
@@ -188,7 +199,7 @@ class _ServiceCard extends StatelessWidget {
                     color: ENetColors.mint.withValues(alpha: .19),
                     blurRadius: 26, offset: const Offset(0, 10))],
                 ),
-                child: const Icon(Icons.auto_awesome_mosaic_rounded,
+                child: const Icon(Icons.dashboard_customize_rounded,
                   color: ENetColors.onAccent, size: 27),
               ),
               const Spacer(),
