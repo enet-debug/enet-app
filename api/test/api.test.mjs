@@ -22,7 +22,17 @@ test('registration, session, catalog and logout', async () => {
     return { status: response.status, data: await response.json() };
   };
   try {
-    assert.equal((await call('/health')).status, 200);
+    const health = await fetch(base + '/health');
+    assert.equal(health.status, 200);
+    assert.deepEqual(await health.json(), {
+      status: 'ok', service: 'enet-api', version: '0.5.0',
+    });
+    assert.match(health.headers.get('x-request-id') || '', /^[0-9a-f-]{36}$/i);
+    assert.equal(health.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(health.headers.get('cache-control'), 'no-store');
+    const ready = await fetch(base + '/ready');
+    assert.equal(ready.status, 200);
+    assert.equal((await ready.json()).status, 'ready');
     assert.equal((await call('/v1/auth/me')).status, 401);
     assert.equal((await call('/v1/services')).status, 401);
     assert.equal((await call('/v1/auth/register', 'POST', {
@@ -46,7 +56,21 @@ test('registration, session, catalog and logout', async () => {
     assert.equal(login.status, 200);
     const token = login.data.token;
     assert.equal((await call('/v1/auth/me', 'GET', undefined, token)).data.user.name, 'Test User');
-    assert.equal((await call('/v1/services', 'GET', undefined, token)).data.services[0].id, 'prodayzer');
+    const serviceList = await call('/v1/services', 'GET', undefined, token);
+    assert.equal(serviceList.data.services[0].id, 'prodayzer');
+    assert.equal(serviceList.data.services[0].favorite, false);
+    const addedFavorite = await call('/v1/services/favorite', 'POST', {
+      service_id: 'prodayzer', favorite: true,
+    }, token);
+    assert.deepEqual(addedFavorite.data, { service_id: 'prodayzer', favorite: true });
+    const favoriteList = await call('/v1/services', 'GET', undefined, token);
+    assert.equal(favoriteList.data.services[0].favorite, true);
+    assert.equal((await call('/v1/services/favorite', 'POST', {
+      service_id: 'unknown', favorite: true,
+    }, token)).status, 400);
+    await call('/v1/services/favorite', 'POST', {
+      service_id: 'prodayzer', favorite: false,
+    }, token);
     assert.equal((await call('/v1/auth/logout', 'POST', undefined, token)).status, 200);
     assert.equal((await call('/v1/auth/me', 'GET', undefined, token)).status, 401);
     assert.equal((await call('/v1/auth/reset-password', 'POST')).status, 501);
