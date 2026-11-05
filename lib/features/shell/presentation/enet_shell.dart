@@ -74,10 +74,12 @@ class _ENetShellState extends State<ENetShell> {
   static const desktopItems = [
     _Dest(0, Icons.home_outlined, Icons.home_rounded, 'Главная'),
     _Dest(1, Icons.apps_outlined, Icons.apps_rounded, 'Сервисы'),
-    _Dest(3, Icons.person_outline_rounded, Icons.person_rounded, 'Профиль'),
+    _Dest(7, Icons.checklist_outlined, Icons.checklist_rounded, 'Задачи'),
+    _Dest(2, Icons.notifications_none_rounded, Icons.notifications_rounded, 'Уведомления'),
+    _Dest(3, Icons.fingerprint_rounded, Icons.fingerprint_rounded, 'eNet ID'),
+    _Dest(5, Icons.devices_outlined, Icons.devices_rounded, 'Устройства'),
     _Dest(4, Icons.shield_outlined, Icons.shield_rounded, 'Безопасность'),
     _Dest(6, Icons.tune_rounded, Icons.tune_rounded, 'Настройки'),
-    _Dest(8, Icons.info_outline_rounded, Icons.info_rounded, 'О приложении'),
   ];
 
   static const mobileItems = [
@@ -219,7 +221,7 @@ class _ENetShellState extends State<ENetShell> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8),
-                            child: SizedBox(width: 258, child: _sidebar()),
+                            child: SizedBox(width: 200, child: _sidebar()),
                           ),
                           Container(width: 1, color: ENetColors.border),
                           Expanded(child: _content(compact)),
@@ -236,8 +238,8 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Навигация ─────────────────────────
 
   Widget _sidebar() {
-    const itemHeight = 46.0;
-    const gap = 7.0;
+    const itemHeight = 40.0;
+    const gap = 4.0;
     return Glass(
       radius: 19,
       blur: 14,
@@ -538,8 +540,8 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная ─────────────────────────
 
   Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
-    final split = !compact && constraints.maxWidth >= 850;
-    final railWidth = constraints.maxWidth >= 1050 ? 350.0 : 285.0;
+    final split = !compact && constraints.maxWidth >= 710;
+    final railWidth = constraints.maxWidth >= 1050 ? 265.0 : 235.0;
 
     final intro = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
