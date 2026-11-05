@@ -791,7 +791,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Главная карточка ─────────────────────────
 
   Widget _hero(bool compact) {
-    final height = compact ? 132.0 : 178.0;
+    final height = compact ? 104.0 : 132.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -825,13 +825,13 @@ class _ENetShellState extends State<ENetShell> {
           child: Stack(children: [
             const Positioned.fill(child: HeroRibbonArtwork()),
             Positioned(
-              right: compact ? -12 : 28,
-              top: compact ? 14 : 14,
+              right: compact ? -12 : 18,
+              top: compact ? 7 : 8,
               child: Transform.rotate(
                 angle: -.16,
                 child: Container(
-                  width: compact ? 80 : 225,
-                  height: compact ? 100 : 150,
+                  width: compact ? 70 : 155,
+                  height: compact ? 90 : 116,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(compact ? 17 : 23),
                     gradient: const LinearGradient(
@@ -863,7 +863,7 @@ class _ENetShellState extends State<ENetShell> {
                       ),
                     )),
                     Center(child: BrandLogo(
-                      size: compact ? 53 : 100,
+                      size: compact ? 42 : 79,
                       showName: false,
                     )),
 
@@ -873,13 +873,13 @@ class _ENetShellState extends State<ENetShell> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: compact ? 14 : 26,
-                vertical: compact ? 13 : 20,
+                horizontal: compact ? 13 : 16,
+                vertical: compact ? 11 : 15,
               ),
               child: Row(children: [
                 Container(
-                  width: compact ? 52 : 90,
-                  height: compact ? 52 : 90,
+                  width: compact ? 46 : 55,
+                  height: compact ? 46 : 55,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(compact ? 15 : 22),
                     gradient: const LinearGradient(
@@ -896,7 +896,7 @@ class _ENetShellState extends State<ENetShell> {
                   child: Icon(
                     Icons.fingerprint_rounded,
                     color: const Color(0xFF03231B),
-                    size: compact ? 30 : 54,
+                    size: compact ? 28 : 31,
                   ),
                 ),
                 SizedBox(width: compact ? 12 : 22),
@@ -910,7 +910,7 @@ class _ENetShellState extends State<ENetShell> {
                         Text('eNet ID',
                           style: TextStyle(
                             color: ENetColors.text,
-                            fontSize: compact ? 19 : 31,
+                            fontSize: compact ? 17 : 23,
                             fontWeight: FontWeight.w800,
                             letterSpacing: -.7,
                           )),
@@ -925,7 +925,7 @@ class _ENetShellState extends State<ENetShell> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: const Color(0xFFD2F8E9),
-                              fontSize: compact ? 10.5 : 16,
+                              fontSize: compact ? 10 : 12,
                               height: 1.3,
                             ),
                           ),
