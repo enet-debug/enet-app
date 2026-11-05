@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '22'
       - run: bash -n scripts/run-linux.sh
+      - run: bash -n scripts/run-ios.sh
       - run: bash -n api/deploy/backup-enet-db.sh
       - run: npm test
         working-directory: api
