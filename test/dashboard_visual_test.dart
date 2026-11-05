@@ -42,10 +42,9 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text('Сервер отвечает'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('eNet ID, Управление профилем. Открыть профиль'));
+    await tester.tap(find.text('eNet ID'));
     expect(openedProfile, true);
-    await tester.tap(find.bySemanticsLabel(
-      'Безопасность, Пароли и устройства. Открыть настройки безопасности'));
+    await tester.tap(find.text('Безопасность'));
     expect(openedSettings, true);
   });
 
