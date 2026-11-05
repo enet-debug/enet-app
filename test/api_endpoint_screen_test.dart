@@ -37,13 +37,15 @@ void main() {
 
     expect(find.text('Настроить адрес API'), findsOneWidget);
     await tester.tap(find.text('Настроить адрес API'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('Подключение к eNet API'), findsOneWidget);
     final fields = find.byType(TextFormField);
     await tester.enterText(fields.last, 'https://api.example.org/');
     await tester.tap(find.text('Сохранить'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
 
     expect(repository.endpoint, 'https://api.example.org');
     expect(find.text('Адрес API сохранён. Теперь можно войти в eNet ID.'), findsOneWidget);
