@@ -34,5 +34,15 @@ class DemoAuthRepository implements AuthRepository {
   Future<int> revokeOtherSessions() async => 0;
 
   @override
+  Future<AuthUser> updateName(String name) async =>
+      AuthUser(email: 'demo@example.org', name: name);
+
+  @override
+  Future<List<AccountSession>> listSessions() async => const [];
+
+  @override
+  Future<void> revokeSession(String sessionId) async {}
+
+  @override
   Future<void> signOut() async {}
 }
