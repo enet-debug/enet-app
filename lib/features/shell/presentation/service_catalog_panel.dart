@@ -19,6 +19,9 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
   List<EcosystemService> _services = const [];
   String? _error;
   String _query = '';
+  bool _onlyFavorites = false;
+  bool _savingFavorite = false;
+  Set<String> _favoriteIds = {};
   final TextEditingController _search = TextEditingController();
 
   @override
@@ -29,10 +32,17 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
 
   List<EcosystemService> get _matches {
     final q = _query.trim().toLowerCase();
-    if (q.isEmpty) return _services;
-    return _services.where((service) =>
-        service.name.toLowerCase().contains(q) ||
-        service.description.toLowerCase().contains(q)).toList(growable: false);
+    final visible = _services.where((service) =>
+      (!_onlyFavorites || _favoriteIds.contains(service.id)) &&
+      (q.isEmpty || service.name.toLowerCase().contains(q) ||
+        service.description.toLowerCase().contains(q))).toList(growable: true);
+    visible.sort((a, b) {
+      final left = _favoriteIds.contains(a.id);
+      final right = _favoriteIds.contains(b.id);
+      if (left == right) return 0;
+      return left ? -1 : 1;
+    });
+    return visible;
   }
 
   @override
@@ -47,15 +57,37 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       _error = null;
     });
     try {
-      final result = await widget.auth.listServices();
+      final result = await Future.wait<Object>([
+        widget.auth.listServices(),
+        widget.auth.favoriteServices(),
+      ]);
       if (!mounted) return;
-      setState(() { _services = result; _loading = false; });
+      setState(() {
+        _services = result[0] as List<EcosystemService>;
+        _favoriteIds = Set<String>.from(result[1] as List<String>);
+        _loading = false;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _error = e.toString().replaceFirst('Exception: ', '');
       });
+    }
+  }
+
+  Future<void> _toggleFavorite(EcosystemService service) async {
+    if (_savingFavorite) return;
+    setState(() => _savingFavorite = true);
+    final next = Set<String>.from(_favoriteIds);
+    if (!next.add(service.id)) next.remove(service.id);
+    try {
+      final saved = await widget.auth.saveFavoriteServices(next.toList());
+      if (mounted) setState(() => _favoriteIds = saved.toSet());
+    } catch (e) {
+      _notify(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _savingFavorite = false);
     }
   }
 
@@ -98,7 +130,21 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
           icon: const Icon(Icons.refresh_rounded, color: ENetColors.cyan),
         ),
       ]),
-      const SizedBox(height: 16),
+      if (_services.isNotEmpty) ...[
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilterChip(
+            key: const ValueKey('favorites-only'),
+            selected: _onlyFavorites,
+            avatar: Icon(_onlyFavorites ? Icons.star_rounded : Icons.star_border_rounded,
+              size: 18, color: ENetColors.cyan),
+            label: Text('Избранное (${_favoriteIds.length})'),
+            onSelected: (selected) => setState(() => _onlyFavorites = selected),
+          ),
+        ),
+        const SizedBox(height: 13),
+      ],
       if (_services.isNotEmpty) ...[
         TextField(
           key: const ValueKey('service-search'),
@@ -144,7 +190,10 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       else if (matches.isEmpty)
         Padding(
           padding: const EdgeInsets.all(18),
-          child: Text('По запросу «$_query» сервисы не найдены.',
+          child: Text(
+            _onlyFavorites && _query.isEmpty
+              ? 'В избранном пока нет сервисов. Добавь их через звёздочку на карточке.'
+              : 'По запросу «$_query» сервисы не найдены.',
             style: const TextStyle(color: ENetColors.muted)),
         )
       else
@@ -156,7 +205,10 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
             children: [
               for (final service in matches)
                 SizedBox(width: itemWidth, child: _ServiceCard(
-                  service: service, open: () => _open(service.url))),
+                  service: service,
+                  favorite: _favoriteIds.contains(service.id),
+                  onFavorite: _savingFavorite ? null : () => _toggleFavorite(service),
+                  open: () => _open(service.url))),
             ],
           );
         }),
@@ -171,8 +223,15 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
 }
 
 class _ServiceCard extends StatelessWidget {
-  const _ServiceCard({required this.service, required this.open});
+  const _ServiceCard({
+    required this.service,
+    required this.favorite,
+    required this.onFavorite,
+    required this.open,
+  });
   final EcosystemService service;
+  final bool favorite;
+  final VoidCallback? onFavorite;
   final VoidCallback open;
 
   @override
@@ -203,6 +262,14 @@ class _ServiceCard extends StatelessWidget {
                   color: ENetColors.onAccent, size: 27),
               ),
               const Spacer(),
+              IconButton(
+                key: ValueKey('favorite-${service.id}'),
+                tooltip: favorite ? 'Убрать из избранного' : 'Добавить в избранное',
+                onPressed: onFavorite,
+                icon: Icon(favorite ? Icons.star_rounded : Icons.star_border_rounded,
+                  color: favorite ? ENetColors.mint : ENetColors.muted, size: 24),
+              ),
+              const SizedBox(width: 4),
               const Icon(Icons.north_east_rounded, color: ENetColors.cyan, size: 21),
             ]),
             const SizedBox(height: 20),

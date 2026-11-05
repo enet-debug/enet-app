@@ -44,5 +44,18 @@ class DemoAuthRepository implements AuthRepository {
   Future<void> revokeSession(String sessionId) async {}
 
   @override
+  Future<String> getApiEndpoint() async => 'http://127.0.0.1:8787';
+
+  @override
+  Future<void> setApiEndpoint(String value) async {}
+
+  @override
+  Future<List<String>> favoriteServices() async => const [];
+
+  @override
+  Future<List<String>> saveFavoriteServices(List<String> serviceIds) async =>
+      List.unmodifiable(serviceIds);
+
+  @override
   Future<void> signOut() async {}
 }

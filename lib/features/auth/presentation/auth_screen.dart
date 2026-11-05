@@ -8,6 +8,7 @@ import '../../../core/widgets/glass_controls.dart';
 import '../../../core/widgets/premium_button.dart';
 import '../../../core/widgets/reveal.dart';
 import '../application/auth_controller.dart';
+import 'api_connection_panel.dart';
 
 enum _AuthMode { signIn, signUp, reset }
 
@@ -99,6 +100,11 @@ class _AuthScreenState extends State<AuthScreen> {
                       const Reveal(child: BrandLogo(size: 48)),
                       const SizedBox(height: 28),
                       card,
+                      const SizedBox(height: 18),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 450),
+                        child: ApiConnectionPanel(auth: widget.auth),
+                      ),
                     ]),
                   ),
                 )
@@ -114,7 +120,11 @@ class _AuthScreenState extends State<AuthScreen> {
                           width: 450,
                           child: SingleChildScrollView(
                             padding: const EdgeInsets.symmetric(vertical: 24),
-                            child: card,
+                            child: Column(mainAxisSize: MainAxisSize.min, children: [
+                              card,
+                              const SizedBox(height: 18),
+                              ApiConnectionPanel(auth: widget.auth),
+                            ]),
                           ),
                         ),
                       ]),
@@ -372,16 +382,16 @@ class _IdentityPanel extends StatelessWidget {
           shaderCallback: (rect) => const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Colors.white, Color(0xFFA9EEFF)],
+            colors: [Colors.white, Color(0xFFA4F6CE)],
           ).createShader(rect),
           child: Text(
-            'Создано для\nновых идей.',
+            'eNet. Твои\nинструменты.',
             style: TextStyle(fontSize: headline, letterSpacing: -headline * .04, height: 1.03, fontWeight: FontWeight.w800, color: Colors.white),
           ),
         ),
         const SizedBox(height: 22),
         const Text(
-          'Единая основа для будущих возможностей eNet.\nБез лишнего. Всё важное впереди.',
+          'Один аккаунт, разные устройства.\nLinux, Windows и iPhone на общей платформе.',
           style: TextStyle(fontSize: 16, height: 1.7, color: ENetColors.muted),
         ),
         const SizedBox(height: 44),
