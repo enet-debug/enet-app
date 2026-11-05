@@ -70,6 +70,16 @@ Future<void> _loadReadableFont() async {
   final icons = FontLoader('MaterialIcons');
   icons.addFont(Future<ByteData>.value(ByteData.sublistView(iconBytes)));
   await icons.load();
+
+  // The profile intentionally uses a monospaced face for the account UUID.
+  final monoSource = File('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf');
+  if (!monoSource.existsSync()) {
+    throw StateError('Monospaced screenshot font was not installed');
+  }
+  final monoBytes = await monoSource.readAsBytes();
+  final mono = FontLoader('monospace');
+  mono.addFont(Future<ByteData>.value(ByteData.sublistView(monoBytes)));
+  await mono.load();
 }
 
 Future<void> _saveCapture(WidgetTester tester, String filename) async {

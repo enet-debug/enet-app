@@ -254,6 +254,7 @@ class _ENetShellState extends State<ENetShell> {
             child: AnimatedDefaultTextStyle(
               duration: ENetMotion.medium,
               style: TextStyle(
+                fontFamily: 'Roboto',
                 color: selected ? ENetColors.text : ENetColors.muted,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -324,6 +325,7 @@ class _ENetShellState extends State<ENetShell> {
                         AnimatedDefaultTextStyle(
                           duration: ENetMotion.medium,
                           style: TextStyle(
+                            fontFamily: 'Roboto',
                             fontSize: 10.5,
                             fontWeight: FontWeight.w600,
                             color: selected ? ENetColors.text : ENetColors.muted,
