@@ -17,5 +17,8 @@ class DemoAuthRepository implements AuthRepository {
   Future<void> requestPasswordReset(String email) async {}
 
   @override
+  Future<AuthUser?> restoreSession() async => null;
+
+  @override
   Future<void> signOut() async {}
 }
