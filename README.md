@@ -4,7 +4,8 @@
 
 - `lib/`: Flutter-приложение для Linux, Windows и iOS с адаптивным интерфейсом.
 - `api/`: локальный HTTP API с настоящими учётными записями, SQLite, сессиями и каталогом сервисов.
-- `.github/workflows/enet-linux.yml`: интеграционные тесты API и сборка Linux-приложения.
+- `.github/workflows/enet-linux.yml`: интеграционные тесты API и сборка Linux;
+- `.github/workflows/enet-cross-platform.yml`: сборки Windows x64 и iOS без подписи.
 
 **Статус: MVP версии 0.6 для разработки**, не готовая публичная identity-платформа. eNet ID пока самостоятельный, **не связан с аккаунтами Продайзера**. В приложении есть переход на `https://prodayzer.ru`, но нет интеграции его БД или платёжного баланса.
 
@@ -137,11 +138,20 @@ lib/
 
 ## Windows 10/11
 
-GitHub Actions собирает переносимую версию Windows `enet-app-windows-x64` с EXE и зависимостями. Для самостоятельной сборки требуются Flutter SDK и Visual Studio с компонентом Desktop development with C++:
+GitHub Actions собирает переносимую версию Windows `enet-app-windows-x64` с EXE и зависимостями. Для самостоятельной сборки требуются Flutter SDK и Visual Studio с компонентом Desktop development with C++.
+
+Самый простой запуск вместе с локальным API из PowerShell:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\run-windows.ps1
+```
+
+Скрипт создаёт Windows runner при первом запуске, проверяет API, запускает локальный сервер при необходимости и останавливает только тот процесс, который сам запустил. Для ручной сборки:
 
 ```powershell
 flutter config --enable-windows-desktop
-flutter create --platforms=windows .
+flutter create --platforms=windows --org ru.enetdev .
 flutter pub get
 flutter run -d windows
 ```
@@ -153,6 +163,15 @@ flutter run -d windows
 Код Flutter адаптирован под мобильные экраны. GitHub Actions на macOS выполняет `flutter build ios --release --no-codesign`. Это **проверка компиляции**, а не подписанное приложение для установки на iPhone. Для реального запуска нужен Mac с Xcode и Apple Developer-подпись, затем TestFlight или другой разрешённый Apple способ распространения.
 
 Важное ограничение: `127.0.0.1` на iPhone обозначает **сам телефон**, а не Ubuntu-сервер. Перед входом пользователь должен указать работающий HTTPS API. Например, `https://api.enet-dev.ru` может стать таким адресом после фактического развёртывания, но пока он не подтверждён как действующий.
+
+Для запуска на Mac с Xcode и подключённым симулятором/iPhone:
+
+```bash
+export ENET_API_URL=https://адрес-твоего-api
+bash scripts/run-ios.sh
+```
+
+Скрипт проверяет HTTPS, генерирует iOS runner при необходимости и задаёт отображаемое имя приложения `eNet`. Для реального устройства всё равно нужна публичная доступность API.
 
 ## Синхронизация и безопасность
 
