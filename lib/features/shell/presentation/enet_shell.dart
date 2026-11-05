@@ -229,11 +229,17 @@ class _ENetShellState extends State<ENetShell> {
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
           padding: EdgeInsets.only(left: 5),
-          child: BrandLogo(size: 43),
+          child: Row(children: [
+            BrandLogo(size: 43),
+            SizedBox(width: 6),
+            Text('APP', style: TextStyle(
+              color: ENetColors.text, fontSize: 12,
+              fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+          ]),
         ),
         const Padding(
           padding: EdgeInsets.only(left: 8, top: 2, bottom: 25),
-          child: Text('v0.5.0', style: TextStyle(
+          child: Text('v0.8.0', style: TextStyle(
             color: ENetColors.faint, fontSize: 10, letterSpacing: .7)),
         ),
         SizedBox(
@@ -674,76 +680,6 @@ class _ENetShellState extends State<ENetShell> {
       );
     });
   }
-
-  Widget _featureHighlights() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      const Padding(
-        padding: EdgeInsets.only(left: 2, bottom: 11),
-        child: Text('ВОЗМОЖНОСТИ eNet', style: _eyebrow),
-      ),
-      LayoutBuilder(builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 760
-            ? 6
-            : constraints.maxWidth >= 530 ? 3 : 2;
-        const gap = 10.0;
-        final itemWidth =
-            (constraints.maxWidth - gap * (columns - 1)) / columns;
-        final cards = <_FeatureCardData>[
-          _FeatureCardData(
-            icon: Icons.fingerprint_rounded,
-            title: 'eNet ID',
-            subtitle: 'Единый аккаунт',
-            color: ENetColors.cyan,
-            onTap: () => go(3),
-          ),
-          _FeatureCardData(
-            icon: Icons.shield_outlined,
-            title: 'Безопасность',
-            subtitle: 'Пароль и доступ',
-            color: ENetColors.blue,
-            onTap: () => go(4),
-          ),
-          _FeatureCardData(
-            icon: Icons.devices_rounded,
-            title: 'Устройства',
-            subtitle: 'Активные сеансы',
-            color: ENetColors.mint,
-            onTap: () => go(5),
-          ),
-          _FeatureCardData(
-            icon: Icons.checklist_rounded,
-            title: 'Задачи',
-            subtitle: 'Планирование дел',
-            color: ENetColors.cyan,
-            onTap: () => go(7),
-          ),
-          _FeatureCardData(
-            icon: Icons.notifications_active_outlined,
-            title: 'Уведомления',
-            subtitle: 'События аккаунта',
-            color: ENetColors.violet,
-            onTap: () => go(2),
-          ),
-          _FeatureCardData(
-            icon: Icons.apps_rounded,
-            title: 'Сервисы',
-            subtitle: 'Приложения eNet',
-            color: ENetColors.blue,
-            onTap: () => go(1),
-          ),
-        ];
-        return Wrap(
-          spacing: gap,
-          runSpacing: gap,
-          children: [
-            for (final card in cards)
-              SizedBox(width: itemWidth, child: _FeatureCard(data: card)),
-          ],
-        );
-      }),
-    ],
-  );
 
   Widget _accountSummaryCard() => Pressable(
     onTap: () => go(3),
@@ -1304,69 +1240,6 @@ class _HomeShortcut extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FeatureCardData {
-  const _FeatureCardData({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onTap;
-}
-
-class _FeatureCard extends StatelessWidget {
-  const _FeatureCard({required this.data});
-  final _FeatureCardData data;
-
-  @override
-  Widget build(BuildContext context) => Pressable(
-    onTap: data.onTap,
-    pressedScale: .985,
-    haptic: false,
-    builder: (context, hovered) => Glass(
-      radius: 18,
-      blur: 11,
-      shadow: false,
-      padding: const EdgeInsets.all(13),
-      tint: data.color,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: data.color.withValues(alpha: .14),
-              border: Border.all(color: data.color.withValues(alpha: .32)),
-            ),
-            child: Icon(data.icon, color: data.color, size: 20),
-          ),
-          const SizedBox(height: 11),
-          Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: ENetColors.text,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            )),
-          const SizedBox(height: 4),
-          Text(data.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: ENetColors.muted,
-              fontSize: 10,
-            )),
-        ],
-      ),
-    ),
-  );
 }
 
 // ═════════════════════════ Вспомогательные виджеты ═════════════════════════
