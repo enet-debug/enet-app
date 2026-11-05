@@ -1,5 +1,6 @@
 import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
+import '../theme/enet_theme.dart';
 
 /// «Матовое стекло» в стиле visionOS / Fluent Acrylic: размытие фона,
 /// тонкий светлый контур и мягкая глубокая тень.
@@ -26,7 +27,7 @@ class Glass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final r = BorderRadius.circular(radius);
-    final base = tint ?? Colors.white;
+    final base = tint ?? ENetColors.mint;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: r,
@@ -45,11 +46,11 @@ class Glass extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  base.withValues(alpha: .10 * strength),
-                  base.withValues(alpha: .04 * strength),
+                  base.withValues(alpha: .105 * strength),
+                  ENetColors.surface.withValues(alpha: .81),
                 ],
               ),
-              border: Border.all(color: Colors.white.withValues(alpha: .10)),
+              border: Border.all(color: ENetColors.mint.withValues(alpha: .15)),
             ),
             child: Padding(padding: padding, child: child),
           ),

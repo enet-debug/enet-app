@@ -1,36 +1,36 @@
 import 'dart:ui' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 
-/// Палитра eNet. Глубокий «чернильный» фон, стекло и холодный неоновый акцент.
+/// Палитра eNet 0.5: глубокий изумрудный фон и мятные акценты.
 abstract final class ENetColors {
-  static const background = Color(0xFF04070F);
-  static const surface = Color(0xFF0B1220);
-  static const surfaceRaised = Color(0xFF121B2E);
-  static const border = Color(0x1AFFFFFF);
-  static const cyan = Color(0xFF5CE5FF);
-  static const blue = Color(0xFF3C93FF);
-  static const violet = Color(0xFF8B7CFF);
-  static const mint = Color(0xFF4EE3B0);
-  static const danger = Color(0xFFFF6B81);
-  static const text = Color(0xFFF5F8FF);
-  static const muted = Color(0xFF9BA9C1);
-  static const faint = Color(0xFF6E7C95);
-  static const onAccent = Color(0xFF031425);
+  static const background = Color(0xFF06110F);
+  static const surface = Color(0xFF0D201B);
+  static const surfaceRaised = Color(0xFF163128);
+  static const border = Color(0x335FCBA2);
+  static const cyan = Color(0xFF86F3C8);
+  static const blue = Color(0xFF2FBA90);
+  static const violet = Color(0xFF77CFC0);
+  static const mint = Color(0xFF55E5B0);
+  static const danger = Color(0xFFFF8892);
+  static const text = Color(0xFFF4FFF9);
+  static const muted = Color(0xFFA5C0B3);
+  static const faint = Color(0xFF779B8B);
+  static const onAccent = Color(0xFF06221A);
 
   static const accent = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF7DF0FF), Color(0xFF3C93FF)],
+    colors: [Color(0xFF9AF6D0), Color(0xFF38C994)],
   );
   static const violetGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFB4A8FF), Color(0xFF6C5CFF)],
+    colors: [Color(0xFF77D8C5), Color(0xFF277C70)],
   );
   static const mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF7BF3CF), Color(0xFF1FB58A)],
+    colors: [Color(0xFFA6F8D1), Color(0xFF28AC79)],
   );
   static const amberGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -87,6 +87,7 @@ abstract final class ENetTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: ENetColors.background,
+      fontFamily: 'Roboto',
       colorScheme: scheme,
       splashFactory: NoSplash.splashFactory,
       splashColor: Colors.transparent,
@@ -99,7 +100,7 @@ abstract final class ENetTheme {
       ),
       textSelectionTheme: const TextSelectionThemeData(
         cursorColor: ENetColors.cyan,
-        selectionColor: Color(0x553C93FF),
+        selectionColor: Color(0x5543C99C),
         selectionHandleColor: ENetColors.cyan,
       ),
       inputDecorationTheme: InputDecorationTheme(

@@ -93,7 +93,7 @@ class GlassToggle extends StatelessWidget {
                 : LinearGradient(colors: [Colors.white.withValues(alpha: .16), Colors.white.withValues(alpha: .16)]),
             boxShadow: [
               BoxShadow(
-                color: ENetColors.blue.withValues(alpha: value ? .45 : 0),
+                color: ENetColors.mint.withValues(alpha: value ? .36 : 0),
                 blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
