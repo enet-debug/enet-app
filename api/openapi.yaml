@@ -1,0 +1,247 @@
+openapi: 3.0.3
+info:
+  title: eNet ID API
+  version: 0.4.0
+  description: |
+    Local-first API for eNet ID. Public internet deployment requires HTTPS,
+    email verification, central rate limiting and operations hardening.
+    eNet ID is NOT single sign-on for Prodayzer.
+servers:
+  - url: http://127.0.0.1:8787
+    description: Local development
+security: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+    User:
+      type: object
+      required: [id, email, name]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: string }
+    SessionToken:
+      type: object
+      properties:
+        token: { type: string }
+        expires_at: { type: string, format: date-time }
+        user: { $ref: '#/components/schemas/User' }
+    Favorites:
+      type: object
+      required: [favorite_services]
+      properties:
+        favorite_services:
+          type: array
+          maxItems: 20
+          uniqueItems: true
+          items: { type: string }
+        updated_at:
+          type: string
+          nullable: true
+          format: date-time
+  responses:
+    Unauthorized:
+      description: No valid bearer session
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+paths:
+  /health:
+    get:
+      summary: HTTP process health
+      responses:
+        '200':
+          description: API alive and version
+  /ready:
+    get:
+      summary: SQLite readiness probe
+      responses:
+        '200':
+          description: Storage available
+        '503':
+          description: Storage unavailable
+  /v1/meta:
+    get:
+      summary: API discovery and supported capabilities
+      responses:
+        '200':
+          description: Supported capabilities; SSO remains false
+  /v1/auth/register:
+    post:
+      summary: Register a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 80 }
+                email: { type: string, format: email }
+                password: { type: string, minLength: 12, maxLength: 128 }
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionToken' }
+        '400': { description: Invalid input }
+        '409': { description: Account exists }
+  /v1/auth/login:
+    post:
+      summary: Exchange credentials for session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionToken' }
+        '401': { description: Invalid credentials }
+  /v1/auth/me:
+    get:
+      summary: Get current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/logout:
+    post:
+      summary: Revoke current session
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Logged out }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/change-password:
+    post:
+      summary: Change password and revoke other sessions
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [current_password, new_password]
+              properties:
+                current_password: { type: string }
+                new_password: { type: string, minLength: 12, maxLength: 128 }
+      responses:
+        '200': { description: Password changed }
+        '403': { description: Invalid current password }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/reset-password:
+    post:
+      summary: Placeholder only; email delivery not configured
+      responses:
+        '501': { description: Password reset is not configured }
+  /v1/auth/logout-others:
+    post:
+      summary: Revoke all sessions other than current
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Number of revoked sessions }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/profile:
+    post:
+      summary: Update current user's display name
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 2, maxLength: 80 }
+      responses:
+        '200': { description: Updated public user }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/sessions:
+    get:
+      summary: List the user's active sessions
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Session list }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/auth/sessions/revoke:
+    post:
+      summary: Revoke one other session owned by user
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id]
+              properties:
+                session_id: { type: string, format: uuid }
+      responses:
+        '200': { description: Session revoked }
+        '404': { description: Session not found or current }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/services:
+    get:
+      summary: List services in the eNet ecosystem
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Service catalog }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /v1/me/preferences:
+    get:
+      summary: Get current user's favorite services
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Favorites' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      summary: Replace current user's favorite services
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Favorites' }
+      responses:
+        '200':
+          description: Updated user preferences
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Favorites' }
+        '400': { description: Unknown or duplicate favorite ID }
+        '401': { $ref: '#/components/responses/Unauthorized' }
