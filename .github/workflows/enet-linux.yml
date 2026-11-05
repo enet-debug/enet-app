@@ -96,6 +96,10 @@ jobs:
           cache: true
       - name: Generate iOS runner
         run: flutter create --platforms=ios .
+      - name: Set iOS app display name
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string eNet" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleName string eNet" ios/Runner/Info.plist
       - name: Resolve packages
         run: flutter pub get
       - name: Analyze
