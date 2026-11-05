@@ -1,4 +1,4 @@
-name: eNet API tests and Linux desktop build
+name: eNet API tests and cross-platform desktop/mobile builds
 
 on:
   push:
@@ -9,9 +9,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: enet-cross-platform-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   api:
-    name: API integration tests
+    name: API integration and security tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -19,11 +23,13 @@ jobs:
         with:
           node-version: '22'
       - run: bash -n scripts/run-linux.sh
+      - run: bash -n scripts/run-ios.sh
+      - run: bash -n api/deploy/backup-enet-db.sh
       - run: npm test
         working-directory: api
 
   linux:
-    name: Flutter Linux bundle
+    name: Flutter Linux x64
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -45,10 +51,72 @@ jobs:
         run: flutter test
       - name: Build Linux desktop application
         run: flutter build linux --release --dart-define=ENET_API_URL=http://127.0.0.1:8787
-      - name: Publish desktop bundle
+      - name: Publish Linux bundle
         uses: actions/upload-artifact@v4
         with:
           name: enet-app-linux-x64
           path: build/linux/x64/release/bundle/
+          if-no-files-found: error
+          retention-days: 14
+
+  windows:
+    name: Flutter Windows x64
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Validate Windows launcher syntax
+        shell: pwsh
+        run: |
+          $null = [scriptblock]::Create((Get-Content scripts/run-windows.ps1 -Raw))
+      - name: Generate Windows runner
+        run: flutter create --platforms=windows .
+      - name: Resolve packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
+      - name: Build Windows desktop application
+        run: flutter build windows --release --dart-define=ENET_API_URL=http://127.0.0.1:8787
+      - name: Publish Windows bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: enet-app-windows-x64
+          path: build/windows/x64/runner/Release/
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: Flutter iOS device build (unsigned)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate iOS runner
+        run: flutter create --platforms=ios .
+      - name: Set iOS app display name
+        run: |
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string eNet" ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName eNet" ios/Runner/Info.plist || /usr/libexec/PlistBuddy -c "Add :CFBundleName string eNet" ios/Runner/Info.plist
+      - name: Resolve packages
+        run: flutter pub get
+      - name: Analyze
+        run: flutter analyze
+      - name: Run Flutter tests
+        run: flutter test
+      - name: Build iOS application without signing
+        run: flutter build ios --release --no-codesign
+      - name: Publish unsigned iOS app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: enet-app-ios-unsigned
+          path: build/ios/iphoneos/Runner.app/
           if-no-files-found: error
           retention-days: 14
