@@ -180,8 +180,8 @@ class ApiAuthRepository implements AuthRepository {
   @override
   Future<bool> checkServer() async {
     try {
-      final response = await _request('GET', '/health');
-      return response['status'] == 'ok';
+      final response = await _request('GET', '/ready');
+      return response['status'] == 'ready';
     } catch (_) {
       return false;
     }
