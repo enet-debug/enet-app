@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'core/theme/enet_theme.dart';
 import 'features/auth/application/auth_controller.dart';
 import 'features/auth/data/api_auth_repository.dart';
+import 'features/auth/domain/auth_repository.dart';
 import 'features/auth/presentation/auth_screen.dart';
 import 'features/shell/presentation/enet_shell.dart';
 
@@ -19,7 +20,8 @@ void main() {
 }
 
 class ENetApp extends StatefulWidget {
-  const ENetApp({super.key});
+  const ENetApp({super.key, this.authRepository});
+  final AuthRepository? authRepository;
 
   @override
   State<ENetApp> createState() => _ENetAppState();
@@ -31,7 +33,7 @@ class _ENetAppState extends State<ENetApp> {
   @override
   void initState() {
     super.initState();
-    auth = AuthController(ApiAuthRepository());
+    auth = AuthController(widget.authRepository ?? ApiAuthRepository());
     auth.addListener(_update);
     auth.restoreSession();
   }
