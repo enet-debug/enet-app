@@ -201,8 +201,18 @@ class ApiAuthRepository implements AuthRepository {
         name: item['name'] as String,
         description: item['description'] as String? ?? '',
         url: item['url'] as String,
+        favorite: item['favorite'] == true,
       );
     }).toList(growable: false);
+  }
+
+  @override
+  Future<void> setServiceFavorite(String serviceId, bool favorite) async {
+    await _request(
+      'POST', '/v1/services/favorite',
+      token: await _token(),
+      body: {'service_id': serviceId, 'favorite': favorite},
+    );
   }
 
   @override
