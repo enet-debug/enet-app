@@ -117,7 +117,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
             visualDensity: VisualDensity.compact,
           ),
-          child: const Text('Проверить', style: TextStyle(fontSize: 10.5)),
+          child: const Text('Проверить', style: TextStyle(fontFamily: 'Roboto', fontSize: 10.5)),
         ),
       ),
     ]),
