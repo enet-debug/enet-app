@@ -268,7 +268,7 @@ class MobileWelcomeScene extends StatelessWidget {
             ).createShader(bounds),
             blendMode: BlendMode.dstIn,
             child: Transform.translate(
-              offset: const Offset(0, 36),
+              offset: const Offset(0, 48),
               child: Image.asset(
                 'assets/brand/approved_mobile_mountains.jpg',
                 fit: BoxFit.cover,
@@ -324,8 +324,8 @@ class _MobileMountainPainter extends CustomPainter {
       begin: Alignment.topCenter, end: Alignment.bottomCenter,
       stops: [0, .34, .62, 1],
       colors: [
-        Color(0xFF02101D), Color(0xFF082A39),
-        Color(0xFF1B5260), Color(0xFF04171B),
+        Color(0xFF062C36), Color(0xFF0A3E47),
+        Color(0xFF174F59), Color(0xFF04171B),
       ],
     ).createShader(bounds));
     final light = Offset(w * .51, h * .51);
