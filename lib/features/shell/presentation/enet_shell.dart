@@ -539,9 +539,7 @@ class _ENetShellState extends State<ENetShell> {
         icon: const Icon(Icons.more_horiz_rounded, color: ENetColors.cyan),
       ),
       IconButton(
-        tooltip: (_unreadCount ?? 0) > 0
-          ? 'Уведомления: $_unreadCount непрочитанных'
-          : 'Открыть уведомления',
+        tooltip: 'Уведомления',
         onPressed: () => go(2),
         icon: Badge(
           isLabelVisible: (_unreadCount ?? 0) > 0,

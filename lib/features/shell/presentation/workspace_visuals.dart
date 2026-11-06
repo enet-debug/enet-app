@@ -550,10 +550,21 @@ class V07HeroIdCard extends StatelessWidget {
                         fontWeight: FontWeight.w800, letterSpacing: -.6,
                       )),
                       const SizedBox(height: 4),
-                      Text(compact ? 'Единый аккаунт eNet' : 'Единый вход во все сервисы',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: ENetColors.muted, fontSize: 13.5)),
+                      if (compact)
+                        const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text('Единый аккаунт eNet',
+                            maxLines: 1,
+                            style: TextStyle(
+                              color: ENetColors.muted, fontSize: 13.5)),
+                        )
+                      else
+                        const Text('Единый вход во все сервисы',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: ENetColors.muted, fontSize: 13.5)),
                     ],
                   )),
                   SizedBox(width: compact ? 66 : 150),

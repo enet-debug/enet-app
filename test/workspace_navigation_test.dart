@@ -64,12 +64,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 450));
         expect(find.text('Мои сервисы'), findsOneWidget);
       }
-      final navigationRenderError = tester.takeException();
-      if (navigationRenderError is FlutterError) {
-        debugPrint('ENET_MOBILE_OVERFLOW_DIAGNOSTIC:');
-        debugPrint(navigationRenderError.toStringDeep());
-      }
-      expect(navigationRenderError, isNull);
+      expect(tester.takeException(), isNull);
 
       if (size.width < 600) {
         await tester.tap(find.byKey(const ValueKey('mobile-nav-more')));
