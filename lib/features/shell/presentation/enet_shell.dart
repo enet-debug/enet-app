@@ -719,9 +719,9 @@ class _ENetShellState extends State<ENetShell> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _hero(true),
-                const SizedBox(height: 12),
+                const SizedBox(height: 27),
                 _shortcutStrip(true),
-                const SizedBox(height: 24),
+                const SizedBox(height: 34),
                 _mobileQuickAccess(),
               ],
             ),
@@ -803,17 +803,17 @@ class _ENetShellState extends State<ENetShell> {
       const Text('Быстрый доступ', style: TextStyle(
         color: ENetColors.text,
         fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -.3)),
-      const SizedBox(height: 10),
+      const SizedBox(height: 14),
       Pressable(
         onTap: () => go(1),
         haptic: false,
         pressedScale: .98,
         builder: (context, hovered) => Glass(
           radius: 18, blur: 16, strength: hovered ? 1.6 : 1,
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           child: Row(children: [
             Container(
-              width: 48, height: 48,
+              width: 58, height: 58,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 gradient: LinearGradient(colors: [
@@ -1208,7 +1208,7 @@ class _HomeShortcut extends StatelessWidget {
         builder: (context, hovered) {
           if (compact) {
             return Container(
-              height: 78,
+              height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
                 color: ENetColors.surface.withValues(alpha: .7),
