@@ -752,11 +752,11 @@ class _ENetShellState extends State<ENetShell> {
         const SizedBox(height: 8),
         const Text('Ваша единая платформа для работы, автоматизации и ИИ',
           style: TextStyle(color: ENetColors.muted, fontSize: 15)),
-        const SizedBox(height: 24),
+        const SizedBox(height: 22),
         _hero(false),
-        const SizedBox(height: 16),
+        const SizedBox(height: 19),
         _shortcutStrip(false),
-        const SizedBox(height: 16),
+        const SizedBox(height: 22),
         ServiceCatalogPanel(
           auth: widget.auth,
           dashboard: true,
@@ -1261,34 +1261,34 @@ class _HomeShortcut extends StatelessWidget {
             offset: Offset(0, hovered ? -.04 : 0),
             child: AnimatedContainer(
               duration: ENetMotion.medium,
-              height: 84,
+              height: 108,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    data.color.withValues(alpha: .43),
-                    const Color(0xFF061F29),
+                    data.color.withValues(alpha: .64),
+                    const Color(0xFF051A20),
                   ],
                 ),
                 border: Border.all(color: data.color.withValues(
                   alpha: hovered ? .95 : .66)),
                 boxShadow: [BoxShadow(
-                  color: data.color.withValues(alpha: hovered ? .40 : .20),
-                  blurRadius: 24,
+                  color: data.color.withValues(alpha: hovered ? .46 : .27),
+                  blurRadius: 29,
                 )],
               ),
               child: Column(mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(data.icon, size: 30, color: Colors.white),
+                  Icon(data.icon, size: 36, color: Colors.white),
                   const SizedBox(height: 9),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(data.title,
                       maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: const TextStyle(color: ENetColors.text,
-                        fontSize: 12.5, fontWeight: FontWeight.w600)),
+                        fontSize: 13.5, fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
