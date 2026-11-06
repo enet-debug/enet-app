@@ -534,7 +534,7 @@ class V07HeroIdCard extends StatelessWidget {
                 const Positioned.fill(
                   child: CustomPaint(painter: _V07StreakPainter())),
                 const Positioned(
-                  right: 54, top: 12,
+                  right: 54, top: -28,
                   child: _V07Plate(size: 252),
                 ),
               ] else
@@ -645,7 +645,7 @@ class _V07Plate extends StatelessWidget {
         ],
       ),
       child: Center(
-        child: BrandLogo(size: size * .63, showName: false),
+        child: BrandLogo(size: size * .46, showName: false),
       ),
     ),
   );
