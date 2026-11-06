@@ -504,7 +504,7 @@ class V07HeroIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = compact ? 104.0 : 124.0;
+    final height = compact ? 104.0 : 154.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -519,7 +519,7 @@ class V07HeroIdCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             gradient: const LinearGradient(
               begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: [Color(0xFF12453A), Color(0xFF0B2B23), Color(0xFF0E3A2D)],
+              colors: [Color(0xFF145849), Color(0xFF082C25), Color(0xFF0E5942)],
             ),
             border: Border.all(color: ENetColors.mint.withValues(alpha: .36)),
             boxShadow: [BoxShadow(
@@ -530,15 +530,25 @@ class V07HeroIdCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: Stack(children: [
-              const Positioned.fill(child: CustomPaint(painter: _V07StreakPainter())),
-              Positioned(
-                right: compact ? -6 : 18, top: 0, bottom: 0,
-                child: Center(child: _V07Plate(size: compact ? 86 : 104)),
-              ),
+              if (!compact) ...[
+                const Positioned.fill(
+                  child: CustomPaint(painter: _V07StreakPainter())),
+                const Positioned(
+                  right: 24, top: 0, bottom: 0,
+                  child: Center(
+                    child: _V07Plate(size: 124)),
+                ),
+              ] else
+                const Positioned(
+                  right: 14, top: 0, bottom: 0,
+                  child: Center(child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: ENetColors.cyan, size: 26)),
+                ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 22),
                 child: Row(children: [
-                  _V07FingerprintTile(size: compact ? 52 : 60),
+                  _V07FingerprintTile(size: compact ? 57 : 67),
                   const SizedBox(width: 16),
                   Expanded(child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -567,7 +577,7 @@ class V07HeroIdCard extends StatelessWidget {
                             color: ENetColors.muted, fontSize: 13.5)),
                     ],
                   )),
-                  SizedBox(width: compact ? 66 : 150),
+                  SizedBox(width: compact ? 21 : 155),
                 ]),
               ),
             ]),
@@ -586,8 +596,11 @@ class _V07FingerprintTile extends StatelessWidget {
     width: size, height: size,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(size * .3),
-      color: ENetColors.mint.withValues(alpha: .13),
-      border: Border.all(color: ENetColors.mint.withValues(alpha: .42)),
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF147F67), Color(0xFF0B453D)]),
+      border: Border.all(color: ENetColors.mint.withValues(alpha: .56)),
       boxShadow: [BoxShadow(
         color: ENetColors.mint.withValues(alpha: .2), blurRadius: 22)],
     ),
@@ -605,48 +618,92 @@ class _V07Plate extends StatelessWidget {
     alignment: Alignment.center,
     transform: Matrix4.identity()
       ..setEntry(3, 2, .0014)
-      ..rotateX(.55)
-      ..rotateZ(-.42),
+      ..rotateX(.48)
+      ..rotateZ(-.34),
     child: Container(
+      key: const ValueKey('desktop-enet-id-plate'),
       width: size, height: size,
-      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * .24),
-        border: Border.all(color: ENetColors.mint.withValues(alpha: .55), width: 1.4),
-        boxShadow: [BoxShadow(
-          color: ENetColors.mint.withValues(alpha: .45),
-          blurRadius: 34, offset: const Offset(-8, 14))],
+        borderRadius: BorderRadius.circular(size * .21),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF041714),
+            Color(0xFF0D332C),
+            Color(0xFF04100E),
+          ],
+        ),
+        border: Border.all(
+          color: ENetColors.mint.withValues(alpha: .76), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: ENetColors.mint.withValues(alpha: .42),
+            blurRadius: 34, offset: const Offset(-8, 11)),
+          BoxShadow(
+            color: ENetColors.mint.withValues(alpha: .20),
+            blurRadius: 18, spreadRadius: 2),
+        ],
       ),
-      child: Image.asset('assets/enet_logo.jpg',
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-          const Center(child: Icon(Icons.blur_on_rounded,
-            size: 52, color: ENetColors.mint))),
+      child: Center(
+        child: BrandLogo(size: size * .63, showName: false),
+      ),
     ),
   );
 }
 
 class _V07StreakPainter extends CustomPainter {
   const _V07StreakPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width, h = size.height;
-    final shader = LinearGradient(colors: [
-      ENetColors.mint.withValues(alpha: 0),
-      ENetColors.mint.withValues(alpha: .32),
-      ENetColors.mint.withValues(alpha: 0),
-    ]).createShader(Rect.fromLTWH(0, 0, w, h));
-    for (var i = 0; i < 3; i++) {
-      final path = Path()
-        ..moveTo(w * (.30 + i * .12), h * 1.1)
-        ..quadraticBezierTo(w * (.55 + i * .10), h * .55,
-          w * (.95 + i * .05), -h * .1);
-      canvas.drawPath(path, Paint()
+    final bounds = Offset.zero & size;
+
+    // A diffuse emerald light behind the beveled badge from the reference.
+    final glow = Offset(w * .76, h * .3);
+    canvas.drawCircle(glow, w * .42, Paint()
+      ..shader = RadialGradient(
+        colors: [
+          ENetColors.mint.withValues(alpha: .38),
+          ENetColors.mint.withValues(alpha: .07),
+          Colors.transparent,
+        ],
+      ).createShader(Rect.fromCircle(center: glow, radius: w * .42)));
+
+    // The narrow luminous curve replaces the flat straight strokes.
+    final ribbon = Path()
+      ..moveTo(w * .98, -h * .26)
+      ..cubicTo(w * .84, h * .20, w * .66, h * .13, w * .61, h * .49)
+      ..cubicTo(w * .56, h * .76, w * .76, h * 1.12, w * 1.02, h * .77);
+    for (final (double width, double opacity, double blur) in [
+      (h * .31, .15, 23.0),
+      (h * .17, .24, 11.0),
+      (h * .08, .33, 5.0),
+    ]) {
+      canvas.drawPath(ribbon, Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2 + i * .6
-        ..shader = shader);
+        ..strokeWidth = width
+        ..color = ENetColors.mint.withValues(alpha: opacity)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur));
     }
+    canvas.drawPath(ribbon, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = h * .075
+      ..shader = const LinearGradient(
+        begin: Alignment.topRight, end: Alignment.bottomLeft,
+        stops: [0, .3, .72, 1],
+        colors: [
+          Color(0x0077FFC6), Color(0xCC2DFFB1),
+          Color(0xEE72FFD4), Color(0x0036E39B),
+        ],
+      ).createShader(bounds));
+    canvas.drawPath(ribbon, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..color = const Color(0xFFDEFFF0).withValues(alpha: .86));
   }
+
   @override
   bool shouldRepaint(covariant _V07StreakPainter oldDelegate) => false;
 }
