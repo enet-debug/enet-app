@@ -183,6 +183,7 @@ class _ENetShellState extends State<ENetShell> {
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 820;
+    final largeDesktop = MediaQuery.sizeOf(context).width >= 1380;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return CallbackShortcuts(
@@ -218,11 +219,11 @@ class _ENetShellState extends State<ENetShell> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(13, 10, 13, 13),
-                        child: SizedBox(width: 252, child: _sidebar()),
+                        child: SizedBox(width: largeDesktop ? 276 : 252, child: _sidebar()),
                       ),
                       Expanded(child: _content(false)),
                       if (MediaQuery.sizeOf(context).width >= 1180)
-                        SizedBox(width: 306, child: _rightPanel()),
+                        SizedBox(width: largeDesktop ? 376 : 306, child: _rightPanel()),
                     ],
                   )),
                 ]),
@@ -271,16 +272,18 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Навигация ─────────────────────────
 
   Widget _sidebar() {
-    const itemHeight = 40.0;
-    const gap = 2.0;
+    final spacious = MediaQuery.sizeOf(context).width >= 1380 &&
+        MediaQuery.sizeOf(context).height >= 720;
+    final itemHeight = spacious ? 46.0 : 40.0;
+    final gap = spacious ? 3.0 : 2.0;
     return Glass(
       radius: 18,
       tint: const Color(0xFF077C75),
       strength: .68,
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 6, bottom: 17),
+        Padding(
+          padding: EdgeInsets.only(left: 6, bottom: spacious ? 28 : 17),
           child: Row(children: [
             BrandLogo(size: 46, showName: false),
             SizedBox(width: 12),
