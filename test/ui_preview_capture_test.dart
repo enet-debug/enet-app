@@ -220,18 +220,19 @@ void main() {
           findsOneWidget);
       await _saveCapture(tester, 'enet-profile-$device');
 
-      // Capture the actual API-backed feature pages, not invented mock screens.
-      if (size.width < 600) {
-        // The phone dock now opens the real 0.7 command palette.
-        await tester.tap(find.byKey(const ValueKey('mobile-nav-1')));
-        await tester.pump(const Duration(milliseconds: 350));
-        await tester.enterText(
-          find.byKey(const ValueKey('enet-search-input')), 'Сервисы');
-        await tester.pump(const Duration(milliseconds: 150));
-        await tester.tap(find.text('Сервисы').last);
-      } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-1')));
-      }
+      // The archive's search palette is real UI. Record it on both viewports
+      // and navigate through the filtered result, not a mocked link.
+      await tester.tap(find.byKey(ValueKey(
+        size.width < 600 ? 'mobile-nav-1' : 'desktop-search',
+      )));
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.enterText(
+        find.byKey(const ValueKey('enet-search-input')), 'Сервисы');
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('Сервисы'), findsWidgets);
+      await _saveCapture(tester,
+        'enet-search-${size.width < 600 ? "mobile" : "desktop"}');
+      await tester.tap(find.text('Сервисы').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Сервисы'), findsWidgets);
