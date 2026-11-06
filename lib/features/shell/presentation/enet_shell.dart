@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/brand_logo.dart';
@@ -21,6 +22,7 @@ import 'dashboard_status.dart';
 import 'notifications_panel.dart';
 import 'tasks_panel.dart';
 import 'workspace_visuals.dart';
+import 'enet_search_palette.dart';
 
 class _Dest {
   const _Dest(this.index, this.icon, this.activeIcon, this.label);
@@ -124,12 +126,75 @@ class _ENetShellState extends State<ENetShell> {
     if (previous == 2 || next == 2) _refreshUnreadCount();
   }
 
+  /// Real eNet 0.7 command palette, populated with current navigation/API.
+  Future<void> _openSearch() => showENetSearchPalette(
+    context,
+    actions: [
+      for (final destination in <int, _Dest>{
+        for (final item in [...desktopItems, ...moreItems]) item.index: item,
+      }.values)
+        ENetSearchAction(
+          icon: destination.icon,
+          title: destination.label,
+          subtitle: 'Раздел приложения',
+          onSelected: () => go(destination.index),
+        ),
+    ],
+    loadServices: () async {
+      final services = await widget.auth.listServices();
+      return [
+        for (final service in services)
+          ENetSearchAction(
+            icon: Icons.open_in_new_rounded,
+            title: service.name,
+            subtitle: service.description,
+            keywords: 'сервис',
+            onSelected: () => _openSearchService(service.url),
+          ),
+      ];
+    },
+  );
+
+  Future<void> _openSearchService(String address) async {
+    final uri = Uri.tryParse(address);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Недопустимая ссылка на сервис')),
+        );
+      }
+      return;
+    }
+    try {
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось открыть сервис')),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Не удалось открыть сервис')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 820;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return Scaffold(
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true):
+          () => _openSearch(),
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true):
+          () => _openSearch(),
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
       body: AmbientBackground(
         animated: effects,
         child: SafeArea(
@@ -158,6 +223,8 @@ class _ENetShellState extends State<ENetShell> {
                       SizedBox(width: 316, child: _rightPanel()),
                   ],
                 ),
+        ),
+      ),
         ),
       ),
     );
@@ -402,7 +469,10 @@ class _ENetShellState extends State<ENetShell> {
           key: ValueKey(destination.index == -2
             ? 'mobile-action-create' : 'mobile-nav-${destination.index}'),
           onTap: destination.index == -2
-            ? _showCreateMenu : () => go(destination.index),
+            ? _showCreateMenu
+            : destination.index == 1
+              ? _openSearch
+              : () => go(destination.index),
           haptic: false,
           builder: (context, hovered) => Center(
             child: destination.index == -2
@@ -486,7 +556,8 @@ class _ENetShellState extends State<ENetShell> {
   Widget _desktopTopBar() => Row(children: [
     const Spacer(),
     Pressable(
-      onTap: () => go(1),
+      key: const ValueKey('desktop-search'),
+      onTap: _openSearch,
       haptic: false,
       builder: (context, hovered) => AnimatedContainer(
         duration: ENetMotion.quick,
@@ -500,7 +571,7 @@ class _ENetShellState extends State<ENetShell> {
         child: const Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.search_rounded, size: 18, color: ENetColors.muted),
           SizedBox(width: 10),
-          Text('Поиск по сервисам',
+          Text('Поиск по приложению',
             style: TextStyle(color: ENetColors.muted, fontSize: 13.5)),
           SizedBox(width: 14),
           Icon(Icons.arrow_forward_rounded,
@@ -1105,6 +1176,8 @@ class _HomeShortcut extends StatelessWidget {
     return Tooltip(
       message: data.subtitle,
       child: Pressable(
+        key: compact && data.title == 'Сервисы'
+          ? const ValueKey('mobile-shortcut-services') : null,
         onTap: data.onTap,
         pressedScale: compact ? .94 : .95,
         haptic: false,

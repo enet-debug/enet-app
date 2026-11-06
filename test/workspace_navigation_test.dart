@@ -41,7 +41,7 @@ void main() {
       expect(tester.takeException(), isNull);
 
       if (size.width < 600) {
-        await tester.tap(find.byKey(const ValueKey('mobile-nav-1')));
+        await tester.tap(find.byKey(const ValueKey('mobile-shortcut-services')));
       } else {
         await tester.tap(find.byKey(const ValueKey('desktop-nav-1')));
       }
