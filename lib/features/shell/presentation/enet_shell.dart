@@ -1147,54 +1147,87 @@ class _HomeShortcutData {
   final VoidCallback onTap;
 }
 
+/// Desktop colour tiles and phone quick links use the exact eNet 0.7 design
+/// geometry from the provided Flutter sources.
 class _HomeShortcut extends StatelessWidget {
   const _HomeShortcut({required this.data});
   final _HomeShortcutData data;
+
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 820;
     return Tooltip(
       message: data.subtitle,
       child: Pressable(
-        onTap: data.onTap, pressedScale: .97, haptic: false,
-        builder: (context, hovered) => AnimatedContainer(
-          duration: ENetMotion.quick,
-          height: compact ? 85 : 116,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: compact
-                ? [
-                    const Color(0xFF122C2F),
-                    hovered ? const Color(0xFF0C403C) : const Color(0xFF071B1D),
-                  ]
-                : [
-                    data.color.withValues(alpha: hovered ? .47 : .32),
-                    const Color(0xFF051B1B),
+        onTap: data.onTap,
+        pressedScale: compact ? .94 : .95,
+        haptic: false,
+        builder: (context, hovered) {
+          if (compact) {
+            return Container(
+              height: 78,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                color: ENetColors.surface.withValues(alpha: .7),
+                border: Border.all(color: ENetColors.mint.withValues(
+                  alpha: hovered ? .5 : .22)),
+              ),
+              child: Center(child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(data.icon, size: 27, color: ENetColors.text),
+                  const SizedBox(height: 7),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: Text(data.title, maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: ENetColors.muted,
+                        fontSize: 10.5, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              )),
+            );
+          }
+          return AnimatedSlide(
+            duration: ENetMotion.quick,
+            curve: Curves.easeOutCubic,
+            offset: Offset(0, hovered ? -.04 : 0),
+            child: AnimatedContainer(
+              duration: ENetMotion.medium,
+              height: 94,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    data.color.withValues(alpha: .34),
+                    data.color.withValues(alpha: .10),
                   ],
+                ),
+                border: Border.all(color: data.color.withValues(
+                  alpha: hovered ? .85 : .5)),
+                boxShadow: [BoxShadow(
+                  color: data.color.withValues(alpha: hovered ? .32 : .12),
+                  blurRadius: 24,
+                )],
+              ),
+              child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(data.icon, size: 30, color: Colors.white),
+                  const SizedBox(height: 9),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(data.title,
+                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: ENetColors.text,
+                        fontSize: 12.5, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
             ),
-            border: Border.all(color: compact
-              ? ENetColors.cyan.withValues(alpha: hovered ? .58 : .25)
-              : data.color.withValues(alpha: hovered ? .68 : .4)),
-            boxShadow: [BoxShadow(
-              color: data.color.withValues(alpha: .09),
-              blurRadius: 12, offset: const Offset(0, 3),
-            )],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 6),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(data.icon,
-              color: compact ? const Color(0xFFCBFFF1) : data.color,
-              size: compact ? 26 : 33),
-            const SizedBox(height: 7),
-            Text(data.title, maxLines: 1, overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: ENetColors.text,
-                fontSize: compact ? 8.4 : 12,
-                fontWeight: FontWeight.w800)),
-          ]),
-        ),
+          );
+        },
       ),
     );
   }
