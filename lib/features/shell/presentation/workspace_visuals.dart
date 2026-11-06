@@ -250,7 +250,7 @@ class MobileWelcomeScene extends StatelessWidget {
     child: InkWell(
       onTap: onOpenProfile,
       child: SizedBox(
-        height: 312,
+        height: 285,
         width: double.infinity,
         child: Stack(fit: StackFit.expand, children: [
           const CustomPaint(painter: _MobileMountainPainter()),
@@ -267,7 +267,7 @@ class MobileWelcomeScene extends StatelessWidget {
             child: Center(child: BrandLogo(size: 62, showName: false)),
           ),
           Positioned(
-            left: 18, right: 18, bottom: 30,
+            left: 18, right: 18, bottom: 72,
             child: Text.rich(
               TextSpan(children: [
                 const TextSpan(text: 'Добро пожаловать,\n'),
@@ -504,7 +504,7 @@ class V07HeroIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = compact ? 110.0 : 148.0;
+    final height = compact ? 116.0 : 166.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -545,29 +545,26 @@ class V07HeroIdCard extends StatelessWidget {
                     color: ENetColors.cyan, size: 26)),
                 ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22),
+                padding: EdgeInsets.symmetric(horizontal: compact ? 26 : 22),
                 child: Row(children: [
-                  _V07FingerprintTile(size: compact ? 57 : 67),
-                  const SizedBox(width: 16),
+                  _V07FingerprintTile(size: compact ? 76 : 67),
+                  SizedBox(width: compact ? 19 : 16),
                   Expanded(child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('eNet ID', style: TextStyle(
                         color: ENetColors.text,
-                        fontSize: compact ? 22 : 26,
+                        fontSize: compact ? 24 : 26,
                         fontWeight: FontWeight.w800, letterSpacing: -.6,
                       )),
                       const SizedBox(height: 4),
                       if (compact)
-                        const FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text('Единый аккаунт eNet',
-                            maxLines: 1,
-                            style: TextStyle(
-                              color: ENetColors.muted, fontSize: 13.5)),
-                        )
+                        const Text('Единый аккаунт\neNet',
+                          maxLines: 2,
+                          style: TextStyle(
+                            color: ENetColors.muted,
+                            fontSize: 14, height: 1.28))
                       else
                         const Text('Единый вход во все сервисы',
                           maxLines: 2,
