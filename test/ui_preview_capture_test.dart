@@ -222,7 +222,13 @@ void main() {
 
       // Capture the actual API-backed feature pages, not invented mock screens.
       if (size.width < 600) {
+        // The phone dock now opens the real 0.7 command palette.
         await tester.tap(find.byKey(const ValueKey('mobile-nav-1')));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.enterText(
+          find.byKey(const ValueKey('enet-search-input')), 'Сервисы');
+        await tester.pump(const Duration(milliseconds: 150));
+        await tester.tap(find.text('Сервисы').last);
       } else {
         await tester.tap(find.byKey(const ValueKey('desktop-nav-1')));
       }
