@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/glass.dart';
+import '../../../core/widgets/brand_logo.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_repository.dart';
 
@@ -236,6 +237,8 @@ class _DashboardSessionsSnapshotState extends State<DashboardSessionsSnapshot> {
   );
 }
 
+/// The full-bleed phone welcome screen from the supplied eNet 0.7 layout.
+/// Only the scenery is decorative; the profile action and name remain live.
 class MobileWelcomeScene extends StatelessWidget {
   const MobileWelcomeScene({super.key, required this.name, required this.onOpenProfile});
   final String name;
@@ -246,54 +249,44 @@ class MobileWelcomeScene extends StatelessWidget {
     color: Colors.transparent,
     child: InkWell(
       onTap: onOpenProfile,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        height: 235,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: ENetColors.cyan.withValues(alpha: .08)),
-        ),
+      child: SizedBox(
+        height: 250,
+        width: double.infinity,
         child: Stack(fit: StackFit.expand, children: [
-          // Approved artwork extracted from the user's visual reference.
-          // Only the backdrop is a raster asset; cards/text/actions are Flutter.
-          // Keep a valid scenic fallback while the approved JPEG is decoded.
-          // This also prevents blank frames on slow devices or test renderers.
           const CustomPaint(painter: _MobileMountainPainter()),
-          Positioned.fill(
-            child: Image.asset(
-              'assets/brand/approved_mobile_mountains.jpg',
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.medium,
-              gaplessPlayback: true,
-              errorBuilder: (context, error, stackTrace) =>
-                const SizedBox.expand(),
-            ),
+          Positioned.fill(child: Image.asset(
+            'assets/brand/approved_mobile_mountains.jpg',
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.medium,
+            gaplessPlayback: true,
+            errorBuilder: (context, error, stackTrace) =>
+              const SizedBox.expand(),
+          )),
+          const Positioned(
+            top: 22, left: 0, right: 0,
+            child: Center(child: BrandLogo(size: 62, showName: false)),
           ),
           Positioned(
-            left: 18, right: 55, bottom: 17,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Добро пожаловать,', style: TextStyle(
-                  color: ENetColors.text,
-                  fontSize: 16, fontWeight: FontWeight.w600)),
-                Row(children: [
-                  Flexible(child: Text(name,
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: ENetColors.text,
-                      fontSize: 23, fontWeight: FontWeight.w800))),
-                  const SizedBox(width: 7),
-                  const Icon(Icons.waving_hand_rounded,
-                    color: Color(0xFFFFC15B), size: 19),
-                ]),
-              ],
+            left: 18, right: 18, bottom: 14,
+            child: Text.rich(
+              TextSpan(children: [
+                const TextSpan(text: 'Добро пожаловать,\n'),
+                TextSpan(text: name, style: const TextStyle(fontWeight: FontWeight.w800)),
+                const WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 6),
+                    child: Icon(Icons.waving_hand_rounded,
+                      size: 20, color: Color(0xFFFFC15B)),
+                  )),
+              ]),
+              style: const TextStyle(
+                color: ENetColors.text,
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -.8,
+                height: 1.15),
             ),
-          ),
-          const Positioned(
-            right: 16, bottom: 20,
-            child: Icon(Icons.arrow_forward_ios_rounded,
-              color: ENetColors.cyan, size: 16),
           ),
         ]),
       ),
