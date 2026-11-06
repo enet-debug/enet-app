@@ -311,8 +311,11 @@ class _ENetShellState extends State<ENetShell> {
                     borderRadius: BorderRadius.circular(14),
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft, end: Alignment.centerRight,
-                      colors: [Color(0xFF10D9A9), Color(0xFF078772)]),
-                    border: Border.all(color: ENetColors.mint.withValues(alpha: .48)),
+                      colors: [Color(0xFF18EDBD), Color(0xFF068875)]),
+                    border: Border.all(color: ENetColors.mint.withValues(alpha: .70)),
+                    boxShadow: [BoxShadow(
+                      color: ENetColors.mint.withValues(alpha: .18),
+                      blurRadius: 16, spreadRadius: .2)],
                   ),
                 ),
               ),
