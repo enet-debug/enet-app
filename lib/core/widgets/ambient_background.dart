@@ -103,23 +103,23 @@ class _AuroraPainter extends CustomPainter {
         ..moveTo(-w * .12, h * 1.01)
         ..cubicTo(w * .23, h * .91, w * .29, h * .63, w * .53, h * .60)
         ..cubicTo(w * .70, h * .57, w * .74, h * .30, w * .94, h * .19);
-      for (final (path, alpha) in [(upper, .70), (lower, .30)]) {
+      for (final (path, alpha) in [(upper, .90), (lower, .35)]) {
         canvas.drawPath(path, Paint()
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round
           ..strokeWidth = 54
-          ..color = ENetColors.mint.withValues(alpha: .17 * alpha)
+          ..color = ENetColors.mint.withValues(alpha: .25 * alpha)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 27));
         canvas.drawPath(path, Paint()
           ..style = PaintingStyle.stroke
           ..strokeCap = StrokeCap.round
           ..strokeWidth = 10
-          ..color = ENetColors.cyan.withValues(alpha: .18 * alpha)
+          ..color = ENetColors.cyan.withValues(alpha: .25 * alpha)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 13));
         canvas.drawPath(path, Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.6
-          ..color = const Color(0xFF66FFE5).withValues(alpha: .42 * alpha));
+          ..color = const Color(0xFF66FFE5).withValues(alpha: .70 * alpha));
       }
       final star = Offset(w * .76 + math.cos(t * 2 * math.pi) * 12, h * .06);
       canvas.drawCircle(star, 6, Paint()
