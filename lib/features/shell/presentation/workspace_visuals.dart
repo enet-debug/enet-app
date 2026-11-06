@@ -499,3 +499,150 @@ class _DashboardNebulaPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _DashboardNebulaPainter oldDelegate) => false;
 }
+
+
+/// eNet 0.7: UI components ported from the supplied enet-app-0.7.zip source.
+/// They keep the archived dimensions, shadows, tilting and card typography;
+/// the surrounding current shell retains its live account/backend functions.
+class V07HeroIdCard extends StatelessWidget {
+  const V07HeroIdCard({super.key, required this.onTap, this.compact = false});
+  final VoidCallback onTap;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final height = compact ? 104.0 : 124.0;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: AnimatedContainer(
+          key: const ValueKey('workspace-hero'),
+          duration: ENetMotion.medium,
+          curve: Curves.easeOutCubic,
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
+              colors: [Color(0xFF12453A), Color(0xFF0B2B23), Color(0xFF0E3A2D)],
+            ),
+            border: Border.all(color: ENetColors.mint.withValues(alpha: .36)),
+            boxShadow: [BoxShadow(
+              color: ENetColors.mint.withValues(alpha: .16),
+              blurRadius: 44, offset: const Offset(0, 14),
+            )],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(children: [
+              const Positioned.fill(child: CustomPaint(painter: _V07StreakPainter())),
+              Positioned(
+                right: compact ? -6 : 18, top: 0, bottom: 0,
+                child: Center(child: _V07Plate(size: compact ? 86 : 104)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 22),
+                child: Row(children: [
+                  _V07FingerprintTile(size: compact ? 52 : 60),
+                  const SizedBox(width: 16),
+                  Expanded(child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('eNet ID', style: TextStyle(
+                        color: ENetColors.text,
+                        fontSize: compact ? 22 : 26,
+                        fontWeight: FontWeight.w800, letterSpacing: -.6,
+                      )),
+                      const SizedBox(height: 4),
+                      Text(compact ? 'Единый аккаунт eNet' : 'Единый вход во все сервисы',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: ENetColors.muted, fontSize: 13.5)),
+                    ],
+                  )),
+                  SizedBox(width: compact ? 66 : 150),
+                ]),
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _V07FingerprintTile extends StatelessWidget {
+  const _V07FingerprintTile({required this.size});
+  final double size;
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size, height: size,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(size * .3),
+      color: ENetColors.mint.withValues(alpha: .13),
+      border: Border.all(color: ENetColors.mint.withValues(alpha: .42)),
+      boxShadow: [BoxShadow(
+        color: ENetColors.mint.withValues(alpha: .2), blurRadius: 22)],
+    ),
+    child: Icon(Icons.fingerprint_rounded,
+      size: size * .62, color: ENetColors.mint),
+  );
+}
+
+class _V07Plate extends StatelessWidget {
+  const _V07Plate({required this.size});
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Transform(
+    alignment: Alignment.center,
+    transform: Matrix4.identity()
+      ..setEntry(3, 2, .0014)
+      ..rotateX(.55)
+      ..rotateZ(-.42),
+    child: Container(
+      width: size, height: size,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size * .24),
+        border: Border.all(color: ENetColors.mint.withValues(alpha: .55), width: 1.4),
+        boxShadow: [BoxShadow(
+          color: ENetColors.mint.withValues(alpha: .45),
+          blurRadius: 34, offset: const Offset(-8, 14))],
+      ),
+      child: Image.asset('assets/enet_logo.jpg',
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+          const Center(child: Icon(Icons.blur_on_rounded,
+            size: 52, color: ENetColors.mint))),
+    ),
+  );
+}
+
+class _V07StreakPainter extends CustomPainter {
+  const _V07StreakPainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final shader = LinearGradient(colors: [
+      ENetColors.mint.withValues(alpha: 0),
+      ENetColors.mint.withValues(alpha: .32),
+      ENetColors.mint.withValues(alpha: 0),
+    ]).createShader(Rect.fromLTWH(0, 0, w, h));
+    for (var i = 0; i < 3; i++) {
+      final path = Path()
+        ..moveTo(w * (.30 + i * .12), h * 1.1)
+        ..quadraticBezierTo(w * (.55 + i * .10), h * .55,
+          w * (.95 + i * .05), -h * .1);
+      canvas.drawPath(path, Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2 + i * .6
+        ..shader = shader);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant _V07StreakPainter oldDelegate) => false;
+}
