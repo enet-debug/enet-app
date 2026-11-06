@@ -34,7 +34,7 @@ class Glass extends StatelessWidget {
         boxShadow: shadow
             ? [
                 const BoxShadow(color: Color(0x76000208), blurRadius: 26, offset: Offset(0, 12)),
-                BoxShadow(color: base.withValues(alpha: .075 * strength), blurRadius: 24),
+                BoxShadow(color: base.withValues(alpha: .11 * strength), blurRadius: 29),
               ]
             : null,
       ),
@@ -49,13 +49,13 @@ class Glass extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  base.withValues(alpha: .16 * strength),
+                  base.withValues(alpha: .19 * strength),
                   ENetColors.surfaceRaised.withValues(alpha: .74),
                   ENetColors.surface.withValues(alpha: .94),
                 ],
                 stops: const [0, .35, 1],
               ),
-              border: Border.all(color: base.withValues(alpha: .25 * strength), width: .9),
+              border: Border.all(color: base.withValues(alpha: .36 * strength), width: .9),
             ),
             child: Padding(padding: padding, child: child),
           ),
