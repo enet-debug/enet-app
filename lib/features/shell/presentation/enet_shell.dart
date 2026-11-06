@@ -235,7 +235,8 @@ class _ENetShellState extends State<ENetShell> {
   }
 
   Widget _rightPanel() => Padding(
-    padding: const EdgeInsets.fromLTRB(0, 10, 13, 13),
+    padding: EdgeInsets.fromLTRB(0,
+      MediaQuery.sizeOf(context).width >= 1380 ? 24 : 10, 13, 13),
     child: SingleChildScrollView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _accountSummaryCard(),
@@ -274,7 +275,7 @@ class _ENetShellState extends State<ENetShell> {
   Widget _sidebar() {
     final spacious = MediaQuery.sizeOf(context).width >= 1380 &&
         MediaQuery.sizeOf(context).height >= 720;
-    final itemHeight = spacious ? 46.0 : 40.0;
+    final itemHeight = spacious ? 47.5 : 40.0;
     final gap = spacious ? 3.0 : 2.0;
     return Glass(
       radius: 18,
@@ -283,7 +284,7 @@ class _ENetShellState extends State<ENetShell> {
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
-          padding: EdgeInsets.only(left: 6, bottom: spacious ? 28 : 17),
+          padding: EdgeInsets.only(left: 6, bottom: spacious ? 46 : 17),
           child: Row(children: [
             BrandLogo(size: 46, showName: false),
             SizedBox(width: 12),
@@ -772,11 +773,11 @@ class _ENetShellState extends State<ENetShell> {
         const SizedBox(height: 8),
         const Text('Ваша единая платформа для работы, автоматизации и ИИ',
           style: TextStyle(color: ENetColors.muted, fontSize: 15)),
-        const SizedBox(height: 22),
+        const SizedBox(height: 30),
         _hero(false),
         const SizedBox(height: 19),
         _shortcutStrip(false),
-        const SizedBox(height: 22),
+        const SizedBox(height: 38),
         ServiceCatalogPanel(
           auth: widget.auth,
           dashboard: true,
@@ -908,9 +909,9 @@ class _ENetShellState extends State<ENetShell> {
     builder: (context, hovered) => Glass(
       radius: 17,
       blur: 12,
-      padding: const EdgeInsets.all(13),
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width >= 1380 ? 14 : 13),
       child: Row(children: [
-        const DashboardNebulaAvatar(size: 46),
+        DashboardNebulaAvatar(size: MediaQuery.sizeOf(context).width >= 1380 ? 62 : 46),
         const SizedBox(width: 12),
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
