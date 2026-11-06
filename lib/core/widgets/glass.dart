@@ -9,8 +9,8 @@ class Glass extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = EdgeInsets.zero,
-    this.radius = 22,
-    this.blur = 16,
+    this.radius = 18,
+    this.blur = 19,
     this.strength = 1,
     this.shadow = true,
     this.tint,
@@ -32,7 +32,10 @@ class Glass extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: r,
         boxShadow: shadow
-            ? const [BoxShadow(color: Color(0x44000000), blurRadius: 24, offset: Offset(0, 10))]
+            ? [
+                const BoxShadow(color: Color(0x76000208), blurRadius: 26, offset: Offset(0, 12)),
+                BoxShadow(color: base.withValues(alpha: .075 * strength), blurRadius: 24),
+              ]
             : null,
       ),
       child: ClipRRect(
@@ -46,11 +49,13 @@ class Glass extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  base.withValues(alpha: .075 * strength),
-                  ENetColors.surface.withValues(alpha: .93),
+                  base.withValues(alpha: .16 * strength),
+                  ENetColors.surfaceRaised.withValues(alpha: .74),
+                  ENetColors.surface.withValues(alpha: .94),
                 ],
+                stops: const [0, .35, 1],
               ),
-              border: Border.all(color: ENetColors.mint.withValues(alpha: .12)),
+              border: Border.all(color: base.withValues(alpha: .25 * strength), width: .9),
             ),
             child: Padding(padding: padding, child: child),
           ),
