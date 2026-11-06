@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 /// Палитра eNet 0.7: глубокий изумрудный фон и мятные акценты.
 abstract final class ENetColors {
   static const background = Color(0xFF031A1C);
-  static const surface = Color(0xFF07282A);
-  static const surfaceRaised = Color(0xFF124039);
+  static const surface = Color(0xFF05272A);
+  static const surfaceRaised = Color(0xFF0A3335);
   static const border = Color(0x5540EAC2);
   static const cyan = Color(0xFF38F9D0);
   static const blue = Color(0xFF11BEAD);
