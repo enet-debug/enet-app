@@ -38,11 +38,11 @@ void main() {
     ));
     await tester.pumpAndSettle();
     expect(find.text('eNet API'), findsOneWidget);
-    expect(find.text('Работает'), findsOneWidget);
-    expect(find.textContaining('Время ответа:'), findsOneWidget);
+    expect(find.textContaining('Работает ·'), findsOneWidget);
+    expect(find.textContaining('мс'), findsOneWidget);
     await tester.tap(find.text('Проверить'));
     await tester.pumpAndSettle();
-    expect(find.text('Работает'), findsOneWidget);
+    expect(find.textContaining('Работает ·'), findsOneWidget);
   });
 
   testWidgets('Favorites can be saved and filtered across service cards', (tester) async {
