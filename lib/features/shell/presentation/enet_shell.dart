@@ -1056,24 +1056,6 @@ class _ENetShellState extends State<ENetShell> {
   }
 }
 
-class _WindowDot extends StatelessWidget {
-  const _WindowDot({required this.color});
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    width: 9,
-    height: 9,
-    decoration: BoxDecoration(
-      color: color,
-      shape: BoxShape.circle,
-      boxShadow: [
-        BoxShadow(color: color.withValues(alpha: .45), blurRadius: 8),
-      ],
-    ),
-  );
-}
-
 class _HomeShortcutData {
   const _HomeShortcutData({
     required this.icon,
