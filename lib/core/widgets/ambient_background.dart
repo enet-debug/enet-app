@@ -72,9 +72,9 @@ class _AuroraPainter extends CustomPainter {
 
     // (цвет, x, y, радиус, обороты за цикл, фаза, прозрачность)
     final blobs = <(Color, double, double, double, int, double, double)>[
-      (ENetColors.blue, .94, .06, .64, 1, .00, .25),
-      (ENetColors.violet, .02, .88, .60, 2, .33, .13),
-      (ENetColors.mint, .48, 1.02, .46, 1, .66, .15),
+      (ENetColors.mint, .94, .06, .64, 1, .00, .29),
+      (const Color(0xFF00A879), .02, .88, .60, 2, .33, .17),
+      (ENetColors.cyan, .48, 1.02, .46, 1, .66, .19),
     ];
     for (final (color, bx, by, rf, k, phase, alpha) in blobs) {
       final a = (t * k + phase) * math.pi * 2;
@@ -84,10 +84,30 @@ class _AuroraPainter extends CustomPainter {
         c,
         radius,
         Paint()
-          ..shader = RadialGradient(colors: [color.withValues(alpha: alpha), color.withValues(alpha: 0)])
+          ..shader = RadialGradient(colors: [
+            color.withValues(alpha: alpha * (w < 820 ? .55 : 1.0)),
+            color.withValues(alpha: 0),
+          ])
               .createShader(Rect.fromCircle(center: c, radius: radius)),
       );
     }
+
+    // A faint emerald sweep remains visible around the app frame,
+    // echoing the ribbon used by the original dashboard reference.
+    final sweep = Path()
+      ..moveTo(-w * .08, h * .82)
+      ..cubicTo(w * .18, h * 1.02, w * .25, h * .45, w * .48, h * .60)
+      ..cubicTo(w * .72, h * .78, w * .84, h * .18, w * 1.08, -h * .06);
+    canvas.drawPath(sweep, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 34
+      ..color = ENetColors.mint.withValues(alpha: .07)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24));
+    canvas.drawPath(sweep, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = ENetColors.cyan.withValues(alpha: .18));
 
     // Тонкая орбита — фирменный мотив eNet.
     final center = Offset(w * .84, h * .26);

@@ -4,18 +4,10 @@ import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/glass.dart';
 import '../../auth/application/auth_controller.dart';
 
-/// A compact, live status rail. Every state is backed by an API check.
+/// The eNet 0.7 SystemStatusCard, backed by the current live API.
 class DashboardStatus extends StatefulWidget {
-  const DashboardStatus({
-    super.key,
-    required this.auth,
-    required this.openAccount,
-    required this.openSettings,
-  });
-
+  const DashboardStatus({super.key, required this.auth});
   final AuthController auth;
-  final VoidCallback openAccount;
-  final VoidCallback openSettings;
 
   @override
   State<DashboardStatus> createState() => _DashboardStatusState();
@@ -24,6 +16,7 @@ class DashboardStatus extends StatefulWidget {
 class _DashboardStatusState extends State<DashboardStatus> {
   bool _checking = true;
   bool _online = false;
+  int? _responseMs;
 
   @override
   void initState() {
@@ -34,133 +27,102 @@ class _DashboardStatusState extends State<DashboardStatus> {
   Future<void> _check() async {
     if (!mounted) return;
     setState(() => _checking = true);
-    final result = await widget.auth.checkServer();
+    final watch = Stopwatch()..start();
+    var online = false;
+    try {
+      online = await widget.auth.checkServer();
+    } catch (_) {
+      // An unavailable API is an offline state, never a blank card.
+    }
+    watch.stop();
     if (!mounted) return;
     setState(() {
       _checking = false;
-      _online = result;
+      _online = online;
+      _responseMs = online ? watch.elapsedMilliseconds : null;
     });
   }
 
   @override
-  Widget build(BuildContext context) => Glass(
-    radius: 21,
-    blur: 14,
-    padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Row(children: [
-        AnimatedContainer(
-          duration: ENetMotion.medium,
-          width: 9,
-          height: 9,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _checking
-                ? ENetColors.muted
-                : _online ? ENetColors.mint : ENetColors.danger,
-            boxShadow: [
-              BoxShadow(
-                color: (_checking
-                    ? ENetColors.muted
-                    : _online ? ENetColors.mint : ENetColors.danger)
-                    .withValues(alpha: .42),
-                blurRadius: 12,
-              ),
-            ],
+  Widget build(BuildContext context) {
+    final color = _checking ? ENetColors.muted :
+      _online ? ENetColors.mint : ENetColors.danger;
+    final headline = _checking ? 'Проверяем систему' :
+      _online ? 'Система работает' : 'Есть проблемы';
+    return Glass(
+      radius: 22,
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          AnimatedContainer(
+            duration: ENetMotion.medium,
+            width: 10, height: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: [BoxShadow(
+                color: color.withValues(alpha: .55), blurRadius: 10)],
+            ),
           ),
-        ),
-        const SizedBox(width: 9),
-        Expanded(child: Text(
-          _checking ? 'Проверяем систему' : _online ? 'Система работает' : 'Нет соединения',
-          style: const TextStyle(
-            color: ENetColors.text,
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
+          const SizedBox(width: 10),
+          Expanded(child: AnimatedSwitcher(
+            duration: ENetMotion.quick,
+            child: Text(headline, key: ValueKey(headline),
+              style: const TextStyle(
+                color: ENetColors.text,
+                fontSize: 14.5, fontWeight: FontWeight.w700)),
+          )),
+          Icon(Icons.signal_cellular_alt_rounded, size: 20, color: color),
+        ]),
+        const SizedBox(height: 13),
+        _line(Icons.dns_outlined, 'eNet API',
+          _checking ? 'Проверка' : _online ? 'Работает' : 'Нет связи', color),
+        const SizedBox(height: 5),
+        Text(
+          _checking ? 'Проверяем соединение с сервером' :
+          _online ? 'Время ответа: ${_responseMs ?? 0} мс' :
+          'Сервер не отвечает',
+          style: const TextStyle(color: ENetColors.faint, fontSize: 10.5)),
+        _line(Icons.fingerprint_rounded, 'eNet ID',
+          widget.auth.user == null ? 'Нет сеанса' : 'Сеанс активен',
+          widget.auth.user == null ? ENetColors.muted : ENetColors.mint),
+        _line(Icons.info_outline_rounded, 'Приложение',
+          'v0.8.0', ENetColors.muted),
+        const SizedBox(height: 8),
+        Align(alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: _checking ? null : _check,
+            style: TextButton.styleFrom(
+              foregroundColor: ENetColors.cyan,
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2)),
+            child: const Text('Проверить',
+              style: TextStyle(fontFamily: 'Roboto', fontSize: 11.5,
+                fontWeight: FontWeight.w600)),
           ),
-        )),
-        IconButton(
-          tooltip: 'Проверить подключение',
-          visualDensity: VisualDensity.compact,
-          onPressed: _checking ? null : _check,
-          icon: const Icon(Icons.refresh_rounded, color: ENetColors.cyan, size: 18),
         ),
       ]),
-      const SizedBox(height: 5),
-      _StatusLine(
-        icon: Icons.cloud_done_rounded,
-        title: 'API',
-        subtitle: _checking
-            ? 'Проверяем соединение'
-            : _online ? 'Сервер отвечает' : 'Нет подключения',
-        color: _checking
-            ? ENetColors.muted
-            : _online ? ENetColors.mint : ENetColors.danger,
-        onTap: _checking ? null : _check,
-      ),
-      const Divider(height: 9, indent: 32),
-      _StatusLine(
-        icon: Icons.fingerprint_rounded,
-        title: 'eNet ID',
-        subtitle: 'Аккаунт и профиль',
-        color: ENetColors.cyan,
-        onTap: widget.openAccount,
-      ),
-      const Divider(height: 9, indent: 32),
-      _StatusLine(
-        icon: Icons.shield_outlined,
-        title: 'Безопасность',
-        subtitle: 'Пароль и активные сеансы',
-        color: ENetColors.blue,
-        onTap: widget.openSettings,
-      ),
-    ]),
-  );
-}
+    );
+  }
 
-class _StatusLine extends StatelessWidget {
-  const _StatusLine({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.transparent,
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(11),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-        child: Row(children: [
-          Icon(icon, color: color, size: 17),
-          const SizedBox(width: 9),
-          Expanded(child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(
-                color: ENetColors.text,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              )),
-              const SizedBox(height: 2),
-              Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: ENetColors.muted, fontSize: 10.5)),
-            ],
-          )),
-          if (onTap != null)
-            const Icon(Icons.chevron_right_rounded,
-              color: ENetColors.faint, size: 17),
-        ]),
-      ),
-    ),
-  );
+  Widget _line(IconData icon, String label, String value, Color color) =>
+    Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(children: [
+        Icon(icon, size: 16, color: ENetColors.muted),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(label,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: ENetColors.muted, fontSize: 12.5))),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(value,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: color, fontSize: 12, fontWeight: FontWeight.w600))),
+      ]),
+    );
 }

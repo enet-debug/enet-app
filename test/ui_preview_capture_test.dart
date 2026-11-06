@@ -19,8 +19,8 @@ class _PreviewRepository extends DemoAuthRepository {
   @override
   Future<AuthUser?> restoreSession() async => const AuthUser(
         id: '00000000-0000-4000-8000-000000000001',
-        email: 'preview@example.org',
-        name: 'Preview',
+        email: 'user@enet-dev.ru',
+        name: 'Виталий',
       );
 
   @override
@@ -34,6 +34,18 @@ class _PreviewRepository extends DemoAuthRepository {
           description:
               'Создание и улучшение объявлений. Единый вход пока не подключён.',
           url: 'https://prodayzer.ru',
+        ),
+      ];
+
+  @override
+  Future<List<AccountSession>> listSessions() async => [
+        AccountSession(
+          id: 'preview-session',
+          device: 'Linux (текущее)',
+          createdAt: DateTime.utc(2026, 11, 5, 8),
+          lastSeenAt: DateTime.utc(2026, 11, 5, 12, 30),
+          expiresAt: DateTime.utc(2026, 11, 6, 8),
+          current: true,
         ),
       ];
 }
@@ -159,8 +171,29 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
       await tester.pump(const Duration(milliseconds: 800));
 
-      expect(find.text('Мои сервисы'), findsOneWidget);
-      expect(find.text('ВОЗМОЖНОСТИ eNet'), findsOneWidget);
+      // Raster decorations are bundled offline and remain separate from
+      // interactive Flutter widgets. Ensure both screenshot viewports render
+      // loaded assets rather than a transient image-decoding frame.
+      final artwork = size.width < 600
+          ? const AssetImage('assets/brand/approved_mobile_mountains.jpg')
+          : const AssetImage('assets/brand/approved_hero_graphic.jpg');
+      final loaded = await tester.runAsync(() async {
+        await precacheImage(
+          artwork,
+          tester.element(find.byKey(const ValueKey('workspace-hero'))),
+        );
+        return true;
+      });
+      expect(loaded, isTrue);
+      await tester.pump(const Duration(milliseconds: 150));
+
+      if (size.width < 600) {
+        expect(find.text('Быстрый доступ'), findsOneWidget);
+        expect(find.text('Мои сервисы'), findsNothing);
+      } else {
+        expect(find.text('Мои сервисы'), findsOneWidget);
+      }
+      expect(find.text('Продайзер'), findsWidgets);
       final heroSize = tester.getSize(find.byKey(const ValueKey('workspace-hero')));
       if (size.width > 600) {
         expect(heroSize.width, greaterThan(680));
@@ -187,12 +220,19 @@ void main() {
           findsOneWidget);
       await _saveCapture(tester, 'enet-profile-$device');
 
-      // Capture the actual API-backed feature pages, not invented mock screens.
-      if (size.width < 600) {
-        await tester.tap(find.byKey(const ValueKey('mobile-nav-1')));
-      } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-1')));
-      }
+      // The archive's search palette is real UI. Record it on both viewports
+      // and navigate through the filtered result, not a mocked link.
+      await tester.tap(find.byKey(ValueKey(
+        size.width < 600 ? 'mobile-nav-1' : 'desktop-search',
+      )));
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.enterText(
+        find.byKey(const ValueKey('enet-search-input')), 'Сервисы');
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(find.text('Сервисы'), findsWidgets);
+      await _saveCapture(tester,
+        'enet-search-${size.width < 600 ? "mobile" : "desktop"}');
+      await tester.tap(find.text('Сервисы').last);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
       expect(find.text('Сервисы'), findsWidgets);
@@ -203,7 +243,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-7')));
       } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-7')));
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-more')));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.tap(find.byKey(const ValueKey('more-nav-7')));
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
@@ -227,7 +269,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-5')));
       } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-5')));
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-0')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 450));
+        await tester.tap(find.text('Управление сеансами'));
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));

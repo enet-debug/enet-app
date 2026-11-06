@@ -33,16 +33,15 @@ void main() {
       ));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      expect(
-        find.text(size.width < 600
-            ? 'Единый аккаунт eNet'
-            : 'Добро пожаловать в eNet'),
-        findsOneWidget,
-      );
+      if (size.width < 600) {
+        expect(find.textContaining('Добро пожаловать,'), findsOneWidget);
+      } else {
+        expect(find.text('Добро пожаловать в eNet'), findsOneWidget);
+      }
       expect(tester.takeException(), isNull);
 
       if (size.width < 600) {
-        await tester.tap(find.byKey(const ValueKey('mobile-nav-1')));
+        await tester.tap(find.byKey(const ValueKey('mobile-shortcut-services')));
       } else {
         await tester.tap(find.byKey(const ValueKey('desktop-nav-1')));
       }
@@ -55,13 +54,16 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('mobile-nav-more')));
         await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-7')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 450));
+        expect(find.text('Задачи'), findsAtLeastNWidgets(1));
+        expect(find.text('Список пока пуст'), findsOneWidget);
       } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-7')));
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-0')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 450));
+        expect(find.text('Мои сервисы'), findsOneWidget);
       }
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 450));
-      expect(find.text('Задачи'), findsAtLeastNWidgets(1));
-      expect(find.text('Список пока пуст'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       if (size.width < 600) {
@@ -81,7 +83,10 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
         await tester.tap(find.byKey(const ValueKey('more-nav-5')));
       } else {
-        await tester.tap(find.byKey(const ValueKey('desktop-nav-5')));
+        await tester.tap(find.byKey(const ValueKey('desktop-nav-0')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 450));
+        await tester.tap(find.text('Управление сеансами'));
       }
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 450));
