@@ -504,39 +504,39 @@ class V07HeroIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = compact ? 104.0 : 154.0;
+    final height = compact ? 104.0 : 148.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(18),
         child: AnimatedContainer(
           key: const ValueKey('workspace-hero'),
           duration: ENetMotion.medium,
           curve: Curves.easeOutCubic,
           height: height,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(18),
             gradient: const LinearGradient(
               begin: Alignment.topLeft, end: Alignment.bottomRight,
-              colors: [Color(0xFF145849), Color(0xFF082C25), Color(0xFF0E5942)],
+              colors: [Color(0xFF085447), Color(0xFF03272A), Color(0xFF075F4D)],
             ),
-            border: Border.all(color: ENetColors.mint.withValues(alpha: .36)),
+            border: Border.all(color: ENetColors.mint.withValues(alpha: .66), width: 1.1),
             boxShadow: [BoxShadow(
-              color: ENetColors.mint.withValues(alpha: .16),
+              color: ENetColors.mint.withValues(alpha: .24),
               blurRadius: 44, offset: const Offset(0, 14),
             )],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(18),
             child: Stack(children: [
               if (!compact) ...[
                 const Positioned.fill(
                   child: CustomPaint(painter: _V07StreakPainter())),
                 const Positioned(
-                  right: 24, top: 0, bottom: 0,
+                  right: 17, top: 0, bottom: 0,
                   child: Center(
-                    child: _V07Plate(size: 124)),
+                    child: _V07Plate(size: 122)),
                 ),
               ] else
                 const Positioned(
@@ -599,10 +599,10 @@ class _V07FingerprintTile extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF147F67), Color(0xFF0B453D)]),
-      border: Border.all(color: ENetColors.mint.withValues(alpha: .56)),
+        colors: [Color(0xFF03A98D), Color(0xFF063E3A)]),
+      border: Border.all(color: ENetColors.mint.withValues(alpha: .78)),
       boxShadow: [BoxShadow(
-        color: ENetColors.mint.withValues(alpha: .2), blurRadius: 22)],
+        color: ENetColors.mint.withValues(alpha: .34), blurRadius: 24)],
     ),
     child: Icon(Icons.fingerprint_rounded,
       size: size * .62, color: ENetColors.mint),
