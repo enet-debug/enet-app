@@ -146,89 +146,37 @@ class _ENetShellState extends State<ENetShell> {
                     child: _tabBar(),
                   ),
                 ])
-              : Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Container(
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      color: const Color(0xD0071714),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: ENetColors.cyan.withValues(alpha: .22),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: ENetColors.mint.withValues(alpha: .08),
-                          blurRadius: 42,
-                          spreadRadius: 1,
-                          offset: const Offset(0, 12),
-                        ),
-                      ],
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: SizedBox(width: 252, child: _sidebar()),
                     ),
-                    child: Column(children: [
-                      SizedBox(
-                        height: 45,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 17),
-                          child: Row(children: [
-                            const BrandLogo(size: 22, showName: false),
-                            const SizedBox(width: 9),
-                            const Text('eNet APP', style: TextStyle(
-                              color: ENetColors.text,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                            )),
-                            const Spacer(),
-                            IconButton(
-                              tooltip: (_unreadCount ?? 0) > 0
-                                ? 'Уведомления: $_unreadCount непрочитанных'
-                                : 'Открыть уведомления',
-                              visualDensity: VisualDensity.compact,
-                              onPressed: () => go(2),
-                              icon: Badge(
-                                isLabelVisible: (_unreadCount ?? 0) > 0,
-                                backgroundColor: ENetColors.mint,
-                                textColor: ENetColors.onAccent,
-                                label: Text(_unreadCount == null ? '' :
-                                  _unreadCount! > 99 ? '99+' : '$_unreadCount'),
-                                child: const Icon(Icons.notifications_none_rounded,
-                                  color: ENetColors.cyan, size: 18),
-                              ),
-                            ),
-                            const Text('v0.8.0', style: TextStyle(
-                              color: ENetColors.faint,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            )),
-                            const SizedBox(width: 14),
-                            const _WindowDot(color: Color(0xFF39D98A)),
-                            const SizedBox(width: 6),
-                            const _WindowDot(color: Color(0xFFFFC84A)),
-                            const SizedBox(width: 6),
-                            const _WindowDot(color: Color(0xFFFF6B68)),
-                          ]),
-                        ),
-                      ),
-                      Expanded(child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: SizedBox(
-                              width: MediaQuery.sizeOf(context).width >= 1360 ? 282 : 246,
-                              child: _sidebar()),
-                          ),
-                          Container(width: 1, color: ENetColors.border),
-                          Expanded(child: _content(compact)),
-                        ],
-                      )),
-                    ]),
-                  ),
+                    Expanded(child: _content(false)),
+                    if (MediaQuery.sizeOf(context).width >= 1180)
+                      SizedBox(width: 316, child: _rightPanel()),
+                  ],
                 ),
         ),
       ),
     );
   }
+
+  Widget _rightPanel() => Padding(
+    padding: const EdgeInsets.fromLTRB(0, 16, 16, 16),
+    child: SingleChildScrollView(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        _accountSummaryCard(),
+        const SizedBox(height: 12),
+        _balancePreviewCard(),
+        const SizedBox(height: 12),
+        DashboardStatus(auth: widget.auth),
+        const SizedBox(height: 12),
+        _quickActionsCard(),
+      ]),
+    ),
+  );
 
   // ───────────────────────── Навигация ─────────────────────────
 
@@ -480,6 +428,11 @@ class _ENetShellState extends State<ENetShell> {
           padding: EdgeInsets.fromLTRB(pad, 10, pad, 0),
           child: _topBar(compact),
         ),
+      if (!compact)
+        Padding(
+          padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
+          child: _desktopTopBar(),
+        ),
       Expanded(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(pad,
@@ -511,6 +464,44 @@ class _ENetShellState extends State<ENetShell> {
       ),
     ]);
   }
+
+  Widget _desktopTopBar() => Row(children: [
+    const Spacer(),
+    Pressable(
+      onTap: () => go(1),
+      haptic: false,
+      builder: (context, hovered) => AnimatedContainer(
+        duration: ENetMotion.quick,
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: hovered ? .09 : .05),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: .09)),
+        ),
+        child: const Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.search_rounded, size: 18, color: ENetColors.muted),
+          SizedBox(width: 10),
+          Text('Поиск по сервисам',
+            style: TextStyle(color: ENetColors.muted, fontSize: 13.5)),
+          SizedBox(width: 14),
+          Icon(Icons.arrow_forward_rounded,
+            color: ENetColors.faint, size: 15),
+        ]),
+      ),
+    ),
+    const SizedBox(width: 10),
+    IconButton(
+      tooltip: 'Уведомления',
+      onPressed: () => go(2),
+      icon: Badge(
+        isLabelVisible: (_unreadCount ?? 0) > 0,
+        backgroundColor: ENetColors.mint,
+        child: const Icon(Icons.notifications_none_rounded,
+          color: ENetColors.cyan, size: 21),
+      ),
+    ),
+  ]);
 
   Widget _topBar(bool compact) {
     return Row(children: [
@@ -625,105 +616,41 @@ class _ENetShellState extends State<ENetShell> {
         ],
       );
     }
-    return LayoutBuilder(builder: (context, constraints) {
-    final split = !compact && constraints.maxWidth >= 710;
-    final railWidth = constraints.maxWidth >= 1050 ? 340.0 : 250.0;
-
-    final intro = Container(
-      decoration: compact ? null : BoxDecoration(
-        gradient: RadialGradient(
-          center: const Alignment(.72, -.85),
-          radius: 1.55,
-          colors: [
-            ENetColors.mint.withValues(alpha: .14),
-            Colors.transparent,
-          ],
-        ),
-      ),
-      child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (compact)
-          MobileWelcomeScene(name: user.name, onOpenProfile: () => go(3))
-        else ...[
-          const Text('Добро пожаловать в eNet',
-            style: TextStyle(color: ENetColors.text, fontSize: 31,
-              fontWeight: FontWeight.w800, letterSpacing: -.8)),
-          const SizedBox(height: 4),
-          const Text('Ваша единая платформа для работы, автоматизации и ИИ',
-            style: TextStyle(color: ENetColors.muted, fontSize: 13)),
-        ],
-        SizedBox(height: compact ? 10 : 30),
-        _hero(compact),
-      ],
-      ),
-    );
-
-    final shortcuts = _shortcutStrip(compact);
-    final catalog = ServiceCatalogPanel(
-      auth: widget.auth,
-      dashboard: true,
-      onSeeAll: () => go(1),
-    );
-
-    // Keep the four-panel hierarchy of the approved desktop reference.
-    // Device sessions remain accessible without a fifth dashboard card.
-    final rail = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        ConstrainedBox(constraints: const BoxConstraints(minHeight: 102), child: _accountSummaryCard()),
-        const SizedBox(height: 12),
-        ConstrainedBox(constraints: const BoxConstraints(minHeight: 140), child: _balancePreviewCard()),
-        const SizedBox(height: 12),
-        DashboardStatus(auth: widget.auth),
-        const SizedBox(height: 12),
-        ConstrainedBox(constraints: const BoxConstraints(minHeight: 213), child: _quickActionsCard()),
-        Align(alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: () => go(5),
-            icon: const Icon(Icons.devices_outlined, size: 16),
-            label: const Text('Управление сеансами',
-              style: TextStyle(fontFamily: 'Roboto', fontSize: 11)),
-          )),
-      ],
-    );
-
-    final central = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        intro,
-        const SizedBox(height: 21),
-        shortcuts,
-        const SizedBox(height: 33),
-        catalog,
-      ],
-    );
-
-    if (split) {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: central),
-          const SizedBox(width: 18),
-          SizedBox(width: railWidth, child: rail),
-        ],
-      );
-    }
-
-    // The phone reference has a focused landing view; the complete catalog
-    // lives under "Сервисы" instead of pushing the quick-access card away.
     return Column(
+      key: const ValueKey('home'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        intro,
-        const SizedBox(height: 17),
-        shortcuts,
-        const SizedBox(height: 60),
-        _mobileQuickAccess(),
+        const Text.rich(
+          TextSpan(children: [
+            TextSpan(text: 'Добро пожаловать в '),
+            TextSpan(text: 'eNet',
+              style: TextStyle(color: ENetColors.mint)),
+          ]),
+          style: TextStyle(
+            color: ENetColors.text,
+            fontSize: 34,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -1.2,
+            height: 1.1,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text('Ваша единая платформа для работы, автоматизации и ИИ',
+          style: TextStyle(color: ENetColors.muted, fontSize: 15)),
+        const SizedBox(height: 24),
+        _hero(false),
+        const SizedBox(height: 16),
+        _shortcutStrip(false),
+        const SizedBox(height: 16),
+        ServiceCatalogPanel(
+          auth: widget.auth,
+          dashboard: true,
+          onSeeAll: () => go(1),
+        ),
       ],
     );
-    });
   }
+
 
   Widget _shortcutStrip(bool compact) {
     final shortcuts = compact
