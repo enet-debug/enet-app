@@ -647,7 +647,7 @@ class _V07Plate extends StatelessWidget {
       child: Align(
         alignment: Alignment.topCenter,
         child: Padding(
-          padding: EdgeInsets.only(top: size * .10),
+          padding: EdgeInsets.only(top: size * .00),
           child: BrandLogo(size: size * .46, showName: false),
         ),
       ),
