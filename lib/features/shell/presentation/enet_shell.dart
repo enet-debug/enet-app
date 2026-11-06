@@ -473,16 +473,18 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Контент ─────────────────────────
 
   Widget _content(bool compact) {
-    final pad = compact ? 16.0 : MediaQuery.sizeOf(context).width >= 1360 ? 30.0 : 24.0;
+    final pad = compact ? (index == 0 ? 0.0 : 18.0) : 30.0;
     return Column(children: [
-      if (compact)
+      if (compact && index != 0)
         Padding(
           padding: EdgeInsets.fromLTRB(pad, 10, pad, 0),
           child: _topBar(compact),
         ),
       Expanded(
         child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(pad, compact ? 13 : 30, pad, 24),
+          padding: EdgeInsets.fromLTRB(pad,
+            compact && index == 0 ? 0 : compact ? 13 : 30,
+            pad, compact && index == 0 ? 100 : 24),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1260.0);
             return Align(
@@ -600,7 +602,30 @@ class _ENetShellState extends State<ENetShell> {
 
   // ───────────────────────── Главная ─────────────────────────
 
-  Widget _home(bool compact) => LayoutBuilder(builder: (context, constraints) {
+  Widget _home(bool compact) {
+    if (compact) {
+      return Column(
+        key: const ValueKey('home'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          MobileWelcomeScene(name: user.name, onOpenProfile: () => go(3)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _hero(true),
+                const SizedBox(height: 12),
+                _shortcutStrip(true),
+                const SizedBox(height: 24),
+                _mobileQuickAccess(),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+    return LayoutBuilder(builder: (context, constraints) {
     final split = !compact && constraints.maxWidth >= 710;
     final railWidth = constraints.maxWidth >= 1050 ? 340.0 : 250.0;
 
@@ -697,7 +722,8 @@ class _ENetShellState extends State<ENetShell> {
         _mobileQuickAccess(),
       ],
     );
-  });
+    });
+  }
 
   Widget _shortcutStrip(bool compact) {
     final shortcuts = compact
