@@ -177,11 +177,21 @@ class _ENetShellState extends State<ENetShell> {
         const SizedBox(height: 5),
         Align(
           alignment: Alignment.centerRight,
-          child: TextButton.icon(
-            onPressed: () => go(5),
-            icon: const Icon(Icons.devices_outlined, size: 16),
-            label: const Text('Управление сеансами',
-              style: TextStyle(fontSize: 11)),
+          child: Pressable(
+            onTap: () => go(5),
+            haptic: false,
+            builder: (context, hovered) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.devices_outlined,
+                  color: ENetColors.cyan, size: 16),
+                const SizedBox(width: 6),
+                Text('Управление сеансами',
+                  style: TextStyle(color: ENetColors.cyan,
+                    fontSize: 11, fontWeight: FontWeight.w600,
+                    decoration: hovered ? TextDecoration.underline : TextDecoration.none)),
+              ]),
+            ),
           ),
         ),
       ]),
@@ -775,7 +785,7 @@ class _ENetShellState extends State<ENetShell> {
       blur: 12,
       padding: const EdgeInsets.all(13),
       child: Row(children: [
-        const DashboardNebulaAvatar(size: 48),
+        ENetAvatar(name: user.name, size: 46),
         const SizedBox(width: 12),
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1105,10 +1115,12 @@ class _HomeShortcut extends StatelessWidget {
                   const SizedBox(height: 7),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: Text(data.title, maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: ENetColors.muted,
-                        fontSize: 10.5, fontWeight: FontWeight.w600)),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(data.title,
+                        maxLines: 1,
+                        style: const TextStyle(color: ENetColors.muted,
+                          fontSize: 10.5, fontWeight: FontWeight.w600))),
                   ),
                 ],
               )),
