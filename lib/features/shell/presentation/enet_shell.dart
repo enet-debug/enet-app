@@ -576,8 +576,9 @@ class _ENetShellState extends State<ENetShell> {
     ]),
   );
 
-  Widget _desktopTopBar() => Row(children: [
-    const Spacer(),
+  Widget _desktopTopBar() => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
     Pressable(
       key: const ValueKey('desktop-search'),
       onTap: _openSearch,
