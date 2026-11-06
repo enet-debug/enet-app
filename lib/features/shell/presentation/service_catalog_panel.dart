@@ -709,7 +709,7 @@ class _DashboardServiceTile extends StatelessWidget {
           backgroundColor: const Color(0xFF17443D),
           foregroundColor: ENetColors.text,
           side: BorderSide(color: ENetColors.mint.withValues(alpha: .23)),
-          minimumSize: Size(compact ? 84 : 106, compact ? 34 : 38),
+          minimumSize: Size(compact ? 84 : 95, compact ? 34 : 34),
           padding: EdgeInsets.symmetric(horizontal: compact ? 9 : 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           textStyle: TextStyle(
@@ -754,34 +754,34 @@ class _DashboardServiceTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 600;
     return Glass(
-      radius: 17,
+      radius: 14,
       blur: 11,
       shadow: false,
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 10 : 13,
-        vertical: compact ? 11 : 16,
+        vertical: compact ? 10 : 11,
       ),
       tint: color,
       child: Row(children: [
         Container(
-          width: compact ? 58 : 68,
-          height: compact ? 58 : 68,
+          width: compact ? 55 : 58,
+          height: compact ? 55 : 58,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [color.withValues(alpha: .95), color.withValues(alpha: .48)],
+              colors: [color.withValues(alpha: .85), color.withValues(alpha: .35)],
             ),
             boxShadow: [
               BoxShadow(
-                color: color.withValues(alpha: .18),
-                blurRadius: 16,
+                color: color.withValues(alpha: .32),
+                blurRadius: 22,
                 offset: const Offset(0, 5),
               ),
             ],
           ),
-          child: Icon(icon, color: Colors.white, size: compact ? 27 : 34),
+          child: Icon(icon, color: Colors.white, size: compact ? 25 : 30),
         ),
         SizedBox(width: compact ? 10 : 15),
         Expanded(child: Column(
