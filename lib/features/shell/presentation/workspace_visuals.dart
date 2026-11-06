@@ -534,9 +534,8 @@ class V07HeroIdCard extends StatelessWidget {
                 const Positioned.fill(
                   child: CustomPaint(painter: _V07StreakPainter())),
                 const Positioned(
-                  right: 17, top: 0, bottom: 0,
-                  child: Center(
-                    child: _V07Plate(size: 122)),
+                  right: 54, top: 12,
+                  child: _V07Plate(size: 252),
                 ),
               ] else
                 const Positioned(
@@ -659,49 +658,61 @@ class _V07StreakPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final w = size.width, h = size.height;
     final bounds = Offset.zero & size;
+    canvas.save();
+    canvas.clipRect(bounds);
 
-    // A diffuse emerald light behind the beveled badge from the reference.
-    final glow = Offset(w * .76, h * .3);
-    canvas.drawCircle(glow, w * .42, Paint()
-      ..shader = RadialGradient(
-        colors: [
-          ENetColors.mint.withValues(alpha: .38),
-          ENetColors.mint.withValues(alpha: .07),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromCircle(center: glow, radius: w * .42)));
+    final glow = Offset(w * .82, h * .35);
+    final radius = w * .48;
+    canvas.drawCircle(glow, radius, Paint()
+      ..shader = RadialGradient(colors: [
+        ENetColors.mint.withValues(alpha: .24),
+        const Color(0xFF0EC99A).withValues(alpha: .10),
+        Colors.transparent,
+      ]).createShader(Rect.fromCircle(center: glow, radius: radius)));
 
-    // The narrow luminous curve replaces the flat straight strokes.
-    final ribbon = Path()
-      ..moveTo(w * .98, -h * .26)
-      ..cubicTo(w * .84, h * .20, w * .66, h * .13, w * .61, h * .49)
-      ..cubicTo(w * .56, h * .76, w * .76, h * 1.12, w * 1.02, h * .77);
-    for (final (double width, double opacity, double blur) in [
-      (h * .31, .15, 23.0),
-      (h * .17, .24, 11.0),
-      (h * .08, .33, 5.0),
-    ]) {
-      canvas.drawPath(ribbon, Paint()
+    // Two *open* crossing ribbons, like the diagonals in the approved mockup.
+    // The former curve returned to its start and formed an unrelated oval.
+    final primary = Path()
+      ..moveTo(w * 1.11, -h * .76)
+      ..cubicTo(w * .87, h * .14, w * .74, h * .14, w * .64, h * .56)
+      ..cubicTo(w * .53, h * .99, w * .48, h * 1.20, w * .43, h * 1.40);
+    final secondary = Path()
+      ..moveTo(w * 1.17, -h * .07)
+      ..cubicTo(w * 1.05, h * .43, w * .83, h * .76, w * .69, h * 1.34);
+
+    for (final path in [primary, secondary]) {
+      canvas.drawPath(path, Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = width
-        ..color = ENetColors.mint.withValues(alpha: opacity)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, blur));
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = h * .72
+        ..color = const Color(0xFF16FFD0).withValues(alpha: .14)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 33));
+      canvas.drawPath(path, Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = h * .29
+        ..color = const Color(0xFF28F5B3).withValues(alpha: .17)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 17));
     }
-    canvas.drawPath(ribbon, Paint()
+    canvas.drawPath(primary, Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = h * .075
+      ..strokeWidth = h * .18
       ..shader = const LinearGradient(
         begin: Alignment.topRight, end: Alignment.bottomLeft,
-        stops: [0, .3, .72, 1],
         colors: [
-          Color(0x0077FFC6), Color(0xCC2DFFB1),
-          Color(0xEE72FFD4), Color(0x0036E39B),
+          Color(0x001AEDA9), Color(0x7743FFDC),
+          Color(0xBB16DCA5), Color(0x0024B489),
         ],
       ).createShader(bounds));
-    canvas.drawPath(ribbon, Paint()
+    canvas.drawPath(primary, Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.8
-      ..color = const Color(0xFFDEFFF0).withValues(alpha: .86));
+      ..strokeWidth = 1.4
+      ..color = const Color(0xFFC4FFE7).withValues(alpha: .38));
+    canvas.drawPath(secondary, Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = h * .10
+      ..color = const Color(0xFF0CE4A5).withValues(alpha: .15));
+    canvas.restore();
   }
 
   @override
