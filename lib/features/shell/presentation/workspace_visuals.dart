@@ -547,8 +547,8 @@ class V07HeroIdCard extends StatelessWidget {
                 const Positioned.fill(
                   child: CustomPaint(painter: _V07StreakPainter())),
                 const Positioned(
-                  right: 54, top: 14,
-                  child: _V07Plate(size: 252),
+                  right: 79, top: 13,
+                  child: _V07Plate(size: 224),
                 ),
               ] else
                 const Positioned(
@@ -699,13 +699,13 @@ class _V07StreakPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeWidth = h * .72
-        ..color = const Color(0xFF16FFD0).withValues(alpha: .14)
+        ..color = const Color(0xFF16FFD0).withValues(alpha: .22)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 33));
       canvas.drawPath(path, Paint()
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
         ..strokeWidth = h * .29
-        ..color = const Color(0xFF28F5B3).withValues(alpha: .17)
+        ..color = const Color(0xFF28F5B3).withValues(alpha: .23)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 17));
     }
     canvas.drawPath(primary, Paint()
