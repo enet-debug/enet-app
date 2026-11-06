@@ -254,13 +254,30 @@ class MobileWelcomeScene extends StatelessWidget {
         width: double.infinity,
         child: Stack(fit: StackFit.expand, children: [
           const CustomPaint(painter: _MobileMountainPainter()),
-          Positioned.fill(child: Image.asset(
-            'assets/brand/approved_mobile_mountains.jpg',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
-            gaplessPlayback: true,
-            errorBuilder: (context, error, stackTrace) =>
-              const SizedBox.expand(),
+          // The approved mountain asset already contains the mint e symbol.
+          // Blend it with the vector sky so it sits at reference height.
+          Positioned.fill(child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0, .09, .14, 1],
+              colors: [
+                Colors.transparent, Colors.transparent,
+                Colors.white, Colors.white,
+              ],
+            ).createShader(bounds),
+            blendMode: BlendMode.dstIn,
+            child: Transform.translate(
+              offset: const Offset(0, 36),
+              child: Image.asset(
+                'assets/brand/approved_mobile_mountains.jpg',
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+                gaplessPlayback: true,
+                errorBuilder: (context, error, stackTrace) =>
+                  const SizedBox.expand(),
+              ),
+            ),
           )),
           Positioned(
             left: 18, right: 18, bottom: 44,
