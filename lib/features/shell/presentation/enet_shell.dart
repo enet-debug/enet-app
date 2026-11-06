@@ -181,33 +181,25 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Навигация ─────────────────────────
 
   Widget _sidebar() {
-    const itemHeight = 40.0;
-    const gap = 4.0;
+    const itemHeight = 44.0;
+    const gap = 3.0;
     return Glass(
-      radius: 19,
-      blur: 14,
-      tint: const Color(0xFF001512),
-      strength: 4,
-      padding: const EdgeInsets.fromLTRB(15, 20, 15, 15),
+      radius: 26,
+      padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
-          padding: EdgeInsets.only(left: 5),
-          child: FittedBox(
-            alignment: Alignment.centerLeft,
-            fit: BoxFit.scaleDown,
-            child: Row(children: [
-              BrandLogo(size: 38),
-              SizedBox(width: 5),
-              Text('APP', style: TextStyle(
-                color: ENetColors.text, fontSize: 11,
-                fontWeight: FontWeight.w800, letterSpacing: 1.1)),
+          padding: EdgeInsets.only(left: 6, bottom: 22),
+          child: Row(children: [
+            BrandLogo(size: 46, showName: false),
+            SizedBox(width: 12),
+            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('eNet', style: TextStyle(color: ENetColors.text,
+                fontSize: 22, fontWeight: FontWeight.w800,
+                letterSpacing: -.6)),
+              Text('v0.8.0', style: TextStyle(
+                color: ENetColors.muted, fontSize: 12)),
             ]),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(left: 8, top: 2, bottom: 25),
-          child: Text('v0.8.0', style: TextStyle(
-            color: ENetColors.faint, fontSize: 10, letterSpacing: .7)),
+          ]),
         ),
         SizedBox(
           height: desktopItems.length * (itemHeight + gap),
@@ -220,7 +212,7 @@ class _ENetShellState extends State<ENetShell> {
                 left: 0, right: 0, height: itemHeight,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft, end: Alignment.centerRight,
                       colors: [Color(0xFF0FAF87), Color(0xFF0A5D51)]),
@@ -376,9 +368,9 @@ class _ENetShellState extends State<ENetShell> {
   }
 
   Widget _tabBar() => Glass(
-    radius: 23, blur: 14, strength: .9,
-    padding: const EdgeInsets.all(5),
-    child: SizedBox(height: 58, child: Row(children: [
+    radius: 32, blur: 34, strength: 1.3,
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: SizedBox(height: 66, child: Row(children: [
       for (final destination in mobileItems)
         Expanded(child: Pressable(
           key: ValueKey(destination.index == -2
@@ -389,16 +381,16 @@ class _ENetShellState extends State<ENetShell> {
           builder: (context, hovered) => Center(
             child: destination.index == -2
               ? Container(
-                  width: 46, height: 46,
+                  width: 54, height: 54,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: ENetColors.mint,
+                    gradient: ENetColors.mintGradient,
                     boxShadow: [BoxShadow(
-                      color: ENetColors.mint.withValues(alpha: .35),
-                      blurRadius: 17, spreadRadius: 1)],
+                      color: ENetColors.mint.withValues(alpha: .42),
+                      blurRadius: 22)],
                   ),
                   child: const Icon(Icons.add_rounded,
-                    color: ENetColors.onAccent, size: 29),
+                    color: ENetColors.onAccent, size: 32),
                 )
               : Container(
                   width: 46, height: 46,
