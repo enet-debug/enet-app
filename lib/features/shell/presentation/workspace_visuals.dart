@@ -250,7 +250,7 @@ class MobileWelcomeScene extends StatelessWidget {
     child: InkWell(
       onTap: onOpenProfile,
       child: SizedBox(
-        height: 250,
+        height: 312,
         width: double.infinity,
         child: Stack(fit: StackFit.expand, children: [
           const CustomPaint(painter: _MobileMountainPainter()),
@@ -263,11 +263,11 @@ class MobileWelcomeScene extends StatelessWidget {
               const SizedBox.expand(),
           )),
           const Positioned(
-            top: 22, left: 0, right: 0,
+            top: 42, left: 0, right: 0,
             child: Center(child: BrandLogo(size: 62, showName: false)),
           ),
           Positioned(
-            left: 18, right: 18, bottom: 14,
+            left: 18, right: 18, bottom: 30,
             child: Text.rich(
               TextSpan(children: [
                 const TextSpan(text: 'Добро пожаловать,\n'),
@@ -504,7 +504,7 @@ class V07HeroIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = compact ? 104.0 : 148.0;
+    final height = compact ? 110.0 : 148.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
