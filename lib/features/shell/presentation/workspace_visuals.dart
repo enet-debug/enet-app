@@ -256,11 +256,11 @@ class MobileWelcomeScene extends StatelessWidget {
           const CustomPaint(painter: _MobileMountainPainter()),
           // The approved mountain asset already contains the mint e symbol.
           // Blend it with the vector sky so it sits at reference height.
-          Positioned.fill(child: ShaderMask(
+          Positioned.fill(child: ClipRect(child: ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              stops: [0, .09, .14, 1],
+              stops: [0, .165, .22, 1],
               colors: [
                 Colors.transparent, Colors.transparent,
                 Colors.white, Colors.white,
@@ -278,7 +278,7 @@ class MobileWelcomeScene extends StatelessWidget {
                   const SizedBox.expand(),
               ),
             ),
-          )),
+          ))),
           Positioned(
             left: 18, right: 18, bottom: 44,
             child: Text.rich(
