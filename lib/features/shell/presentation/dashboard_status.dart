@@ -4,13 +4,9 @@ import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/glass.dart';
 import '../../auth/application/auth_controller.dart';
 
-/// Live API status for the dashboard. No fabricated database or cloud metrics.
+/// The eNet 0.7 SystemStatusCard, backed by the current live API.
 class DashboardStatus extends StatefulWidget {
-  const DashboardStatus({
-    super.key,
-    required this.auth,
-  });
-
+  const DashboardStatus({super.key, required this.auth});
   final AuthController auth;
 
   @override
@@ -31,120 +27,94 @@ class _DashboardStatusState extends State<DashboardStatus> {
   Future<void> _check() async {
     if (!mounted) return;
     setState(() => _checking = true);
-    final timer = Stopwatch()..start();
-    final result = await widget.auth.checkServer();
-    timer.stop();
+    final watch = Stopwatch()..start();
+    var online = false;
+    try {
+      online = await widget.auth.checkServer();
+    } catch (_) {
+      // An unavailable API is an offline state, never a blank card.
+    }
+    watch.stop();
     if (!mounted) return;
     setState(() {
       _checking = false;
-      _online = result;
-      _responseMs = result ? timer.elapsedMilliseconds : null;
+      _online = online;
+      _responseMs = online ? watch.elapsedMilliseconds : null;
     });
   }
 
   @override
-  Widget build(BuildContext context) => Glass(
-    radius: 17,
-    blur: 12,
-    padding: const EdgeInsets.fromLTRB(13, 11, 13, 9),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Row(children: [
-        const Expanded(child: Text('Состояние сервисов', style: TextStyle(
-          color: ENetColors.text,
-          fontSize: 11,
-          fontWeight: FontWeight.w800,
-          letterSpacing: .7,
-        ))),
-        const Icon(Icons.signal_cellular_alt_rounded,
-          color: ENetColors.cyan, size: 19),
-      ]),
-      const SizedBox(height: 10),
-      Row(children: [
-        AnimatedContainer(
-          duration: ENetMotion.medium,
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _checking
-              ? ENetColors.muted
-              : _online ? ENetColors.mint : ENetColors.danger,
-            boxShadow: [
-              BoxShadow(
-                color: (_checking
-                  ? ENetColors.muted
-                  : _online ? ENetColors.mint : ENetColors.danger)
-                  .withValues(alpha: .38),
-                blurRadius: 10,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 9),
-        const Expanded(child: Text('eNet API', style: TextStyle(
-          color: ENetColors.text, fontSize: 12,
-          fontWeight: FontWeight.w700,
-        ))),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-          decoration: BoxDecoration(
-            color: (_checking ? ENetColors.muted
-              : _online ? ENetColors.mint : ENetColors.danger)
-              .withValues(alpha: .14),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            _checking ? 'Проверка' : _online ? 'Работает' : 'Нет связи',
-            style: TextStyle(
-              color: _checking ? ENetColors.muted
-                : _online ? ENetColors.mint : ENetColors.danger,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final color = _checking ? ENetColors.muted :
+      _online ? ENetColors.mint : ENetColors.danger;
+    final headline = _checking ? 'Проверяем систему' :
+      _online ? 'Система работает' : 'Есть проблемы';
+    return Glass(
+      radius: 22,
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          AnimatedContainer(
+            duration: ENetMotion.medium,
+            width: 10, height: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: [BoxShadow(
+                color: color.withValues(alpha: .55), blurRadius: 10)],
             ),
           ),
-        ),
-      ]),
-      const SizedBox(height: 5),
-      Text(
-        _checking
-          ? 'Проверяем соединение с сервером'
-          : _online
-            ? 'Время ответа: ${_responseMs ?? 0} мс'
-            : 'Сервер не отвечает',
-        style: const TextStyle(color: ENetColors.muted, fontSize: 10.5),
-      ),
-      const SizedBox(height: 9),
-      const Divider(height: 12, color: ENetColors.border),
-      const Row(children: [
-        Icon(Icons.storage_outlined, color: ENetColors.muted, size: 15),
-        SizedBox(width: 7),
-        Expanded(child: Text('База данных', style: TextStyle(
-          color: ENetColors.muted, fontSize: 10.5))),
-        Text('Не проверено', style: TextStyle(
-          color: ENetColors.faint, fontSize: 9.5)),
-      ]),
-      const SizedBox(height: 8),
-      const Row(children: [
-        Icon(Icons.cloud_outlined, color: ENetColors.muted, size: 15),
-        SizedBox(width: 7),
-        Expanded(child: Text('eNet Cloud', style: TextStyle(
-          color: ENetColors.muted, fontSize: 10.5))),
-        Text('Не подключено', style: TextStyle(
-          color: ENetColors.faint, fontSize: 9.5)),
-      ]),
-      const SizedBox(height: 7),
-      Align(
-        alignment: Alignment.centerRight,
-        child: TextButton(
-          onPressed: _checking ? null : _check,
-          style: TextButton.styleFrom(
-            foregroundColor: ENetColors.cyan,
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            visualDensity: VisualDensity.compact,
+          const SizedBox(width: 10),
+          Expanded(child: AnimatedSwitcher(
+            duration: ENetMotion.quick,
+            child: Text(headline, key: ValueKey(headline),
+              style: const TextStyle(
+                color: ENetColors.text,
+                fontSize: 14.5, fontWeight: FontWeight.w700)),
+          )),
+          Icon(Icons.signal_cellular_alt_rounded, size: 20, color: color),
+        ]),
+        const SizedBox(height: 13),
+        _line(Icons.dns_outlined, 'eNet API',
+          _checking ? 'Проверка' : _online ? 'Работает' : 'Нет связи', color),
+        const SizedBox(height: 5),
+        Text(
+          _checking ? 'Проверяем соединение с сервером' :
+          _online ? 'Время ответа: \${_responseMs ?? 0} мс' :
+          'Сервер не отвечает',
+          style: const TextStyle(color: ENetColors.faint, fontSize: 10.5)),
+        _line(Icons.fingerprint_rounded, 'eNet ID',
+          widget.auth.user == null ? 'Нет сеанса' : 'Сеанс активен',
+          widget.auth.user == null ? ENetColors.muted : ENetColors.mint),
+        _line(Icons.info_outline_rounded, 'Приложение',
+          'v0.8.0', ENetColors.muted),
+        const SizedBox(height: 8),
+        Align(alignment: Alignment.centerRight,
+          child: TextButton(
+            onPressed: _checking ? null : _check,
+            style: TextButton.styleFrom(
+              foregroundColor: ENetColors.cyan,
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2)),
+            child: const Text('Проверить',
+              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
           ),
-          child: const Text('Проверить', style: TextStyle(fontFamily: 'Roboto', fontSize: 10.5)),
         ),
-      ),
-    ]),
-  );
+      ]),
+    );
+  }
+
+  Widget _line(IconData icon, String label, String value, Color color) =>
+    Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(children: [
+        Icon(icon, size: 16, color: ENetColors.muted),
+        const SizedBox(width: 9),
+        Text(label, style: const TextStyle(
+          color: ENetColors.muted, fontSize: 12.5)),
+        const Spacer(),
+        Text(value, style: TextStyle(
+          color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+      ]),
+    );
 }
