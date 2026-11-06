@@ -3,24 +3,24 @@ import 'package:flutter/material.dart';
 
 /// Палитра eNet 0.7: глубокий изумрудный фон и мятные акценты.
 abstract final class ENetColors {
-  static const background = Color(0xFF06110F);
-  static const surface = Color(0xFF0D201B);
-  static const surfaceRaised = Color(0xFF163128);
-  static const border = Color(0x335FCBA2);
-  static const cyan = Color(0xFF86F3C8);
-  static const blue = Color(0xFF2FBA90);
+  static const background = Color(0xFF031A1C);
+  static const surface = Color(0xFF07282A);
+  static const surfaceRaised = Color(0xFF124039);
+  static const border = Color(0x5540EAC2);
+  static const cyan = Color(0xFF38F9D0);
+  static const blue = Color(0xFF11BEAD);
   static const violet = Color(0xFF77CFC0);
-  static const mint = Color(0xFF55E5B0);
+  static const mint = Color(0xFF25F5B5);
   static const danger = Color(0xFFFF8892);
   static const text = Color(0xFFF4FFF9);
-  static const muted = Color(0xFFA5C0B3);
-  static const faint = Color(0xFF779B8B);
-  static const onAccent = Color(0xFF06221A);
+  static const muted = Color(0xFFB1CAC6);
+  static const faint = Color(0xFF719F98);
+  static const onAccent = Color(0xFF042522);
 
   static const accent = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF9AF6D0), Color(0xFF38C994)],
+    colors: [Color(0xFF5AFFF0), Color(0xFF13DEA3)],
   );
   static const violetGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -30,7 +30,7 @@ abstract final class ENetColors {
   static const mintGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFA6F8D1), Color(0xFF28AC79)],
+    colors: [Color(0xFF69FFE2), Color(0xFF11C990)],
   );
   static const amberGradient = LinearGradient(
     begin: Alignment.topLeft,
