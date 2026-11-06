@@ -50,8 +50,8 @@ class _DashboardStatusState extends State<DashboardStatus> {
     final headline = _checking ? 'Проверяем систему' :
       _online ? 'Система работает' : 'Есть проблемы';
     return Glass(
-      radius: 22,
-      padding: const EdgeInsets.all(16),
+      radius: 16,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Row(children: [
           AnimatedContainer(
@@ -74,10 +74,10 @@ class _DashboardStatusState extends State<DashboardStatus> {
           )),
           Icon(Icons.signal_cellular_alt_rounded, size: 20, color: color),
         ]),
-        const SizedBox(height: 13),
+        const SizedBox(height: 9),
         _line(Icons.dns_outlined, 'eNet API',
           _checking ? 'Проверка' : _online ? 'Работает' : 'Нет связи', color),
-        const SizedBox(height: 5),
+        const SizedBox(height: 3),
         Text(
           _checking ? 'Проверяем соединение с сервером' :
           _online ? 'Время ответа: ${_responseMs ?? 0} мс' :
@@ -88,14 +88,14 @@ class _DashboardStatusState extends State<DashboardStatus> {
           widget.auth.user == null ? ENetColors.muted : ENetColors.mint),
         _line(Icons.info_outline_rounded, 'Приложение',
           'v0.8.0', ENetColors.muted),
-        const SizedBox(height: 8),
+        const SizedBox(height: 3),
         Align(alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: _checking ? null : _check,
             style: TextButton.styleFrom(
               foregroundColor: ENetColors.cyan,
               visualDensity: VisualDensity.compact,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2)),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0)),
             child: const Text('Проверить',
               style: TextStyle(fontFamily: 'Roboto', fontSize: 11.5,
                 fontWeight: FontWeight.w600)),
@@ -107,7 +107,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
 
   Widget _line(IconData icon, String label, String value, Color color) =>
     Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 7),
       child: Row(children: [
         Icon(icon, size: 16, color: ENetColors.muted),
         const SizedBox(width: 9),
