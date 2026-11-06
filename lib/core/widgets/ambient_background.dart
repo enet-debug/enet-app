@@ -72,8 +72,8 @@ class _AuroraPainter extends CustomPainter {
 
     // (цвет, x, y, радиус, обороты за цикл, фаза, прозрачность)
     final blobs = <(Color, double, double, double, int, double, double)>[
-      (ENetColors.mint, .94, .06, .64, 1, .00, .29),
-      (const Color(0xFF00A879), .02, .88, .60, 2, .33, .17),
+      (ENetColors.mint, .94, .06, .64, 1, .00, .34),
+      (const Color(0xFF00E8B3), .02, .88, .60, 2, .33, .22),
       (ENetColors.cyan, .48, 1.02, .46, 1, .66, .19),
     ];
     for (final (color, bx, by, rf, k, phase, alpha) in blobs) {
@@ -92,6 +92,9 @@ class _AuroraPainter extends CustomPainter {
       );
     }
 
+    // The desktop uses the luminous orbital motif from the reference.
+    // On phones the mountain artwork is the hero; avoid drawing orbits across content.
+    if (w >= 820) {
     // A faint emerald sweep remains visible around the app frame,
     // echoing the ribbon used by the original dashboard reference.
     final sweep = Path()
@@ -132,6 +135,7 @@ class _AuroraPainter extends CustomPainter {
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
     canvas.drawCircle(p, 3, Paint()..color = ENetColors.cyan);
+    }
   }
 
   @override
