@@ -211,18 +211,21 @@ class _ENetShellState extends State<ENetShell> {
                     child: _tabBar(),
                   ),
                 ])
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: SizedBox(width: 252, child: _sidebar()),
-                    ),
-                    Expanded(child: _content(false)),
-                    if (MediaQuery.sizeOf(context).width >= 1180)
-                      SizedBox(width: 316, child: _rightPanel()),
-                  ],
-                ),
+              : Column(children: [
+                  _desktopChrome(),
+                  Expanded(child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                        child: SizedBox(width: 252, child: _sidebar()),
+                      ),
+                      Expanded(child: _content(false)),
+                      if (MediaQuery.sizeOf(context).width >= 1180)
+                        SizedBox(width: 316, child: _rightPanel()),
+                    ],
+                  )),
+                ]),
         ),
       ),
         ),
@@ -516,11 +519,6 @@ class _ENetShellState extends State<ENetShell> {
           padding: EdgeInsets.fromLTRB(pad, 10, pad, 0),
           child: _topBar(compact),
         ),
-      if (!compact)
-        Padding(
-          padding: const EdgeInsets.fromLTRB(30, 20, 30, 0),
-          child: _desktopTopBar(),
-        ),
       Expanded(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(pad,
@@ -552,6 +550,31 @@ class _ENetShellState extends State<ENetShell> {
       ),
     ]);
   }
+
+  /// Slim application chrome from the approved desktop reference. It remains
+  /// inside Flutter, so no fake native close/minimize buttons are displayed.
+  Widget _desktopChrome() => Container(
+    key: const ValueKey('enet-desktop-chrome'),
+    height: 52,
+    padding: const EdgeInsets.symmetric(horizontal: 23),
+    decoration: BoxDecoration(
+      color: const Color(0xFF061713).withValues(alpha: .88),
+      border: Border(bottom: BorderSide(
+        color: ENetColors.mint.withValues(alpha: .17))),
+    ),
+    child: Row(children: [
+      const BrandLogo(size: 27, showName: false),
+      const SizedBox(width: 11),
+      const Text('eNet APP',
+        style: TextStyle(color: ENetColors.text,
+          fontSize: 15, fontWeight: FontWeight.w800)),
+      const SizedBox(width: 18),
+      Container(width: 1, height: 22,
+        color: ENetColors.mint.withValues(alpha: .24)),
+      const Expanded(child: SizedBox()),
+      _desktopTopBar(),
+    ]),
+  );
 
   Widget _desktopTopBar() => Row(children: [
     const Spacer(),
