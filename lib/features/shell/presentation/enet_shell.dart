@@ -392,7 +392,13 @@ class _ENetShellState extends State<ENetShell> {
     padding: const EdgeInsets.symmetric(horizontal: 8),
     child: SizedBox(height: 66, child: Row(children: [
       for (final destination in mobileItems)
-        Expanded(child: Pressable(
+        Expanded(child: Tooltip(
+          message: destination.index == 2
+            ? (_unreadCount ?? 0) > 0
+              ? 'Уведомления: $_unreadCount непрочитанных'
+              : 'Открыть уведомления'
+            : destination.label,
+          child: Pressable(
           key: ValueKey(destination.index == -2
             ? 'mobile-action-create' : 'mobile-nav-${destination.index}'),
           onTap: destination.index == -2
@@ -426,7 +432,7 @@ class _ENetShellState extends State<ENetShell> {
                     selected: destination.index == index, size: 23),
                 ),
           ),
-        )),
+        ))),
     ])),
   );
 
@@ -504,7 +510,9 @@ class _ENetShellState extends State<ENetShell> {
     ),
     const SizedBox(width: 10),
     IconButton(
-      tooltip: 'Уведомления',
+      tooltip: (_unreadCount ?? 0) > 0
+        ? 'Уведомления: $_unreadCount непрочитанных'
+        : 'Открыть уведомления',
       onPressed: () => go(2),
       icon: Badge(
         isLabelVisible: (_unreadCount ?? 0) > 0,
