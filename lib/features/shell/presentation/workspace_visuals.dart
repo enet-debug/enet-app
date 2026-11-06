@@ -262,12 +262,8 @@ class MobileWelcomeScene extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) =>
               const SizedBox.expand(),
           )),
-          const Positioned(
-            top: 42, left: 0, right: 0,
-            child: Center(child: BrandLogo(size: 62, showName: false)),
-          ),
           Positioned(
-            left: 18, right: 18, bottom: 72,
+            left: 18, right: 18, bottom: 44,
             child: Text.rich(
               TextSpan(children: [
                 const TextSpan(text: 'Добро пожаловать,\n'),
