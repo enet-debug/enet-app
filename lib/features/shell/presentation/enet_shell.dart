@@ -675,71 +675,85 @@ class _ENetShellState extends State<ENetShell> {
   }
 
   Widget _mobileQuickAccess() => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
       const Text('Быстрый доступ', style: TextStyle(
-        color: ENetColors.text, fontSize: 16, fontWeight: FontWeight.w800)),
+        color: ENetColors.text,
+        fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -.3)),
       const SizedBox(height: 10),
-      Pressable(onTap: () => go(1), haptic: false,
-        builder: (context, hovered) => Container(
+      Pressable(
+        onTap: () => go(1),
+        haptic: false,
+        pressedScale: .98,
+        builder: (context, hovered) => Glass(
+          radius: 18, blur: 16, strength: hovered ? 1.6 : 1,
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(17),
-            gradient: const LinearGradient(colors: [
-              Color(0xFF123A38), Color(0xFF071D20)]),
-            border: Border.all(color: ENetColors.mint.withValues(
-              alpha: hovered ? .63 : .24)),
-          ),
           child: Row(children: [
-            Container(width: 50, height: 50,
+            Container(
+              width: 48, height: 48,
               decoration: BoxDecoration(
-                gradient: ENetColors.violetGradient,
-                borderRadius: BorderRadius.circular(14)),
-              child: const Icon(Icons.shopping_bag_outlined, color: Colors.white)),
-            const SizedBox(width: 12),
+                borderRadius: BorderRadius.circular(14),
+                gradient: LinearGradient(colors: [
+                  const Color(0xFF8B6CF6).withValues(alpha: .9),
+                  const Color(0xFF8B6CF6).withValues(alpha: .45),
+                ]),
+              ),
+              child: const Icon(Icons.shopping_bag_outlined,
+                color: Colors.white, size: 25),
+            ),
+            const SizedBox(width: 13),
             const Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Продайзер', style: TextStyle(color: ENetColors.text,
-                  fontSize: 15, fontWeight: FontWeight.w800)),
-                SizedBox(height: 4),
+                Text('Продайзер', maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: ENetColors.text,
+                    fontSize: 15.5, fontWeight: FontWeight.w700)),
+                SizedBox(height: 3),
                 Text('Создание объявлений с помощью ИИ',
-                  style: TextStyle(color: ENetColors.muted, fontSize: 11)),
-              ])),
-            const Icon(Icons.chevron_right_rounded, color: ENetColors.cyan),
+                  maxLines: 2,
+                  style: TextStyle(color: ENetColors.muted,
+                    fontSize: 12, height: 1.4)),
+              ],
+            )),
+            const Icon(Icons.chevron_right_rounded, color: ENetColors.muted),
           ]),
-        )),
+        ),
+      ),
     ],
   );
 
+  // eNet 0.7 BalanceCard geometry, but no invented revenue or credits.
   Widget _balancePreviewCard() => Glass(
-    radius: 17, blur: 12,
-    padding: const EdgeInsets.fromLTRB(16, 16, 16, 13),
+    radius: 20,
+    padding: const EdgeInsets.all(16),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('Баланс', style: TextStyle(
-        color: ENetColors.text, fontSize: 13, fontWeight: FontWeight.w700)),
-      const SizedBox(height: 15),
+        color: ENetColors.text, fontSize: 14.5,
+        fontWeight: FontWeight.w700)),
+      const SizedBox(height: 10),
       Row(children: [
-        const Expanded(child: Text('Нет данных', maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: ENetColors.text,
-            fontSize: 20, fontWeight: FontWeight.w800))),
-        Tooltip(
-          message: 'Подключение платежей ещё не завершено',
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              color: ENetColors.mint.withValues(alpha: .12),
-              border: Border.all(
-                color: ENetColors.mint.withValues(alpha: .28)),
-            ),
-            child: const Text('Скоро', style: TextStyle(
-              color: ENetColors.cyan, fontSize: 10, fontWeight: FontWeight.w700)),
+        const Expanded(child: FittedBox(
+          alignment: Alignment.centerLeft, fit: BoxFit.scaleDown,
+          child: Text('Нет данных', style: TextStyle(
+            color: ENetColors.text, fontSize: 27,
+            fontWeight: FontWeight.w800, letterSpacing: -.8)),
+        )),
+        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: ENetColors.mint.withValues(alpha: .13),
+            border: Border.all(
+              color: ENetColors.mint.withValues(alpha: .28)),
           ),
+          child: const Text('Скоро', style: TextStyle(
+            color: ENetColors.cyan, fontSize: 12.5,
+            fontWeight: FontWeight.w800)),
         ),
       ]),
-      const SizedBox(height: 13),
-      const Text('Пополнение пока недоступно',
-        style: TextStyle(color: ENetColors.muted, fontSize: 11)),
+      const SizedBox(height: 10),
+      const Text('Платёжный сервис ещё не подключён',
+        style: TextStyle(color: ENetColors.muted, fontSize: 12)),
     ]),
   );
 
