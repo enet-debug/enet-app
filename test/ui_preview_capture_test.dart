@@ -154,6 +154,34 @@ void main() {
     await _saveCapture(tester, 'enet-login-desktop');
   });
 
+  // Render the home page in the same aspect ratio as the supplied 0.7
+  // desktop window. This is an actual Flutter viewport, not a resized mockup.
+  testWidgets('Capture desktop home at reference window aspect ratio',
+      (tester) async {
+    if (Platform.environment['ENET_CAPTURE_UI'] != '1') return;
+    tester.view.physicalSize = const Size(1440, 790);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(RepaintBoundary(
+      key: _captureKey,
+      child: ENetApp(authRepository: _PreviewRepository()),
+    ));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.runAsync(() async {
+      await precacheImage(
+        const AssetImage('assets/brand/approved_hero_graphic.jpg'),
+        tester.element(find.byKey(const ValueKey('workspace-hero'))),
+      );
+    });
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('Мои сервисы'), findsOneWidget);
+    await _saveCapture(tester, 'enet-home-desktop-reference-aspect');
+  });
+
   for (final size in [const Size(1440, 900), const Size(390, 844)]) {
     testWidgets('Capture actual workspace and profile at $size',
         (tester) async {
