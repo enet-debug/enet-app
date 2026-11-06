@@ -581,44 +581,61 @@ class _ENetShellState extends State<ENetShell> {
   Widget _desktopTopBar() => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-    Pressable(
-      key: const ValueKey('desktop-search'),
-      onTap: _openSearch,
-      haptic: false,
-      builder: (context, hovered) => AnimatedContainer(
-        duration: ENetMotion.quick,
-        height: 40,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: hovered ? .09 : .05),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withValues(alpha: .09)),
+      Tooltip(
+        message: 'Поиск по приложению (Ctrl+K)',
+        child: Pressable(
+          key: const ValueKey('desktop-search'),
+          onTap: _openSearch,
+          haptic: false,
+          builder: (context, hovered) => AnimatedContainer(
+            duration: ENetMotion.quick,
+            width: 36,
+            height: 34,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: hovered ? .12 : .035),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: ENetColors.mint.withValues(alpha: .14)),
+            ),
+            child: const Icon(Icons.search_rounded,
+              size: 19, color: ENetColors.muted),
+          ),
         ),
-        child: const Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.search_rounded, size: 18, color: ENetColors.muted),
-          SizedBox(width: 10),
-          Text('Поиск по приложению',
-            style: TextStyle(color: ENetColors.muted, fontSize: 13.5)),
-          SizedBox(width: 14),
-          Icon(Icons.arrow_forward_rounded,
-            color: ENetColors.faint, size: 15),
+      ),
+      const SizedBox(width: 4),
+      IconButton(
+        tooltip: (_unreadCount ?? 0) > 0
+          ? 'Уведомления: $_unreadCount непрочитанных'
+          : 'Открыть уведомления',
+        onPressed: () => go(2),
+        icon: Badge(
+          isLabelVisible: (_unreadCount ?? 0) > 0,
+          backgroundColor: ENetColors.mint,
+          child: const Icon(Icons.notifications_none_rounded,
+            color: ENetColors.cyan, size: 20),
+        ),
+      ),
+      const SizedBox(width: 12),
+      // Small decorative reference lights, not fake window-control buttons.
+      ExcludeSemantics(
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          for (final color in const [
+            Color(0xFF25F5A4), Color(0xFFFFC342), Color(0xFFF35960),
+          ]) ...[
+            Container(
+              width: 10, height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: color,
+                boxShadow: [BoxShadow(color: color.withValues(alpha: .28),
+                  blurRadius: 8)],
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
         ]),
       ),
-    ),
-    const SizedBox(width: 10),
-    IconButton(
-      tooltip: (_unreadCount ?? 0) > 0
-        ? 'Уведомления: $_unreadCount непрочитанных'
-        : 'Открыть уведомления',
-      onPressed: () => go(2),
-      icon: Badge(
-        isLabelVisible: (_unreadCount ?? 0) > 0,
-        backgroundColor: ENetColors.mint,
-        child: const Icon(Icons.notifications_none_rounded,
-          color: ENetColors.cyan, size: 21),
-      ),
-    ),
-  ]);
+    ],
+  );
 
   Widget _topBar(bool compact) {
     return Row(children: [
