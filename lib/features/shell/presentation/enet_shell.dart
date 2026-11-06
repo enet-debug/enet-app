@@ -174,6 +174,16 @@ class _ENetShellState extends State<ENetShell> {
         DashboardStatus(auth: widget.auth),
         const SizedBox(height: 12),
         _quickActionsCard(),
+        const SizedBox(height: 5),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton.icon(
+            onPressed: () => go(5),
+            icon: const Icon(Icons.devices_outlined, size: 16),
+            label: const Text('Управление сеансами',
+              style: TextStyle(fontSize: 11)),
+          ),
+        ),
       ]),
     ),
   );
