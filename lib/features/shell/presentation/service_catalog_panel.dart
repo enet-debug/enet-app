@@ -761,7 +761,8 @@ class _DashboardServiceTile extends StatelessWidget {
         horizontal: compact ? 10 : 13,
         vertical: compact ? 10 : 11,
       ),
-      tint: color,
+      tint: ENetColors.mint,
+      strength: .82,
       child: Row(children: [
         Container(
           width: compact ? 55 : 58,
@@ -771,11 +772,11 @@ class _DashboardServiceTile extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [color.withValues(alpha: .85), color.withValues(alpha: .35)],
+              colors: [color.withValues(alpha: .98), color.withValues(alpha: .48)],
             ),
             boxShadow: [
               BoxShadow(
-                color: color.withValues(alpha: .32),
+                color: color.withValues(alpha: .36),
                 blurRadius: 22,
                 offset: const Offset(0, 5),
               ),
