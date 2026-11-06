@@ -21,10 +21,12 @@ class _CatalogRepository extends DemoAuthRepository {
 }
 
 void main() {
-  test('eNet 0.5 uses a dark emerald and mint theme', () {
+  test('eNet reference palette uses deep teal and luminous mint', () {
     expect(ENetTheme.dark.brightness, Brightness.dark);
     expect(ENetTheme.dark.colorScheme.primary, ENetColors.cyan);
-    expect(ENetColors.background.g, greaterThan(ENetColors.background.b));
+    expect(ENetColors.background.g, greaterThan(ENetColors.background.r));
+    expect(ENetColors.background.b, greaterThan(ENetColors.background.r));
+    expect(ENetColors.mint.g, greaterThan(ENetColors.mint.r));
   });
 
   testWidgets('The dashboard shows confirmed API status', (tester) async {
