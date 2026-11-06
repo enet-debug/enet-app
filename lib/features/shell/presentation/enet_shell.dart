@@ -274,7 +274,9 @@ class _ENetShellState extends State<ENetShell> {
     const itemHeight = 40.0;
     const gap = 2.0;
     return Glass(
-      radius: 26,
+      radius: 18,
+      tint: const Color(0xFF077C75),
+      strength: .68,
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
@@ -831,7 +833,7 @@ class _ENetShellState extends State<ENetShell> {
                   style: TextStyle(color: ENetColors.text,
                     fontSize: 15.5, fontWeight: FontWeight.w700)),
                 SizedBox(height: 3),
-                Text('Создание объявлений с помощью ИИ',
+                Text('Создание объявлений\nс помощью ИИ',
                   maxLines: 2,
                   style: TextStyle(color: ENetColors.muted,
                     fontSize: 12, height: 1.4)),
