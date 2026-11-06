@@ -76,13 +76,8 @@ class _DashboardStatusState extends State<DashboardStatus> {
         ]),
         const SizedBox(height: 9),
         _line(Icons.dns_outlined, 'eNet API',
-          _checking ? 'Проверка' : _online ? 'Работает' : 'Нет связи', color),
-        const SizedBox(height: 3),
-        Text(
-          _checking ? 'Проверяем соединение с сервером' :
-          _online ? 'Время ответа: ${_responseMs ?? 0} мс' :
-          'Сервер не отвечает',
-          style: const TextStyle(color: ENetColors.faint, fontSize: 10.5)),
+          _checking ? 'Проверка' :
+          _online ? 'Работает · ${_responseMs ?? 0} мс' : 'Нет связи', color),
         _line(Icons.fingerprint_rounded, 'eNet ID',
           widget.auth.user == null ? 'Нет сеанса' : 'Сеанс активен',
           widget.auth.user == null ? ENetColors.muted : ENetColors.mint),
