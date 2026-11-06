@@ -111,11 +111,18 @@ class _DashboardStatusState extends State<DashboardStatus> {
       child: Row(children: [
         Icon(icon, size: 16, color: ENetColors.muted),
         const SizedBox(width: 9),
-        Text(label, style: const TextStyle(
-          color: ENetColors.muted, fontSize: 12.5)),
-        const Spacer(),
-        Text(value, style: TextStyle(
-          color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+        Expanded(
+          child: Text(label,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: ENetColors.muted, fontSize: 12.5))),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(value,
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: color, fontSize: 12, fontWeight: FontWeight.w600))),
       ]),
     );
 }
