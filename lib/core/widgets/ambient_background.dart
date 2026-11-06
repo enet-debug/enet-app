@@ -92,49 +92,39 @@ class _AuroraPainter extends CustomPainter {
       );
     }
 
-    // The desktop uses the luminous orbital motif from the reference.
-    // On phones the mountain artwork is the hero; avoid drawing orbits across content.
+    // The supplied desktop reference uses open, cinematic light ribbons.
+    // Avoid the three concentric circles that read as an unrelated target icon.
     if (w >= 820) {
-    // A faint emerald sweep remains visible around the app frame,
-    // echoing the ribbon used by the original dashboard reference.
-    final sweep = Path()
-      ..moveTo(-w * .08, h * .82)
-      ..cubicTo(w * .18, h * 1.02, w * .25, h * .45, w * .48, h * .60)
-      ..cubicTo(w * .72, h * .78, w * .84, h * .18, w * 1.08, -h * .06);
-    canvas.drawPath(sweep, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 34
-      ..color = ENetColors.mint.withValues(alpha: .07)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24));
-    canvas.drawPath(sweep, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = ENetColors.cyan.withValues(alpha: .18));
-
-    // Тонкая орбита — фирменный мотив eNet.
-    final center = Offset(w * .84, h * .26);
-    final r = math.min(math.min(w * .3, 320.0), h * .5);
-    for (var i = 0; i < 3; i++) {
-      canvas.drawCircle(
-        center,
-        r * (.7 + .34 * i),
-        Paint()
+      final upper = Path()
+        ..moveTo(w * .46, h * .29)
+        ..cubicTo(w * .61, h * .33, w * .63, h * .04, w * .77, h * .06)
+        ..cubicTo(w * .87, h * .07, w * .93, -h * .12, w * 1.10, -h * .16);
+      final lower = Path()
+        ..moveTo(-w * .12, h * 1.01)
+        ..cubicTo(w * .23, h * .91, w * .29, h * .63, w * .53, h * .60)
+        ..cubicTo(w * .70, h * .57, w * .74, h * .30, w * .94, h * .19);
+      for (final (path, alpha) in [(upper, .70), (lower, .30)]) {
+        canvas.drawPath(path, Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = i == 0 ? 1.2 : .7
-          ..color = ENetColors.cyan.withValues(alpha: i == 0 ? .16 : .06),
-      );
-    }
-    final theta = t * math.pi * 2 - .4;
-    final p = center + Offset(math.cos(theta) * r, math.sin(theta) * r);
-    canvas.drawCircle(
-      p,
-      9,
-      Paint()
-        ..color = ENetColors.cyan.withValues(alpha: .25)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
-    );
-    canvas.drawCircle(p, 3, Paint()..color = ENetColors.cyan);
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = 54
+          ..color = ENetColors.mint.withValues(alpha: .17 * alpha)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 27));
+        canvas.drawPath(path, Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round
+          ..strokeWidth = 10
+          ..color = ENetColors.cyan.withValues(alpha: .18 * alpha)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 13));
+        canvas.drawPath(path, Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6
+          ..color = const Color(0xFF66FFE5).withValues(alpha: .42 * alpha));
+      }
+      final star = Offset(w * .76 + math.cos(t * 2 * math.pi) * 12, h * .06);
+      canvas.drawCircle(star, 6, Paint()
+        ..color = ENetColors.mint.withValues(alpha: .24)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 13));
     }
   }
 
