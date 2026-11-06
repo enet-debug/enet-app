@@ -795,31 +795,32 @@ class _ENetShellState extends State<ENetShell> {
   );
 
   Widget _quickActionsCard() => Glass(
-    radius: 18,
-    blur: 12,
-    padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+    radius: 20,
+    padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Row(children: [
-        Icon(Icons.bolt_rounded, color: ENetColors.cyan, size: 19),
-        SizedBox(width: 7),
+        Icon(Icons.bolt_rounded, color: ENetColors.mint, size: 19),
+        SizedBox(width: 8),
         Expanded(child: Text('Быстрые действия',
           maxLines: 1, overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: ENetColors.text, fontSize: 12, fontWeight: FontWeight.w800))),
+          style: TextStyle(color: ENetColors.text,
+            fontSize: 14.5, fontWeight: FontWeight.w700))),
       ]),
-      const SizedBox(height: 7),
+      const SizedBox(height: 4),
       _QuickAction(
-        icon: Icons.shopping_bag_outlined,
+        icon: Icons.edit_outlined,
         label: 'Создать объявление',
         onTap: () => go(1),
       ),
+      const Divider(height: 1),
       _QuickAction(
-        icon: Icons.cloud_upload_outlined,
+        icon: Icons.folder_open_outlined,
         label: 'Загрузить файлы',
         onTap: () => go(9),
       ),
+      const Divider(height: 1),
       _QuickAction(
-        icon: Icons.checklist_rounded,
+        icon: Icons.check_box_outlined,
         label: 'Новая задача',
         onTap: () => go(7),
       ),
