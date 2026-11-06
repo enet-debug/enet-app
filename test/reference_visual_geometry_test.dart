@@ -23,7 +23,7 @@ void main() {
 
     expect(tester.getSize(find.byType(MobileWelcomeScene)).height, 285);
     expect(tester.getSize(find.byKey(const ValueKey('workspace-hero'))).height, 116);
-    expect(find.text('Единый аккаунт\\neNet'), findsOneWidget);
+    expect(find.text('Единый аккаунт\neNet'), findsOneWidget);
     // The supplied scenery already includes the logo. A second vector mark
     // would create a doubled symbol, which was caught in a previous capture.
     expect(find.byType(BrandLogo), findsNothing);
