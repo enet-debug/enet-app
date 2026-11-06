@@ -888,7 +888,7 @@ class _ENetShellState extends State<ENetShell> {
       blur: 12,
       padding: const EdgeInsets.all(13),
       child: Row(children: [
-        ENetAvatar(name: user.name, size: 46),
+        const DashboardNebulaAvatar(size: 46),
         const SizedBox(width: 12),
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
