@@ -828,11 +828,11 @@ class _ENetShellState extends State<ENetShell> {
         haptic: false,
         pressedScale: .98,
         builder: (context, hovered) => Glass(
-          radius: 18, blur: 16, strength: hovered ? 1.6 : 1,
-          padding: const EdgeInsets.all(16),
+          radius: 18, blur: 16, strength: hovered ? 1.8 : 1.35,
+          padding: const EdgeInsets.fromLTRB(30, 16, 16, 16),
           child: Row(children: [
             Container(
-              width: 58, height: 58,
+              width: 72, height: 72,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
                 gradient: LinearGradient(colors: [
@@ -841,9 +841,9 @@ class _ENetShellState extends State<ENetShell> {
                 ]),
               ),
               child: const Icon(Icons.shopping_bag_outlined,
-                color: Colors.white, size: 25),
+                color: Colors.white, size: 32),
             ),
-            const SizedBox(width: 13),
+            const SizedBox(width: 20),
             const Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('Продайзер', maxLines: 1, overflow: TextOverflow.ellipsis,
