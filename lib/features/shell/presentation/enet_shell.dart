@@ -284,16 +284,16 @@ class _ENetShellState extends State<ENetShell> {
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
-          padding: EdgeInsets.only(left: 6, bottom: spacious ? 46 : 17),
+          padding: EdgeInsets.only(left: 6, bottom: spacious ? 36 : 17),
           child: Row(children: [
-            BrandLogo(size: 46, showName: false),
-            SizedBox(width: 12),
+            BrandLogo(size: spacious ? 56 : 46, showName: false),
+            SizedBox(width: spacious ? 13 : 12),
             Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text('eNet', style: TextStyle(color: ENetColors.text,
-                fontSize: 22, fontWeight: FontWeight.w800,
+                fontSize: spacious ? 27 : 22, fontWeight: FontWeight.w800,
                 letterSpacing: -.6)),
               Text('v0.8.0', style: TextStyle(
-                color: ENetColors.muted, fontSize: 12)),
+                color: ENetColors.muted, fontSize: spacious ? 13 : 12)),
             ]),
           ]),
         ),
@@ -379,14 +379,14 @@ class _ENetShellState extends State<ENetShell> {
         ),
         child: Row(children: [
           _TintedIcon(selected ? destination.activeIcon : destination.icon,
-            selected: selected, size: 20),
-          const SizedBox(width: 12),
+            selected: selected, size: MediaQuery.sizeOf(context).width >= 1380 ? 23 : 20),
+          SizedBox(width: MediaQuery.sizeOf(context).width >= 1380 ? 14 : 12),
           Expanded(child: Text(
             destination.label,
             maxLines: 1, overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: selected ? ENetColors.text : const Color(0xFFD2E5DF),
-              fontSize: 13,
+              fontSize: MediaQuery.sizeOf(context).width >= 1380 ? 15 : 13,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
             ),
           )),
