@@ -217,12 +217,12 @@ class _ENetShellState extends State<ENetShell> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                        padding: const EdgeInsets.fromLTRB(13, 10, 13, 13),
                         child: SizedBox(width: 252, child: _sidebar()),
                       ),
                       Expanded(child: _content(false)),
                       if (MediaQuery.sizeOf(context).width >= 1180)
-                        SizedBox(width: 316, child: _rightPanel()),
+                        SizedBox(width: 306, child: _rightPanel()),
                     ],
                   )),
                 ]),
@@ -234,7 +234,7 @@ class _ENetShellState extends State<ENetShell> {
   }
 
   Widget _rightPanel() => Padding(
-    padding: const EdgeInsets.fromLTRB(0, 16, 16, 16),
+    padding: const EdgeInsets.fromLTRB(0, 10, 13, 13),
     child: SingleChildScrollView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         _accountSummaryCard(),
@@ -271,14 +271,14 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Навигация ─────────────────────────
 
   Widget _sidebar() {
-    const itemHeight = 44.0;
-    const gap = 3.0;
+    const itemHeight = 40.0;
+    const gap = 2.0;
     return Glass(
       radius: 26,
-      padding: const EdgeInsets.fromLTRB(12, 20, 12, 12),
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         const Padding(
-          padding: EdgeInsets.only(left: 6, bottom: 22),
+          padding: EdgeInsets.only(left: 6, bottom: 17),
           child: Row(children: [
             BrandLogo(size: 46, showName: false),
             SizedBox(width: 12),
@@ -305,7 +305,7 @@ class _ENetShellState extends State<ENetShell> {
                     borderRadius: BorderRadius.circular(14),
                     gradient: const LinearGradient(
                       begin: Alignment.centerLeft, end: Alignment.centerRight,
-                      colors: [Color(0xFF0FAF87), Color(0xFF0A5D51)]),
+                      colors: [Color(0xFF10D9A9), Color(0xFF078772)]),
                     border: Border.all(color: ENetColors.mint.withValues(alpha: .48)),
                   ),
                 ),
@@ -512,7 +512,7 @@ class _ENetShellState extends State<ENetShell> {
   // ───────────────────────── Контент ─────────────────────────
 
   Widget _content(bool compact) {
-    final pad = compact ? (index == 0 ? 0.0 : 18.0) : 30.0;
+    final pad = compact ? (index == 0 ? 0.0 : 18.0) : 23.0;
     return Column(children: [
       if (compact && index != 0)
         Padding(
@@ -522,7 +522,7 @@ class _ENetShellState extends State<ENetShell> {
       Expanded(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(pad,
-            compact && index == 0 ? 0 : compact ? 13 : 30,
+            compact && index == 0 ? 0 : compact ? 13 : 25,
             pad, compact && index == 0 ? 100 : 24),
           child: LayoutBuilder(builder: (context, constraints) {
             final width = math.min(constraints.maxWidth, 1260.0);
@@ -555,10 +555,10 @@ class _ENetShellState extends State<ENetShell> {
   /// inside Flutter, so no fake native close/minimize buttons are displayed.
   Widget _desktopChrome() => Container(
     key: const ValueKey('enet-desktop-chrome'),
-    height: 52,
-    padding: const EdgeInsets.symmetric(horizontal: 23),
+    height: 44,
+    padding: const EdgeInsets.symmetric(horizontal: 18),
     decoration: BoxDecoration(
-      color: const Color(0xFF061713).withValues(alpha: .88),
+      color: const Color(0xFF031C22).withValues(alpha: .92),
       border: Border(bottom: BorderSide(
         color: ENetColors.mint.withValues(alpha: .17))),
     ),
@@ -1259,21 +1259,21 @@ class _HomeShortcut extends StatelessWidget {
             offset: Offset(0, hovered ? -.04 : 0),
             child: AnimatedContainer(
               duration: ENetMotion.medium,
-              height: 94,
+              height: 84,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    data.color.withValues(alpha: .34),
-                    data.color.withValues(alpha: .10),
+                    data.color.withValues(alpha: .43),
+                    const Color(0xFF061F29),
                   ],
                 ),
                 border: Border.all(color: data.color.withValues(
-                  alpha: hovered ? .85 : .5)),
+                  alpha: hovered ? .95 : .66)),
                 boxShadow: [BoxShadow(
-                  color: data.color.withValues(alpha: hovered ? .32 : .12),
+                  color: data.color.withValues(alpha: hovered ? .40 : .20),
                   blurRadius: 24,
                 )],
               ),
