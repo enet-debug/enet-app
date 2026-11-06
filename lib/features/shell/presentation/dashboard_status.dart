@@ -80,7 +80,7 @@ class _DashboardStatusState extends State<DashboardStatus> {
         const SizedBox(height: 5),
         Text(
           _checking ? 'Проверяем соединение с сервером' :
-          _online ? 'Время ответа: \${_responseMs ?? 0} мс' :
+          _online ? 'Время ответа: ${_responseMs ?? 0} мс' :
           'Сервер не отвечает',
           style: const TextStyle(color: ENetColors.faint, fontSize: 10.5)),
         _line(Icons.fingerprint_rounded, 'eNet ID',
