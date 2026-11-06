@@ -676,14 +676,14 @@ class _ENetShellState extends State<ENetShell> {
           (Icons.grid_view_rounded, 'Сервисы', ENetColors.cyan, () => go(1)),
           (Icons.notifications_none_rounded, 'Уведомления', ENetColors.cyan, () => go(2)),
           (Icons.check_box_outlined, 'Задачи', ENetColors.cyan, () => go(7)),
-          (Icons.folder_outlined, 'Файлы', ENetColors.cyan, () => go(1)),
+          (Icons.folder_outlined, 'Файлы', ENetColors.cyan, () => go(9)),
         ]
       : <(IconData, String, Color, VoidCallback)>[
-          (Icons.shopping_bag_outlined, 'Продайзер', ENetColors.violet, () => go(1)),
-          (Icons.auto_awesome_rounded, 'eNet AI', const Color(0xFF48BFFB), () => go(1)),
-          (Icons.cloud_outlined, 'eNet Cloud', const Color(0xFF4DDFF0), () => go(1)),
-          (Icons.folder_outlined, 'Проекты', ENetColors.mint, () => go(7)),
-          (Icons.bar_chart_rounded, 'Аналитика', const Color(0xFFFFC75B), () => go(5)),
+          (Icons.shopping_bag_outlined, 'Продайзер', const Color(0xFF8B6CF6), () => go(1)),
+          (Icons.auto_awesome_rounded, 'eNet AI', const Color(0xFF4C8DFF), () => go(1)),
+          (Icons.cloud_outlined, 'eNet Cloud', const Color(0xFF35C2F0), () => go(9)),
+          (Icons.folder_outlined, 'Проекты', const Color(0xFF2DD18F), () => go(10)),
+          (Icons.bar_chart_rounded, 'Аналитика', const Color(0xFFF2A93B), () => go(11)),
         ];
     return LayoutBuilder(builder: (context, constraints) {
       final gap = compact ? 7.0 : 8.0;
@@ -694,7 +694,9 @@ class _ENetShellState extends State<ENetShell> {
           SizedBox(width: width, child: _HomeShortcut(data: _HomeShortcutData(
             icon: shortcuts[i].$1, title: shortcuts[i].$2,
             subtitle: shortcuts[i].$2, color: shortcuts[i].$3,
-            onTap: shortcuts[i].$4))),
+            onTap: shortcuts[i].$4,
+            badgeCount: compact && shortcuts[i].$2 == 'Уведомления'
+              ? (_unreadCount ?? 0) : 0))),
         ],
       ]);
     });
@@ -1080,6 +1082,7 @@ class _HomeShortcutData {
     required this.subtitle,
     required this.color,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   final IconData icon;
@@ -1087,6 +1090,7 @@ class _HomeShortcutData {
   final String subtitle;
   final Color color;
   final VoidCallback onTap;
+  final int badgeCount;
 }
 
 /// Desktop colour tiles and phone quick links use the exact eNet 0.7 design
@@ -1114,22 +1118,42 @@ class _HomeShortcut extends StatelessWidget {
                 border: Border.all(color: ENetColors.mint.withValues(
                   alpha: hovered ? .5 : .22)),
               ),
-              child: Center(child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(data.icon, size: 27, color: ENetColors.text),
-                  const SizedBox(height: 7),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(data.title,
-                        maxLines: 1,
-                        style: const TextStyle(color: ENetColors.muted,
-                          fontSize: 10.5, fontWeight: FontWeight.w600))),
+              child: Stack(children: [
+                Center(child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(data.icon, size: 27, color: ENetColors.text),
+                    const SizedBox(height: 7),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(data.title,
+                          maxLines: 1,
+                          style: const TextStyle(color: ENetColors.muted,
+                            fontSize: 10.5, fontWeight: FontWeight.w600))),
+                    ),
+                  ],
+                )),
+                if (data.badgeCount > 0)
+                  Positioned(
+                    top: 6, right: 8,
+                    child: Container(
+                      height: 18,
+                      constraints: const BoxConstraints(minWidth: 18),
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(9),
+                        color: ENetColors.mint,
+                      ),
+                      child: Text(data.badgeCount > 9 ? '9+' : '${data.badgeCount}',
+                        style: const TextStyle(
+                          color: ENetColors.onAccent, fontSize: 10.5,
+                          fontWeight: FontWeight.w800)),
+                    ),
                   ),
-                ],
-              )),
+              ]),
             );
           }
           return AnimatedSlide(
