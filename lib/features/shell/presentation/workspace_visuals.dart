@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/enet_theme.dart';
 import '../../../core/widgets/glass.dart';
-import '../../../core/widgets/brand_logo.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../auth/domain/auth_repository.dart';
 
@@ -543,14 +542,31 @@ class V07HeroIdCard extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: Stack(children: [
-              if (!compact) ...[
-                const Positioned.fill(
-                  child: CustomPaint(painter: _V07StreakPainter())),
-                const Positioned(
-                  right: 79, top: 13,
-                  child: _V07Plate(size: 224),
-                ),
-              ] else
+              if (!compact)
+                Positioned(
+                  right: 0, top: 0, bottom: 0, width: 385,
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      stops: [0, .17, 1],
+                      colors: [
+                        Colors.transparent,
+                        Colors.white,
+                        Colors.white,
+                      ],
+                    ).createShader(bounds),
+                    blendMode: BlendMode.dstIn,
+                    child: Image.asset(
+                      'assets/brand/approved_hero_graphic.jpg',
+                      key: const ValueKey('desktop-enet-id-plate'),
+                      fit: BoxFit.cover,
+                      alignment: Alignment.center,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                )
+              else
                 const Positioned(
                   right: 14, top: 0, bottom: 0,
                   child: Center(child: Icon(
@@ -618,117 +634,4 @@ class _V07FingerprintTile extends StatelessWidget {
   );
 }
 
-class _V07Plate extends StatelessWidget {
-  const _V07Plate({required this.size});
-  final double size;
 
-  @override
-  Widget build(BuildContext context) => Transform(
-    alignment: Alignment.center,
-    transform: Matrix4.identity()
-      ..setEntry(3, 2, .0014)
-      ..rotateX(.48)
-      ..rotateZ(-.34),
-    child: Container(
-      key: const ValueKey('desktop-enet-id-plate'),
-      width: size, height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * .21),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF041714),
-            Color(0xFF0D332C),
-            Color(0xFF04100E),
-          ],
-        ),
-        border: Border.all(
-          color: ENetColors.mint.withValues(alpha: .76), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: ENetColors.mint.withValues(alpha: .42),
-            blurRadius: 34, offset: const Offset(-8, 11)),
-          BoxShadow(
-            color: ENetColors.mint.withValues(alpha: .20),
-            blurRadius: 18, spreadRadius: 2),
-        ],
-      ),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: EdgeInsets.only(top: size * .00),
-          child: BrandLogo(size: size * .46, showName: false),
-        ),
-      ),
-    ),
-  );
-}
-
-class _V07StreakPainter extends CustomPainter {
-  const _V07StreakPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-    final bounds = Offset.zero & size;
-    canvas.save();
-    canvas.clipRect(bounds);
-
-    final glow = Offset(w * .82, h * .35);
-    final radius = w * .48;
-    canvas.drawCircle(glow, radius, Paint()
-      ..shader = RadialGradient(colors: [
-        ENetColors.mint.withValues(alpha: .24),
-        const Color(0xFF0EC99A).withValues(alpha: .10),
-        Colors.transparent,
-      ]).createShader(Rect.fromCircle(center: glow, radius: radius)));
-
-    // Two *open* crossing ribbons, like the diagonals in the approved mockup.
-    // The former curve returned to its start and formed an unrelated oval.
-    final primary = Path()
-      ..moveTo(w * 1.11, -h * .76)
-      ..cubicTo(w * .87, h * .14, w * .74, h * .14, w * .64, h * .56)
-      ..cubicTo(w * .53, h * .99, w * .48, h * 1.20, w * .43, h * 1.40);
-    final secondary = Path()
-      ..moveTo(w * 1.17, -h * .07)
-      ..cubicTo(w * 1.05, h * .43, w * .83, h * .76, w * .69, h * 1.34);
-
-    for (final path in [primary, secondary]) {
-      canvas.drawPath(path, Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..strokeWidth = h * .72
-        ..color = const Color(0xFF16FFD0).withValues(alpha: .22)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 33));
-      canvas.drawPath(path, Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeCap = StrokeCap.round
-        ..strokeWidth = h * .29
-        ..color = const Color(0xFF28F5B3).withValues(alpha: .23)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 17));
-    }
-    canvas.drawPath(primary, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = h * .18
-      ..shader = const LinearGradient(
-        begin: Alignment.topRight, end: Alignment.bottomLeft,
-        colors: [
-          Color(0x001AEDA9), Color(0x7743FFDC),
-          Color(0xBB16DCA5), Color(0x0024B489),
-        ],
-      ).createShader(bounds));
-    canvas.drawPath(primary, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..color = const Color(0xFFC4FFE7).withValues(alpha: .38));
-    canvas.drawPath(secondary, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = h * .10
-      ..color = const Color(0xFF0CE4A5).withValues(alpha: .15));
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _V07StreakPainter oldDelegate) => false;
-}
