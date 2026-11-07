@@ -197,7 +197,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
             const _DashboardServiceTile(
               title: 'eNet AI',
               description: 'Единый доступ к нейросетям для создания текстов, изображений и контента',
-              icon: Icons.auto_awesome_rounded,
+              icon: Icons.auto_awesome_outlined,
               color: Color(0xFF359ED3),
               active: false,
             ),
@@ -242,7 +242,7 @@ class _ServiceCatalogPanelState extends State<ServiceCatalogPanel> {
       return Icons.shopping_bag_outlined;
     }
     if (id.contains('cloud') || name.contains('cloud')) return Icons.cloud_outlined;
-    if (id.contains('ai') || name.contains('ai')) return Icons.auto_awesome_rounded;
+    if (id.contains('ai') || name.contains('ai')) return Icons.auto_awesome_outlined;
     return Icons.apps_rounded;
   }
 
@@ -479,7 +479,7 @@ class _ServiceCard extends StatelessWidget {
     final id = service.id.toLowerCase();
     final name = service.name.toLowerCase();
     if (id.contains('prodayzer') || name.contains('продайзер')) {
-      return Icons.auto_awesome_rounded;
+      return Icons.auto_awesome_outlined;
     }
     if (id.contains('studio') || name.contains('studio')) {
       return Icons.code_rounded;
