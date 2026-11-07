@@ -39,6 +39,9 @@ jobs:
           retention-days: 14
 
   ios:
+    # Pushes already run the dedicated unsigned iOS workflow. Avoid booking
+    # two macOS runners for every UI-only commit; keep PR/manual coverage.
+    if: github.event_name != 'push'
     name: iOS unsigned compile check
     runs-on: macos-15
     steps:
