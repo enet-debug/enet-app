@@ -210,7 +210,9 @@ class _ENetShellState extends State<ENetShell> {
                   Expanded(child: _content(compact)),
                   Padding(
                     padding: EdgeInsets.fromLTRB(
-                      16, 8, 16, math.max(bottomInset, 10.0) + 6,
+                      // Keep the real OS gesture inset, but avoid an extra 16 px
+                      // of artificial space in edge-to-edge screenshot layouts.
+                      16, 8, 16, math.max(bottomInset, 0.0),
                     ),
                     child: _tabBar(),
                   ),
