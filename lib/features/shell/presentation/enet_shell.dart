@@ -489,13 +489,17 @@ class _ENetShellState extends State<ENetShell> {
           builder: (context, hovered) => Center(
             child: destination.index == -2
               ? Container(
-                  width: 54, height: 54,
+                  width: 56, height: 56,
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(18),
                     gradient: ENetColors.mintGradient,
-                    boxShadow: [BoxShadow(
-                      color: ENetColors.mint.withValues(alpha: .42),
-                      blurRadius: 22)],
+                    border: Border.all(color: const Color(0xFF7FFFF0).withValues(alpha: .72)),
+                    boxShadow: [
+                      BoxShadow(color: ENetColors.mint.withValues(alpha: .43),
+                        blurRadius: 22, spreadRadius: 1),
+                      const BoxShadow(color: Color(0x64000000), blurRadius: 8,
+                        offset: Offset(0, 4)),
+                    ],
                   ),
                   child: const Icon(Icons.add_rounded,
                     color: ENetColors.onAccent, size: 32),
@@ -828,7 +832,7 @@ class _ENetShellState extends State<ENetShell> {
     children: [
       const Text('Быстрый доступ', style: TextStyle(
         color: ENetColors.text,
-        fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -.3)),
+        fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: -.35)),
       const SizedBox(height: 14),
       Pressable(
         onTap: () => go(1),
