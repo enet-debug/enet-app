@@ -1237,16 +1237,37 @@ class _HomeShortcut extends StatelessWidget {
               height: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
-                color: ENetColors.surface.withValues(alpha: .7),
-                border: Border.all(color: ENetColors.mint.withValues(
-                  alpha: hovered ? .5 : .22)),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF124E50).withValues(alpha: hovered ? .94 : .72),
+                    const Color(0xFF05272B),
+                    const Color(0xFF08262A),
+                  ],
+                  stops: const [0, .45, 1],
+                ),
+                border: Border.all(
+                  color: ENetColors.cyan.withValues(alpha: hovered ? .72 : .34),
+                  width: 1.1,
+                ),
+                boxShadow: [
+                  BoxShadow(color: ENetColors.cyan.withValues(alpha: hovered ? .16 : .06),
+                    blurRadius: hovered ? 19 : 11),
+                  const BoxShadow(color: Color(0x73001218), blurRadius: 18,
+                    offset: Offset(0, 8)),
+                ],
               ),
               child: Stack(children: [
                 Center(child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(data.icon, size: 27, color: ENetColors.text),
-                    const SizedBox(height: 7),
+                    Icon(data.icon, size: 30, color: ENetColors.text,
+                      shadows: [Shadow(
+                        color: ENetColors.cyan.withValues(alpha: .34),
+                        blurRadius: 10,
+                      )]),
+                    const SizedBox(height: 8),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: FittedBox(
@@ -1254,7 +1275,7 @@ class _HomeShortcut extends StatelessWidget {
                         child: Text(data.title,
                           maxLines: 1,
                           style: const TextStyle(color: ENetColors.muted,
-                            fontSize: 10.5, fontWeight: FontWeight.w600))),
+                            fontSize: 11, fontWeight: FontWeight.w700))),
                     ),
                   ],
                 )),
