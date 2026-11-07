@@ -813,7 +813,7 @@ class _ENetShellState extends State<ENetShell> {
         ]
       : <(IconData, String, Color, VoidCallback)>[
           (Icons.shopping_bag_outlined, 'Продайзер', const Color(0xFF8B6CF6), () => go(1)),
-          (Icons.auto_awesome_rounded, 'eNet AI', const Color(0xFF4C8DFF), () => go(1)),
+          (Icons.auto_awesome_outlined, 'eNet AI', const Color(0xFF4C8DFF), () => go(1)),
           (Icons.cloud_outlined, 'eNet Cloud', const Color(0xFF35C2F0), () => go(9)),
           (Icons.folder_outlined, 'Проекты', const Color(0xFF2DD18F), () => go(10)),
           (Icons.bar_chart_rounded, 'Аналитика', const Color(0xFFF2A93B), () => go(11)),
@@ -1182,7 +1182,7 @@ class _ENetShellState extends State<ENetShell> {
           footer: 'Плавная анимация фона. Отключается автоматически, если в системе включено уменьшение движения.',
           children: [
             _RowTile(
-              icon: Icons.auto_awesome_rounded,
+              icon: Icons.auto_awesome_outlined,
               gradient: ENetColors.violetGradient,
               title: 'Динамический фон',
               subtitle: 'Анимированное свечение и орбиты',
