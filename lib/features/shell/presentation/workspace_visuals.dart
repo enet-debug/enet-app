@@ -249,7 +249,7 @@ class MobileWelcomeScene extends StatelessWidget {
     child: InkWell(
       onTap: onOpenProfile,
       child: SizedBox(
-        height: 285,
+        height: 305,
         width: double.infinity,
         child: Stack(fit: StackFit.expand, children: [
           const CustomPaint(painter: _MobileMountainPainter()),
@@ -516,7 +516,7 @@ class V07HeroIdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = compact ? 116.0 : 166.0;
+    final height = compact ? 126.0 : 166.0;
     return Material(
       color: Colors.transparent,
       child: InkWell(
