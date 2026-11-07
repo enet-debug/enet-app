@@ -1228,6 +1228,27 @@ class _HomeShortcut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width < 820;
+    // Colours sampled from the five approved 0.7 desktop tiles. Opaque
+    // gradients keep contrast consistent instead of mixing the bright brand
+    // hues with the animated wallpaper underneath.
+    final desktopPalette = switch (data.title) {
+      'Продайзер' => (
+        const Color(0xFF352A55), const Color(0xFF211D3A),
+        const Color(0xFFE1B5FA)),
+      'eNet AI' => (
+        const Color(0xFF0A3657), const Color(0xFF052334),
+        const Color(0xFF71D9FF)),
+      'eNet Cloud' => (
+        const Color(0xFF064B5C), const Color(0xFF052832),
+        const Color(0xFF55E5E8)),
+      'Проекты' => (
+        const Color(0xFF075B3D), const Color(0xFF032F2B),
+        const Color(0xFF48EBC0)),
+      'Аналитика' => (
+        const Color(0xFF624C20), const Color(0xFF292718),
+        const Color(0xFFFFD45D)),
+      _ => (ENetColors.surfaceRaised, ENetColors.surface, ENetColors.text),
+    };
     return Tooltip(
       message: data.subtitle,
       child: Pressable(
@@ -1318,20 +1339,22 @@ class _HomeShortcut extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    data.color.withValues(alpha: .64),
-                    const Color(0xFF051A20),
+                    desktopPalette.$1,
+                    desktopPalette.$2,
                   ],
                 ),
-                border: Border.all(color: data.color.withValues(
-                  alpha: hovered ? .95 : .66)),
+                border: Border.all(color: desktopPalette.$3.withValues(
+                  alpha: hovered ? .65 : .36)),
                 boxShadow: [BoxShadow(
-                  color: data.color.withValues(alpha: hovered ? .46 : .27),
-                  blurRadius: 29,
+                  color: desktopPalette.$3.withValues(alpha: hovered ? .22 : .10),
+                  blurRadius: 25,
                 )],
               ),
               child: Column(mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(data.icon, size: 36, color: Colors.white),
+                  Icon(data.icon, size: 36, color: desktopPalette.$3,
+                    shadows: [Shadow(color: desktopPalette.$3.withValues(alpha: .34),
+                      blurRadius: 13)]),
                   const SizedBox(height: 9),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
