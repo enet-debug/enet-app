@@ -520,13 +520,20 @@ class _ENetShellState extends State<ENetShell> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     color: destination.index == index
-                      ? ENetColors.mint.withValues(alpha: .16)
+                      ? ENetColors.mint.withValues(alpha: .27)
                       : Colors.transparent,
+                    border: destination.index == index
+                      ? Border.all(color: ENetColors.mint.withValues(alpha: .23))
+                      : null,
+                    boxShadow: destination.index == index
+                      ? [BoxShadow(color: ENetColors.mint.withValues(alpha: .13),
+                          blurRadius: 16)]
+                      : null,
                   ),
                   child: _TintedIcon(
                     destination.index == index
                       ? destination.activeIcon : destination.icon,
-                    selected: destination.index == index, size: 23),
+                    selected: destination.index == index, size: 25),
                 ),
           ),
         ))),
