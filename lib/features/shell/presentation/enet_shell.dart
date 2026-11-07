@@ -281,10 +281,10 @@ class _ENetShellState extends State<ENetShell> {
       radius: 18,
       tint: const Color(0xFF077C75),
       strength: .68,
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
+      padding: EdgeInsets.fromLTRB(12, 16, 12, spacious ? 28 : 12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Padding(
-          padding: EdgeInsets.only(left: 6, bottom: spacious ? 36 : 17),
+          padding: EdgeInsets.only(left: spacious ? 26 : 6, bottom: spacious ? 36 : 17),
           child: Row(children: [
             BrandLogo(size: spacious ? 56 : 46, showName: false),
             SizedBox(width: spacious ? 13 : 12),
@@ -375,7 +375,8 @@ class _ENetShellState extends State<ENetShell> {
       haptic: false,
       builder: (context, hovered) => AnimatedContainer(
         duration: ENetMotion.quick,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.symmetric(horizontal:
+          MediaQuery.sizeOf(context).width >= 1380 ? 25 : 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(13),
           color: Colors.white.withValues(alpha: hovered && !selected ? .045 : 0),
@@ -383,7 +384,7 @@ class _ENetShellState extends State<ENetShell> {
         child: Row(children: [
           _TintedIcon(selected ? destination.activeIcon : destination.icon,
             selected: selected, size: MediaQuery.sizeOf(context).width >= 1380 ? 23 : 20),
-          SizedBox(width: MediaQuery.sizeOf(context).width >= 1380 ? 14 : 12),
+          SizedBox(width: MediaQuery.sizeOf(context).width >= 1380 ? 32 : 12),
           Expanded(child: Text(
             destination.label,
             maxLines: 1, overflow: TextOverflow.ellipsis,
@@ -784,7 +785,7 @@ class _ENetShellState extends State<ENetShell> {
         _hero(false),
         const SizedBox(height: 19),
         _shortcutStrip(false),
-        const SizedBox(height: 38),
+        const SizedBox(height: 24),
         ServiceCatalogPanel(
           auth: widget.auth,
           dashboard: true,
@@ -1310,7 +1311,7 @@ class _HomeShortcut extends StatelessWidget {
             offset: Offset(0, hovered ? -.04 : 0),
             child: AnimatedContainer(
               duration: ENetMotion.medium,
-              height: 108,
+              height: 118,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(18),
                 gradient: LinearGradient(
