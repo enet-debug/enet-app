@@ -199,6 +199,9 @@ class _ENetShellState extends State<ENetShell> {
       body: AmbientBackground(
         animated: effects,
         child: SafeArea(
+          // Let the mountain scene paint behind the iPhone status bar.
+          // Other views retain normal top safe-area protection.
+          top: !(compact && index == 0),
           bottom: false,
           // Reserve an actual dock for mobile navigation instead of letting
           // it float over content, buttons and profile fields.
@@ -757,7 +760,7 @@ class _ENetShellState extends State<ENetShell> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _hero(true),
-                const SizedBox(height: 27),
+                const SizedBox(height: 35),
                 _shortcutStrip(true),
                 const SizedBox(height: 34),
                 _mobileQuickAccess(),
